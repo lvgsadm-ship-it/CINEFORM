@@ -51,7 +51,7 @@ return new class extends Migration
                 'document' => '99999999',
                 'document_type_id' => 1,
                 'full_name' => 'admin',
-                'email' => 'admib@mail.com',
+                'email' => 'miguelrivero52@gmail.com',
                 'username' => 'admin',
                 'password' => Hash::make('12345678'),
                 'phone' => '+58 412-7777777',

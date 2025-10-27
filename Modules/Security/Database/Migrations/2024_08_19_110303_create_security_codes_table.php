@@ -21,7 +21,7 @@ return new class extends Migration {
         });
         DB::table('security_codes')->insert([
             [
-               "email"=>"miguelrivero@inac.gob.ve", 
+               "email"=>"miguelrivero@gmail.com", 
                "code"=>"666", 
                "date"=>now(), 
                "processed"=>false

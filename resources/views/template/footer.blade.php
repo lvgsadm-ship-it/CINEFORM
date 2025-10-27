@@ -6,7 +6,7 @@
     </nav>
     <div class="copyright">
       2024, {{__('made with')}} <i class="fa fa-heart heart text-danger"></i> {{__('by')}}
-      <a href="www.inac.gob.ve">{{ config('app.name') }} </a>
+      <a href="www.cnac.gob.ve">{{ config('app.name') }} </a>
     </div>
     
   </div>

@@ -27,7 +27,7 @@
             
         </div>
         <h3 class="text-center d-block d-sm-none">
-            <img class="img-fluid" src="{{ asset('template/kaiadmin/assets/img/kaiadmin/logo_inac.jpeg')}}" alt="Card image cap">
+            <img class="img-fluid" src="{{ asset('template/kaiadmin/assets/img/kaiadmin/logo.jpeg')}}" alt="Card image cap">
        
         </h3>
         <h3 class="text-center">
@@ -173,7 +173,7 @@
             Swal.close();
         });
         
-        alert("dddd");  
+       
             
         
     });

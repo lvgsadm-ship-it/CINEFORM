@@ -4,7 +4,7 @@
 
 <div class="card card-pricing">
     <div class="card-header">
-        <h4 class="card-title">INAC</h4>
+        <h4 class="card-title">CNAC</h4>
         <div class="card-price">
             <span class="price">{{$code}}</span>
             
