@@ -1,6 +1,17 @@
 # Dockerfile ejemplo para PHP-FPM (Laravel dev)
 
-FROM php:8.1-fpm
+FROM php:8.2-fpm
+
+# Instala dependencias necesarias para GD
+RUN apt-get update && apt-get install -y \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev
+
+# Configura e instala GD
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+RUN docker-php-ext-install -j$(nproc) gd
+RUN docker-php-ext-enable gd
 
 # Instalar librerías necesarias y extensiones PHP
 RUN apt-get update && apt-get install -y libpq-dev libzip-dev unzip git && \

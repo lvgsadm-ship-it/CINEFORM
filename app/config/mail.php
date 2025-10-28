@@ -1,5 +1,5 @@
 <?php
-
+use App\Helpers\LockDB;
 return [
 
     /*
@@ -41,7 +41,8 @@ return [
             'port' => env('MAIL_PORT', 587),
             'encryption' => env('MAIL_ENCRYPTION', 'tls'),
             'username' => env('MAIL_USERNAME'),
-            'password' => env('MAIL_PASSWORD'),
+            /*'password' => LockDB::crazy(env('MAIL_PASSWORD')),*/
+			'password' => env('MAIL_PASSWORD'),
             'timeout' => null,
             'local_domain' => env('MAIL_EHLO_DOMAIN'),
         ],

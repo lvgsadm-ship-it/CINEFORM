@@ -41,8 +41,8 @@ return [
             'provider' => 'users',
         ],
     ],
-
-    /*
+   
+    /*  
     |--------------------------------------------------------------------------
     | User Providers
     |--------------------------------------------------------------------------
@@ -62,7 +62,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\User::class,
+            'model' => Modules\Security\Entities\User::class,
         ],
 
         // 'users' => [
