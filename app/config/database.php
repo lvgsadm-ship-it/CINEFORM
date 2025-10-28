@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Str;
+use App\Helpers\LockDB;
 
 return [
 
@@ -68,9 +69,34 @@ return [
             'url' => env('DATABASE_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'forge'),
+            /*'database' => LockDB::crazy(env('DB_DATABASE', 'forge')),
+            'username' => LockDB::crazy(env('DB_USERNAME', 'forge')),
+            'password' => LockDB::crazy(env('DB_PASSWORD', '')),*/
+			
+			'database' => env('DB_DATABASE', 'forge'),
             'username' => env('DB_USERNAME', 'forge'),
             'password' => env('DB_PASSWORD', ''),
+			
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => 'public',
+            'sslmode' => 'prefer',
+        ],
+        
+        'saime' => [
+            'driver' => 'pgsql',
+            'url' => env('DATABASE_URL_CITA'),
+            'host' => env('DB_SAIME_HOST', '127.0.0.1'),
+            'port' => env('DB_SAIME_PORT', '5432'),
+            /*'database' => LockDB::crazy(env('DB_SAIME_DATABASE', 'forge')),
+            'username' => LockDB::crazy(env('DB_SAIME_USERNAME', 'forge')),
+            'password' => LockDB::crazy(env('DB_SAIME_PASSWORD', '')),*/
+			
+			'database' => env('DB_SAIME_DATABASE', 'forge'),
+            'username' => env('DB_SAIME_USERNAME', 'forge'),
+            'password' => env('DB_SAIME_PASSWORD', ''),
+			
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
@@ -125,7 +151,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
         ],
 
         'default' => [

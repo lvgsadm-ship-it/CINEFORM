@@ -55,6 +55,11 @@ return [
     |
     */
 
+    /*
+     * Br Mr
+     */
+    'api_files_route' => env('API_FILES_ROUTE', 'https://localhost'),
+
     'url' => env('APP_URL', 'http://localhost'),
 
     'asset_url' => env('ASSET_URL'),
@@ -70,7 +75,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => env('APP_TIMEZONE', 'UTC'),
 
     /*
     |--------------------------------------------------------------------------
@@ -83,7 +88,7 @@ return [
     |
     */
 
-    'locale' => 'en',
+    'locale' => env('APP_LOCALE', 'en'),
 
     /*
     |--------------------------------------------------------------------------
@@ -139,7 +144,20 @@ return [
     |
     */
 
-    'maintenance' => [
+    "javascripts" => [
+        "core" => [
+            "active" => true,
+            "url" => [
+                "template/kaiadmin/assets/js/core/jquery-3.7.1.min.js",
+                "template/kaiadmin/assets/js/core/popper.min.js",
+                "template/kaiadmin/assets/js/core/bootstrap.min.js"
+            ]
+        ]
+    ],
+
+
+
+    "maintenance" => [
         'driver' => 'file',
         // 'store' => 'redis',
     ],
@@ -168,6 +186,14 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        Spatie\Html\HtmlServiceProvider::class,
+
+        Yajra\DataTables\DataTablesServiceProvider::class,
+
+        Mews\Purifier\PurifierServiceProvider::class,
+
+
+
     ])->toArray(),
 
     /*
@@ -183,6 +209,8 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
+        'DataTables' => Yajra\DataTables\Facades\DataTables::class,
+        'Purifier' => Mews\Purifier\Facades\Purifier::class,
     ])->toArray(),
 
 ];
