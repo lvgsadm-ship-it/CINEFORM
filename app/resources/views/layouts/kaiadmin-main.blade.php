@@ -4,14 +4,13 @@
         @include('template.head')
     </head>
     <body >
+        BODYYY
         <div class="wrapper">
-            
             <div style="width:100%; margin-top:0px" class="main-panel">
                 
 
                 <div style="margin-top:0px" class="container container-menu">
-                    <div class="page-inner">
-                        
+                    <div class="page-inner">                        
                         {{-- Start from here. --}}
                         @yield('content')
                     </div>

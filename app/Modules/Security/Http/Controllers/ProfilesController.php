@@ -132,11 +132,11 @@ class ProfilesController extends Controller {
                 
                 return view('security::profiles.permissions', compact('id', 'profile', 'MODULES'));
             } else {
-                dd($request->all());
+                /* dd($request->all());
                 $request->validate([
                     'name' => 'required',
                     'description' => 'required'
-                ]);
+                ]); */
                 $Profile = Profile::find(Encryptor::decrypt($id));
                 $Profile->name = Upper($request->name);
                 $Profile->description = $request->description;

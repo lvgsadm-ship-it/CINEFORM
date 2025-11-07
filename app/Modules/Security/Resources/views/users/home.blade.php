@@ -1,6 +1,9 @@
 @extends('layouts.kaiadmin-menu')
 
 @section('content')
+<body>
+    ALGO
+</body>
 <style>
     input[type=text]:focus,  input[type=password]:focus{
         background-color: #FFFF99 !important;

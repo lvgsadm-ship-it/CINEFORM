@@ -27,7 +27,7 @@ class UsersController extends Controller {
         if (\Request::ajax()) {
             if ($request->search == null) {
                 $Users = User::limit(100)
-                        ->Where('active', 'true')
+                        ->Where('active', '0')
                         ->orderBy("id", "desc")
                         ->with('getProfile')
                         ->get();
@@ -119,7 +119,37 @@ class UsersController extends Controller {
                 $profiles = \Modules\Security\Entities\Profile::where('active', true)->get()->pluck('name', 'crypt_id');
                 return view('security::users.create', compact('typeDoc', 'profiles'));
             } else {
+                // Validar solo los campos necesarios
                 $request->validate([
+                    'username' => 'required',
+                    'password' => 'required',
+                    'profile_id' => 'required',
+                ]);
+            
+                // Crear usuario
+                $User = new User();
+                $User->username = $request->username;
+                $User->password = Hash::make($request->password);
+                $User->active = true;
+                $User->user_id = Auth::user()->id;  // quien crea
+                $User->register_date = now();
+                $User->ip = $request->ip();
+                $User->save();
+            
+                // Guardar relación en tabla pivote profiles_users
+                $profileId = Encryptor::decrypt($request->profile_id);
+            
+                DB::table('security_profiles_users')->insert([
+                    'id_users' => $User->id,          // id del usuario recién creado
+                    'id_rol' => $profileId,           // perfil asociado
+                    'status' => 'active',             // o algún valor por defecto
+                    'creado_por' => Auth::user()->id,
+                    'creado_en' => now(),
+                ]);
+            
+                return to_route('users')->withSuccess(__('Registered participant, please verify your email'));
+        
+                /* $request->validate([
                     'document_type_id' => 'required',
                     'document' => 'required',
                     'full_name' => 'required',
@@ -149,8 +179,8 @@ class UsersController extends Controller {
                 $User->ip = $request->ip();
                 $User->save();
 
-                return to_route('users')->withSuccess(__('Registered participant, please verify your email'));
-            }
+                return to_route('users')->withSuccess(__('Registered participant, please verify your email'));*/
+            } 
         }
     }
 

@@ -96,6 +96,7 @@ Route::prefix('security')->group(function () {
         Route::match(['get', 'post'], 'login', [Modules\Security\Http\Controllers\SecurityController::class, 'login'])->name('login');
         //Route::match(['get', 'post', 'put'], 'register', [Modules\Security\Http\Controllers\SecurityController::class, 'register'])->name('register');
         Route::match(['get', 'post', 'put'], 'recovery/{token?}', [Modules\Security\Http\Controllers\SecurityController::class, 'recovery'])->name('recovery');
+        Route::match(['get', 'post', 'put'], '/perfil/seleccionar/{id_rol}', [Modules\Security\Http\Controllers\SecurityController::class, 'seleccionarPerfil'])->name('usuario.seleccionarPerfil'); // Ruta para selecccionar perfil
     });
     Route::get('captcha/{seed?}', [Modules\Security\Http\Controllers\SecurityController::class, 'captcha'])->name('captcha');
 
@@ -116,7 +117,7 @@ Route::prefix('security')->group(function () {
         Route::match(['get', 'post'], 'profiles-update/{id}', [Modules\Security\Http\Controllers\ProfilesController::class, 'update'])->name('profiles.update');
         Route::match(['get', 'post'], 'profiles-permissions/{id}', [Modules\Security\Http\Controllers\ProfilesController::class, 'permissions'])->name('profiles.permissions');
 
-        Route::get('users', [Modules\Security\Http\Controllers\UsersController::class, 'index'])->name('users');
+        //Route::get('users', [Modules\Security\Http\Controllers\UsersController::class, 'index'])->name('users');
         Route::get('users-list', [Modules\Security\Http\Controllers\UsersController::class, 'list'])->name('users.list');
         Route::match(['get', 'post'], 'users-create', [Modules\Security\Http\Controllers\UsersController::class, 'create'])->name('users.create');
         Route::match(['get', 'post'], 'users-update/{id}', [Modules\Security\Http\Controllers\UsersController::class, 'update'])->name('users.update');
@@ -125,6 +126,6 @@ Route::prefix('security')->group(function () {
         Route::match(['get', 'post', 'put'], 'file-admin/{id?}', [Modules\Security\Http\Controllers\SecurityController::class, 'file_admin'])->name('security.admin');
 
 
-        Route::get('balizas', [Modules\Security\Http\Controllers\UsersController::class, 'index'])->name('users');
+        Route::get('usuarios', [Modules\Security\Http\Controllers\UsersController::class, 'index'])->name('users');
     });
 });

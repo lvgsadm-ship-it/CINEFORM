@@ -20,9 +20,11 @@ return new class extends Migration
             $table->string('route', 50);
             $table->string('actions', 200);
             $table->integer('order');
-            $table->boolean('active');
-            $table->unsignedBigInteger('menu_id');
-            $table->foreign('menu_id')->references('id')->on('security_menus');
+            $table->boolean('active')->default(true);
+            $table->foreignId('menu_id')->constrained('security_menus')->onDelete('cascade');
+
+           /*  $table->unsignedBigInteger('menu_id');
+            $table->foreign('menu_id')->references('id')->on('security_menus'); */
         });
 
         DB::table('security_processes')->insert([

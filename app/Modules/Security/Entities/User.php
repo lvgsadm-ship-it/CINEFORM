@@ -23,12 +23,11 @@ class User extends Authenticatable {
      */
     protected $table = "security_users";
     protected $fillable = [
-        'name',
-        'email',
+        'username',
         'password',
     ];
     public $timestamps = false;
-    protected $appends = ['cell_phone', 'full_document'];
+    /* protected $appends = ['cell_phone', 'full_document']; */
 
     /**
      * The attributes that should be hidden for serialization.
@@ -38,9 +37,6 @@ class User extends Authenticatable {
     protected $hidden = [
         'id',
         'password',
-        'user_id',
-        'profile_id',
-        'country_id',
         'username',
     ];
 
@@ -61,28 +57,58 @@ class User extends Authenticatable {
         return $this->getDocumentType->code . '-' . $this->document;
     }
     
+   /*  function getProfile() {
+        return $this->belongsTo(Profile::class, 'profile_id');
+    } */
     function getProfile() {
         return $this->belongsTo(Profile::class, 'profile_id');
     }
-    
+        
     function getCountry() {
         return $this->belongsTo(Countries::class, 'country_id');
     }
     
-    
+  /*   
     function getOffices() {
         return $this->belongsToMany(\Modules\Library\Entities\Offices::class, 'library_office_users', 'user_id', 'office_id');
     }
-    
+     */
     public function getDocumentType() {
         return $this->belongsTo(DocumentType::class, 'document_type_id');
     }
 
+    /* public function perfiles()
+    {
+        return $this->belongsToMany(
+            \Modules\Security\Entities\Profile::class,
+            'security_profiles_users',  // Nombre tabla pivote
+            'id_users',                 // FK usuario en pivote
+            'id_rol'                   // FK perfil en pivote
+        )->withPivot('status', 'fecha_aprobacion', 'aprobado_por', 'creado_por', 'creado_en', 'actualizado_por', 'actualizado_en');
+    }
+ */
+    public function getPerfiles()
+    {
+        return $this->belongsToMany(
+            \Modules\Security\Entities\Profile::class,
+            'security_profiles_users',  // Nombre tabla pivote
+            'id_users',                 // FK usuario en pivote
+            'id_rol'                   // FK perfil en pivote
+        )
+        ->select('security_profiles.*')
+        ->withPivot('id_rol','status', 'fecha_aprobacion', 'aprobado_por', 'creado_por', 'creado_en', 'actualizado_por', 'actualizado_en');        
+    }
+
+    public function getProfiles()
+    {
+        return $this->hasMany(ProfileUser::class, 'id_users');  
+    }
+    
     public function getModules() {
         $Modules = Modulo::join('security_menus', 'security_menus.module_id', '=', 'security_modules.id')
                 ->join('security_processes', 'security_processes.menu_id', '=', 'security_menus.id')
                 ->join('security_profile_processes', 'security_profile_processes.process_id', '=', 'security_processes.id')
-                ->where('security_profile_processes.profile_id', $this->profile_id)
+                ->where('security_profile_processes.profile_id', session()->get('profile_id')) //$this->profile_id)
                 ->groupBy("security_modules.id", "security_modules.name", "security_modules.description", "security_modules.icon", "security_modules.order")
                 ->select('security_modules.*')
                 ->get()
@@ -95,7 +121,7 @@ class User extends Authenticatable {
         $Processes = Modulo::join('security_menus', 'security_menus.module_id', '=', 'security_modules.id')
                 ->join('security_processes', 'security_processes.menu_id', '=', 'security_menus.id')
                 ->join('security_profile_processes', 'security_profiles_processes.process_id', '=', 'security_processes.id')
-                ->where('security_profile_processes.profile_id', $this->profile_id)
+                ->where('security_profile_processes.profile_id',session()->get('profile_id')) //$this->profile_id)
                 ->groupBy("security_processes.id", "security_processes.name", "security_processes.description", "security_processes.icon", "security_processes.route", "security_processes.actions", "security_processes.order")
                 ->select('security_processes.*')
                 ->get()
@@ -107,16 +133,25 @@ class User extends Authenticatable {
     public function captureMenu() {
         if (!session()->get('MODULE') == null) {
             return $this->getMenu(session()->get('MODULE'));
-        } else {
+        }  else {
+             return [];
+        } 
+        //return $this->getPerfiles->toArray();
+    }
+
+    public function capturePerfil() {
+        if (session()->get('MODULE') == null) {
+            return $this->getPerfiles->toArray();
+        }  else {
             return [];
-        }
+        } 
     }
 
     public function getMenu($Module) {
         $Menu = Menu::orderBy('order')->where("module_id", $Module)->with('getProcess')->get()->toArray();
         foreach ($Menu as $key => $value) {
             foreach ($value['get_process'] as $key2 => $value2) {
-                if (!in_array($this->profile_id, $value2['profile_array'])) {
+                if (!in_array(/* $this->profile_id */session()->get('profile_id'), $value2['profile_array'])) {
                     unset($Menu[$key]['get_process'][$key2]);
                     unset($Menu[$key]['process'][$key2]);
                 }
@@ -127,6 +162,19 @@ class User extends Authenticatable {
         }
         return $Menu;
     }
+
+    public function getPerfilesArray()
+    {
+        $perfiles = $this->getPerfiles()->get(); // obtiene los perfiles relacionados
+        $resultado = [];
+    
+        foreach ($perfiles as $perfil) {
+            unset($resultado[$perfil]);
+        }
+    
+        return $resultado;
+    }
+
 
     
 
@@ -157,7 +205,7 @@ class User extends Authenticatable {
         $has_permision = Process::join("security_profile_processes", "security_profile_processes.process_id", "security_processes.id")
                 ->select("*")
                 ->where("route", $routeFather)
-                ->where("profile_id", $this->profile_id)
+                ->where("profile_id", session()->get('profile_id')) //$this->profile_id)
                 ->first();
 
         if ($has_permision != null) {

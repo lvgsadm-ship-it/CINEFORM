@@ -2,11 +2,11 @@
     <div class="container-fluid">
         <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
             <div class="input-group">
-
+                    CINEFORM
             </div>
         </nav>
 
-        <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+        <ul class="navbar-nav topbar-nav ms-md-auto align-items-center"> 
             
             <li class="nav-item topbar-icon dropdown hidden-caret">
                 <a

@@ -65,7 +65,6 @@
             },
             serverSide: true,
             processing: true,
-
             rowCallback: function (row, data) {
                 //$(row).addClass(data.class);
             },

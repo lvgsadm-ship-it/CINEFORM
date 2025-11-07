@@ -2,12 +2,16 @@
 
 FROM php:8.2-fpm
 
-# Instala dependencias necesarias para GD
 RUN apt-get update && apt-get install -y \
+    libpq-dev \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
-    libpng-dev
-
+    libpng-dev \
+    && docker-php-ext-configure pgsql --with-pgsql=/usr/local/pgsql \
+    && docker-php-ext-install pdo_pgsql pgsql gd \
+	&& pecl install xdebug \
+	&& docker-php-ext-enable xdebug
+	
 # Configura e instala GD
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-install -j$(nproc) gd

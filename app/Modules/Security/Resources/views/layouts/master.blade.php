@@ -11,8 +11,7 @@
 
     </head>
     <body>
-        @yield('content')
-
+        @yield('content')           
         {{-- Laravel Vite - JS File --}}
         {{-- {{ module_vite('build-security', 'Resources/assets/js/app.js') }} --}}
     </body>
