@@ -12,7 +12,7 @@
                         <span class="fa fa-times"></span>
                     </button>
                 </div>
-            </div>
+            </div>           
         </div>
         <div class="card-body">
             <div class="row">
@@ -21,10 +21,9 @@
                         <thead>
                             <tr>
                                 <th>{{__('ID')}}</th>
-                                <th>{{__('Document')}}</th>
-                                <th>{{__('Full Name')}}</th>
+                                <th>{{__('username')}}</th>
+                                <th>{{__('password')}}</th>
                                 <th>{{__('Profile')}}</th>
-                                <th>{{__('Phone')}}</th>
                                 <th>{{__('Actions')}}</th>
 
                             </tr>
@@ -43,6 +42,8 @@
 
     document.addEventListener("DOMContentLoaded", function (event) {
 
+
+
         table1 = $('#table1').DataTable({
             "paging": true,
             "lengthChange": false,
@@ -53,12 +54,18 @@
             "responsive": true,
             "order": [[0, 'desc']],
 
-            ajax: {
-                url: "{{route('users.list')}}",
-                data: function (d) {
-                    d.search = $('#search').val()
-                }
-            },
+            
+    ajax: {
+        url: "{{route('users.list')}}",
+        data: function (d) {
+            d.search = $('#search').val();
+        },
+        dataFilter: function(data) {
+            console.log("Datos JSON recibidos en DataTables:");
+            console.dir(JSON.parse(data)); // imprime formato objeto en consola
+            return data; // debe retornar los datos sin modificar
+        }
+    },
             initComplete: function () {
                 $("#table1_filter").removeClass('dataTables_filter').html('<div class="col-12  col-md-12  col-lg-12"><div class="form-floating form-floating-custom mb-2">{{html()->input("text", "search", "")->class("form-control")->placeholder("")->maxlength(20)}}<label for="search">{{__("Search")}}</label><div onClick="table1.draw();" class="icon-right"><i class="fa fa-search"></i></div></div></div>');
                 $("#table1_filter").parent().siblings().eq(0).html('<a href="{{route("users.create")}}"  class="btn btn-large btn-info"> <i class="fa fa-plus"></i> {{__("New User")}}</a>');
@@ -70,10 +77,9 @@
             },
             columns: [
                 {data: 'DT_RowIndex'},
-                {data: 'full_document'},
-                {data: 'full_name'},
-                {data: 'get_profile.name'},
-                {data: 'cell_phone'},
+                {data: 'username'},
+                {data: 'password'},
+                {data: 'get_perfiles'},
                 {data: 'action'},
             ],
             language: {

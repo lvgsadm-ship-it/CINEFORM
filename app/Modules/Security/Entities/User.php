@@ -36,8 +36,8 @@ class User extends Authenticatable {
      */
     protected $hidden = [
         'id',
-        'password',
-        'username',
+        /* 'password',
+        'username', */
     ];
 
     /**
@@ -57,9 +57,6 @@ class User extends Authenticatable {
         return $this->getDocumentType->code . '-' . $this->document;
     }
     
-   /*  function getProfile() {
-        return $this->belongsTo(Profile::class, 'profile_id');
-    } */
     function getProfile() {
         return $this->belongsTo(Profile::class, 'profile_id');
     }
@@ -77,16 +74,6 @@ class User extends Authenticatable {
         return $this->belongsTo(DocumentType::class, 'document_type_id');
     }
 
-    /* public function perfiles()
-    {
-        return $this->belongsToMany(
-            \Modules\Security\Entities\Profile::class,
-            'security_profiles_users',  // Nombre tabla pivote
-            'id_users',                 // FK usuario en pivote
-            'id_rol'                   // FK perfil en pivote
-        )->withPivot('status', 'fecha_aprobacion', 'aprobado_por', 'creado_por', 'creado_en', 'actualizado_por', 'actualizado_en');
-    }
- */
     public function getPerfiles()
     {
         return $this->belongsToMany(
@@ -136,7 +123,6 @@ class User extends Authenticatable {
         }  else {
              return [];
         } 
-        //return $this->getPerfiles->toArray();
     }
 
     public function capturePerfil() {
@@ -174,9 +160,6 @@ class User extends Authenticatable {
     
         return $resultado;
     }
-
-
-    
 
     public function getShortNameAttribute() {
         if ($this->document_type->is_natural === false) {

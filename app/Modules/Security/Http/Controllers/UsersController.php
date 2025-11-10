@@ -29,23 +29,24 @@ class UsersController extends Controller {
                 $Users = User::limit(100)
                         ->Where('active', '0')
                         ->orderBy("id", "desc")
-                        ->with('getProfile')
+                        //->with('getProfile')
+                        ->with('getPerfiles')
                         ->get();
             } else {
                 $cond = $request->search;
                 $Users = User::limit(100)
-                        ->Where('active', 'true')
-                        ->where(function ($q) use ($cond) {
-                            $q->orWhere('full_name', 'ILIKE', '%' . Upper($cond) . '%');
+                        ->Where('active', '0')
+                        /* ->where(function ($q) use ($cond) {
+                            $q->orWhere('id', 'ILIKE', '%' . Upper($cond) . '%');
                             $q->orWhere('document', 'ILIKE', '%' . Upper($cond) . '%');
                             $q->orWhere('phone', 'ILIKE', '%' . Upper($cond) . '%');
-                        })
+                        }) */
                         /*
 
                           ->orderBy("id", "desc")
 
                          */
-                        ->with('getProfile')
+                        ->with('getPerfiles')
                         ->get()
                 //->toSql()
                 ;
@@ -91,7 +92,7 @@ class UsersController extends Controller {
                     ->addColumn('action', function ($row) {
                         $actionBtn = '<div class=" text-center">';
 
-                        if ($row->active == true) {
+                        if ($row->active == 0) {
                             $actionBtn .= '<a  title=""  href="' . route('users.update', $row->crypt_id) . '"   class="btn btn-icon btn-link    btn-xs"> <span class="fa fa-edit"></span></a> ';
                             $actionBtn .= '<a  title=""  href="' . route('users.password', $row->crypt_id) . '" class="btn btn-icon btn-link   btn-warning btn-xs"><span class="fa fa-lock"></span></a> ';
                         } else {
@@ -103,7 +104,7 @@ class UsersController extends Controller {
                     ->rawColumns(['action'])
             //->make(true)
 
-            ;
+            ;             
             return $data->toJson();
         }
     }

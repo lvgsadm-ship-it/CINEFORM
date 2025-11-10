@@ -12,11 +12,28 @@ class Personas extends Model
     protected $table = "comun.personas";
     protected $primaryKey = "id_persona";
     public $timestamps = false;
-    protected $fillable = ['tipo_dni', 'dni', 'pasaporte', 'rif', 'Reg_cnac', 'genero',
-        'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido',
-        'email', 'email_verificado', 'token_verificacion_email',
-        'telefono', 'telefono_opcional', 'idPais', 'idEstado', 'idMunicipio', 'idParroquia',
-        'direccion', 'creado_por', 'creado_en', 'actualizado_por', 'actualizado_en'];
+    protected $fillable = [
+        'tipo_dni', 
+        'dni', 
+        'pasaporte', 
+        'rif', 
+        'reg_nac_cine', 
+        'genero',
+        'primer_nombre', 
+        'segundo_nombre', 
+        'primer_apellido', 
+        'segundo_apellido',
+        'telefono', 
+        'telefono_opcional', 
+        'idPais', 
+        'idEstado', 
+        'idMunicipio', 
+        'idParroquia',
+        'direccion', 
+        'creado_por',
+        'creado_en',
+        'actualizado_por',
+        'actualizado_en'];
     
    /*  protected static function newFactory()
     {
