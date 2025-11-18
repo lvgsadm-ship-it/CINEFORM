@@ -35,7 +35,7 @@ return new class extends Migration
             
             $table->unsignedBigInteger('user_id')->nullable();
             
-            $table->timestamp('register_date');
+            $table->timestamp('register_date')->default(now());
             $table->ipAddress('ip');
             
             
@@ -63,6 +63,47 @@ return new class extends Migration
                 'change_password' => false,
                 
                 'user_id' => 1,
+                'ip' => '127.0.0.1',
+                'register_date'=>now()
+
+            ],
+            [
+                'document' => '30098588',
+                'document_type_id' => 1,
+                'full_name' => 'Cristhofer Luis Leon Gonzalez',
+                'email' => 'crisclas@gmail.com',
+                'username' => 'Facilitador',
+                'password' => Hash::make('12345678'),
+                'phone' => '+58 412-8888888',
+                
+                
+                'profile_id' => 2,
+                'country_id' => 238,
+                'active' => true,
+                'change_password' => false,
+                
+                'user_id' => 2,
+                'ip' => '127.0.0.1',
+                'register_date'=>now()
+
+            ],
+
+             [
+                'document' => '29310488',
+                'document_type_id' => 1,
+                'full_name' => 'Zoe Anais Quintero Medina',
+                'email' => 'Zquinte@gmail.com',
+                'username' => 'Participante',
+                'password' => Hash::make('12345678'),
+                'phone' => '+58 412-9999999',
+                
+                
+                'profile_id' => 3,
+                'country_id' => 238,
+                'active' => true,
+                'change_password' => false,
+                
+                'user_id' => 3,
                 'ip' => '127.0.0.1',
                 'register_date'=>now()
 

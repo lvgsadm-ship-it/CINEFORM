@@ -12,8 +12,10 @@
                 <div style="margin-top:0px" class="container container-menu">
                     <div class="page-inner">
                         
-                        {{-- Start from here. --}}
-                        @yield('content')
+                        <div style="margin-top:20px data background-color = white" class="container">
+
+                            @yield('content')
+                        </div>
                     </div>
                 </div>
 

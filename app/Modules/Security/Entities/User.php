@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Traits\EncryptationId;
+use Modules\Comun\Entities\PersonalData;
 
 class User extends Authenticatable {
 
@@ -128,7 +129,10 @@ class User extends Authenticatable {
         return $Menu;
     }
 
-    
+public function personalData()
+{
+    return $this->hasOne(PersonalData::class, 'document', 'document');
+}
 
     public function getShortNameAttribute() {
         if ($this->document_type->is_natural === false) {

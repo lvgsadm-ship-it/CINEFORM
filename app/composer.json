@@ -37,6 +37,10 @@
         },
         "files":[
             "app/Helpers/Helpers.php"
+        ],
+        "classmap": [
+            "Modules/Comun/Entities/",
+            "Modules/Taller/Entities/"
         ]
     },
     "autoload-dev": {
