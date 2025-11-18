@@ -4,7 +4,6 @@
         @include('template.head')
     </head>
     <body >
-        BODYYY
         <div class="wrapper">
             <div style="width:100%; margin-top:0px" class="main-panel">
                 

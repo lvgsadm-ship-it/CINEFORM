@@ -95,12 +95,14 @@ Route::prefix('security')->group(function () {
     Route::group(array('middleware' => array(\Modules\Security\Http\Middleware\SetLanguage::class)), function () {
         Route::match(['get', 'post'], 'login', [Modules\Security\Http\Controllers\SecurityController::class, 'login'])->name('login');
         //Route::match(['get', 'post', 'put'], 'register', [Modules\Security\Http\Controllers\SecurityController::class, 'register'])->name('register');
-        Route::match(['get', 'post', 'put'], 'recovery/{token?}', [Modules\Security\Http\Controllers\SecurityController::class, 'recovery'])->name('recovery');
-        Route::match(['get', 'post', 'put'], '/perfil/seleccionar/{id_rol}', [Modules\Security\Http\Controllers\SecurityController::class, 'seleccionarPerfil'])->name('usuario.seleccionarPerfil'); // Ruta para selecccionar perfil
+        Route::match(['get', 'post', 'put'], 'recovery/{token?}', [Modules\Security\Http\Controllers\SecurityController::class, 'recovery'])->name('recovery');        
     });
     Route::get('captcha/{seed?}', [Modules\Security\Http\Controllers\SecurityController::class, 'captcha'])->name('captcha');
 
     Route::group(array('middleware' => array('auth', \Modules\Security\Http\Middleware\CheckSecurity::class)), function () {
+        //Route::get('/usuario/perfil/seleccionar', [Modules\Security\Http\Controllers\SecurityController::class, 'showProfileSelection'])->name('usuario.mostrarPerfilSeleccion');
+        Route::get('/usuario/perfil/seleccionar', [Modules\Registro\Http\Controllers\RegistroController::class, 'home'])->name('registro.home');
+        Route::get('/usuario/perfil/seleccionar/{id_rol}', [Modules\Security\Http\Controllers\SecurityController::class, 'seleccionarPerfil'])->name('usuario.seleccionarPerfil');
         Route::get('home', [Modules\Security\Http\Controllers\SecurityController::class, 'home'])->name('home');
         Route::get('logout', [Modules\Security\Http\Controllers\SecurityController::class, 'logout'])->name('logout');
         Route::get('set-module/{id}', [Modules\Security\Http\Controllers\SecurityController::class, 'set_module'])->name('set_module');

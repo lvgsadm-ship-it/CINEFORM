@@ -1,8 +1,25 @@
-@extends('layouts.kaiadmin-menu')
+@extends('layouts.kaiadmin-select-profile')
 
 @section('content')
 <body>
-    SECURITY
+    <h3 class="text-center mb-4">{{ __('Selecciona tu perfil') }}</h3>
+    <div class="row justify-content-center">
+        <div class="col-md-4 profile-btn">
+                <a href="#"
+                   class="btn btn-primary btn-block btn-lg">
+                    <i class="fas fa-user-shield mr-2"></i> NOMRE
+                </a>
+            </div>
+       {{--  @foreach(Auth::user()->getProfiles() as $perfiles =>$perfil)
+        {{dd($perfil)}}
+            <div class="col-md-4 profile-btn">
+                <a href="{{ route('usuario.seleccionarPerfil', ['id_rol' => $perfil['id_rol']]) }}"
+                   class="btn btn-primary btn-block btn-lg">
+                    <i class="fas fa-user-shield mr-2"></i> {{ __($perfil['name']) }}
+                </a>
+            </div>
+        @endforeach --}}
+    </div>
 </body>
 <style>
     input[type=text]:focus,  input[type=password]:focus{

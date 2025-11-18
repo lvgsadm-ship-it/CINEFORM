@@ -8,6 +8,12 @@ use Illuminate\Routing\Controller;
 
 class RegistroController extends Controller
 {
+
+     public function home() {
+        //dd(Auth::user()->getMenu());
+        return view('registro::personas.home');
+    }
+
     /**
      * Display a listing of the resource.
      * @return Renderable

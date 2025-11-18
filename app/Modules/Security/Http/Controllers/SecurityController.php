@@ -507,7 +507,7 @@ class SecurityController extends Controller {
                         'password' => $request->password
                     );
                     if (Auth::attempt($userdata)) {//Intenta autenticar (login) con las credenciales proporcionadas.
-
+                        
                         User::whereId(Auth::user()->id)->update([
                             'change_password' => false,
                             'token' => '',
@@ -515,7 +515,7 @@ class SecurityController extends Controller {
                         ]);//Si el login es exitoso, actualiza el usuario logueado para quitar flags temporales relacionados con el cambio de contraseña y limpiar tokens.
 
                         $perfiles = Auth::user()->getProfiles();
-
+                        dd($perfiles);
                         if ($perfiles->count() <= 1) {
                             // Obtener el primer perfil si existe, usando método first()
                             $perfil = $perfiles->first();
@@ -528,7 +528,9 @@ class SecurityController extends Controller {
                              *Crear vista donde se muestran los perfiles para que el usuario seleccione un perfil
                              */
 
-                            dd("Mostrar seleccion");
+                            //dd("Mostrar seleccion");
+                            //return to_route('registro.home');
+                            return view('registro.home', compact('perfiles'));
                         }
 
                         if (Auth::user()->getModules()->count() == 1) {
@@ -566,6 +568,11 @@ class SecurityController extends Controller {
     public function home() {
         //dd(Auth::user()->getMenu());
         return view('security::users.home');
+    }
+
+     public function registroHome() {
+        //dd(Auth::user()->getMenu());
+        return view('registro::personas.home');
     }
 
     public function set_module($id) {
