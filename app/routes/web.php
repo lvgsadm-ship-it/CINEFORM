@@ -19,8 +19,6 @@ Route::get('/bienvenido', function () {
 });
 */
 
-Route::get('/cursoDetalle/{id}', 'TallerController@cursoDetalle')->name('curso.detalle');
-
 
 Route::get('/', function () {
     //exit;

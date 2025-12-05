@@ -4,10 +4,10 @@ namespace Modules\Comun\Http\Controllers;
 use Modules\Taller\Entities\Curso;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use App\Modules\Security\Entities\User;
+use Modules\Taller\Http\Controllers\BaseController;
 
-class PersonalDataController extends Controller
+class PersonalDataController extends BaseController
 {
     /**
      * Display a listing of the resource.
@@ -19,23 +19,23 @@ class PersonalDataController extends Controller
     }
 
 
-    public function prueba()
+   public function DatosPersonales()
 {
     // Obtener el usuario autenticado con sus datos personales
-    $user = auth()->user()->load('personalData');
+    $user = $this->getUsuarioAutenticado();
     
-    // Verificar si el usuario tiene datos personales
-    if (!$user->personalData) {
-        return view('comun::a.prueba', ['cursos' => collect()]);
-    }
-    
-    // Obtener los cursos de la persona con la relación de modalidad cargada
-    $cursos = \Modules\Taller\Entities\Curso::with('modalidad')
-        ->where('id_persona', $user->personalData->id_persona)
-        ->orderBy('creado_en', 'desc')
-        ->paginate(10); // Add pagination with 10 items per pages
-        
-    return view('taller::a.prueba', compact('cursos'));
+    // Obtener el registro de la tabla comun_personas que coincida con el documento del usuario
+    return \DB::table('comun_personas')
+        ->select([
+            'id',
+            'primer_nombre',
+            'segundo_nombre',
+            'primer_apellido',
+            'segundo_apellido',
+            'document'
+        ])
+        ->where('document', $user->document)
+        ->first(); 
 }
 
     /**

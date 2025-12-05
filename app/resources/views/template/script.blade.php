@@ -96,3 +96,5 @@
         @enderror
     });
 </script>
+
+@stack('scripts')

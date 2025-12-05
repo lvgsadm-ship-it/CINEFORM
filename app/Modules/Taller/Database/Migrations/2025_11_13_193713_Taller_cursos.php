@@ -22,13 +22,15 @@ return new class extends Migration
             $table->string('descripcion')->nullable();
             $table->integer('duracion')->nullable(); 
             $table->integer('horas')->nullable();
-           // $table->string('cantidad_cupos')->nullable();
-           // $table->string('status')->nullable();
-           // $table->string('creado_por')->nullable();
-        $table->timestamp('creado_en')->useCurrent();
-           // $table->string('actualizado_por')->nullable();
-           // $table->timestamp('actualizado_en')->nullable()->useCurrentOnUpdate();
-           // $table->timestamps();
+            $table->string('cantidad_cupos')->nullable(); 
+            $table->string('fecha_inicio')->nullable();
+            $table->string('fecha_fin')->nullable();
+            $table->string('creado_por')->nullable();
+            $table->timestamp('creado_en')->useCurrent();
+            $table->string('actualizado_por')->nullable();
+            $table->timestamp('actualizado_en')->nullable()->useCurrentOnUpdate();
+            $table->string('motivo_rechazo')->nullable();
+            $table->timestamps();
 
            
         });
@@ -40,8 +42,13 @@ return new class extends Migration
                 'id_persona' => 2,
                 'duracion' => 5,
                 'horas' => 5,
+                'cantidad_cupos' => 10,
                 'descripcion' => 'Prueba',
+                'fecha_inicio' => '2025-11-13',
+                'fecha_fin' => '2025-11-30',
+                'creado_por' => 'Nicolas',
                 'creado_en' => now(),
+                'motivo_rechazo' => null,
             ],
              [
                 'nombre' => 'Puerba2',
@@ -49,8 +56,13 @@ return new class extends Migration
                 'id_persona' => 1,
                 'duracion' => 5,
                 'horas' => 5,
+                'cantidad_cupos' => 10,
                 'descripcion' => 'Prueba',  
+                'fecha_inicio' => '2025-11-13',
+                'fecha_fin' => '2025-11-30',
+                'creado_por' => 'Nicolas',
                 'creado_en' => now(),
+                'motivo_rechazo' => null,
             ],
             
             

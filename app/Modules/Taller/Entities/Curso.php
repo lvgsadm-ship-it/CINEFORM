@@ -2,8 +2,11 @@
 
 namespace Modules\Taller\Entities;
 
+use App\Enums\EstadoCurso;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
+use Modules\Taller\Entities\Curso;
 
 class Curso extends Model
 {
@@ -16,22 +19,151 @@ class Curso extends Model
         'id_curso',
         'nombre',
         'id_modalidad',
-        'id_persona',
-        'descripcion'
+        'id_persona',   
+        'descripcion',
+        'duracion',
+        'horas',
+        'cantidad_cupos',
+        'creado_por',
+        'creado_en',
+        'fecha_inicio',
+        'fecha_fin'
     ];
 
-public function persona()
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'fecha_inicio' => 'date',
+        'fecha_fin' => 'date',
+        'creado_en' => 'datetime',
+        'status' => EstadoCurso::class
+    ];
+    
+    /**
+     * Obtener los valores posibles para el campo status
+     *
+     * @return array
+     */
+    public static function getStatuses()
+    {
+        return [
+            EstadoCurso::BORRADOR->value => 'Borrador',
+            EstadoCurso::PUBLICADO->value => 'Publicado',
+            EstadoCurso::EN_CURSO->value => 'En Curso',
+            EstadoCurso::FINALIZADO->value => 'Finalizado',
+            EstadoCurso::CANCELADO->value => 'Cancelado',
+        ];
+    }
+
+    public function persona()
+    {
+        return $this->belongsTo(\Modules\Comun\Entities\PersonalData::class, 'id_persona', 'id');
+    }
+
+    public function modalidad()
+    {
+        return $this->belongsTo(Modalidad::class, 'id_modalidad', 'id_modalidad');
+    }
+/**
+ * Get the current estado of the curso.
+ */
+public function estadoActual()
 {
-    return $this->belongsTo(\Modules\Comun\Entities\PersonalData::class, 'id_persona', 'id');
+    return $this->belongsToMany(Estado::class, 'curso_estado', 'id_curso', 'id_estado')
+        ->withPivot('created_at', 'motivo')
+        ->orderBy('curso_estado.created_at', 'desc')
+        ->take(1);
 }
 
-public function modalidad()
+/**
+ * Get the current estado attribute.
+ */
+public function getEstadoActualAttribute()
 {
-    return $this->belongsTo(\Modules\Taller\Entities\Modalidad::class, 'id_modalidad');
+    return $this->estadoActual()->first();
 }
 
-public function contenidos()
+/**
+ * Get the current status of the curso.
+ */
+public function getStatusAttribute()
 {
-    return $this->hasMany(ContenidoCurso::class, 'id_curso', 'id_curso');
+    return $this->estado_actual;
 }
+
+/**
+ * Get all estados for the curso.
+ */
+public function estados()
+{
+    return $this->belongsToMany(Estado::class, 'curso_estado', 'id_curso', 'id_estado')
+        ->withPivot('created_at', 'motivo')
+        ->orderBy('curso_estado.created_at', 'desc');
+}
+
+    /**
+     * Add a new estado to the curso.
+     */
+
+    public function contenidos()
+    {
+        return $this->hasMany(ContenidoCurso::class, 'id_curso');
+    }
+
+    /**
+     * Get all inscripciones for the curso.
+     */
+    public function inscripciones()
+    {
+        return $this->hasMany(\Modules\Taller\Entities\Inscripcion::class, 'id_curso', 'id_curso');
+    }
+
+// En app/Modules/Taller/Entities/Curso.php
+
+/**
+ * Actualiza el estado del curso
+ *
+ * @param int $idEstado
+ * @param string|null $motivo
+ * @return $this
+ */
+public function agregarEstado($idEstado, $motivo = null)
+{
+    // Verificar si el estado existe
+    $estado = \Modules\Taller\Entities\Estado::findOrFail($idEstado);
+    
+    // Verificar si ya existe un registro para este curso
+    $existeEstado = DB::table('curso_estado')
+        ->where('id_curso', $this->id_curso)
+        ->first();
+
+    if ($existeEstado) {
+        // Actualizar el registro existente
+        DB::table('curso_estado')
+            ->where('id_curso', $this->id_curso)
+            ->update([
+                'id_estado' => $idEstado,
+                'motivo' => $motivo,
+                'updated_at' => now()
+            ]);
+    } else {
+        // Crear un nuevo registro si no existe
+        DB::table('curso_estado')->insert([
+            'id_curso' => $this->id_curso,
+            'id_estado' => $idEstado,
+            'motivo' => $motivo,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+    }
+    
+    // No actualizamos id_estado en la tabla taller_cursos
+    // ya que no existe esa columna
+    
+    return $this;
+}
+
 }

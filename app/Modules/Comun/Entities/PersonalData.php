@@ -31,9 +31,9 @@ class PersonalData extends Model
     {
         return trim(implode(' ', array_filter([
             $this->primer_nombre,
-            $this->segundo_nombre,
+         
             $this->primer_apellido,
-            $this->segundo_apellido
+      
         ])));
     }
     
