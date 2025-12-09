@@ -108,15 +108,6 @@ public function aceptarCurso($id_curso)
                 'updated_at' => now()
             ]);
 
-        if (!$updated) {
-            // Si no se pudo actualizar (no existe registro), crear uno nuevo
-            DB::table('curso_estado')->insert([
-                'id_curso' => $id_curso,
-                'id_estado' => 4,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-        }
 
         return response()->json([
             'success' => true, 
@@ -133,4 +124,7 @@ public function aceptarCurso($id_curso)
         return response()->json(['success' => false, 'message' => 'Error al actualizar el estado del curso: ' . $e->getMessage()], 500);
     }
 }
+
+
+
 }

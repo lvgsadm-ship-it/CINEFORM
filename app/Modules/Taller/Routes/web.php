@@ -57,7 +57,12 @@ Route::prefix('taller')->group(function() {
             ->name('taller.Prueba');
 
         // Ruta para actualizar el estado del curso
-Route::put('/taller/cursos/{curso}/status', [CursoController::class, 'updateStatus'])
-    ->name('taller.cursos.updateStatus');
+        Route::put('/taller/cursos/{curso}/status', [CursoController::class, 'updateStatus'])
+            ->name('taller.cursos.updateStatus');
+
+        // Ruta para finalizar la edición del curso
+        Route::put('/taller/cursos/{curso}/finalizar', [CursoController::class, 'finalizarEdicion'])
+            ->name('taller.cursos.finalizarEdicion');
+    
     });
 });

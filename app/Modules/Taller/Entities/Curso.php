@@ -149,20 +149,7 @@ public function agregarEstado($idEstado, $motivo = null)
                 'motivo' => $motivo,
                 'updated_at' => now()
             ]);
-    } else {
-        // Crear un nuevo registro si no existe
-        DB::table('curso_estado')->insert([
-            'id_curso' => $this->id_curso,
-            'id_estado' => $idEstado,
-            'motivo' => $motivo,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
     }
-    
-    // No actualizamos id_estado en la tabla taller_cursos
-    // ya que no existe esa columna
-    
     return $this;
 }
 

@@ -194,8 +194,8 @@
                             <a class="btn btn-warning w-100 mb-2" href="{{ route('taller.cursos.edit', $curso->id_curso) }}">
                                 <i class="fas fa-user-tie me-2"></i> Editar curso 
                             </a>
-                            <button class="btn btn-danger w-100 mb-2" href="{{ route('taller.cursos.edit', $curso->id_curso) }}">
-                                <i class="fas fa-user-tie me-2"></i> Finalizar edicion  
+                            <button onclick="finalizarEdicion({{ $curso->id_curso }})" class="btn btn-primary w-100 mb-2">
+                                Finalizar Edición
                             </button>
                         @elseif($esFacilitador && $EnAprobacion)
                             <a class="btn btn-info w-100 mb-2" disabled>
@@ -260,6 +260,62 @@
 
 @push('scripts')
 <script>
+
+function finalizarEdicion(idCurso) {
+
+
+
+    fetch('{{ route("taller.cursos.updateStatus", ["curso" => $curso->id_curso]) }}', {
+    method: 'PUT',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+        'Accept': 'application/json'
+    },
+    body: JSON.stringify({ 
+        id_estado: 5 // El ID del estado al que quieres cambiar
+    })
+
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Tu solicitud esta en proceso!',
+                text: 'En la brevedad posible te daremos respuesta de tu propuesta',
+                showConfirmButton: false,
+                timer: 5000
+            }).then(() => {
+                // Recargar la página para actualizar la vista
+                window.location.reload();
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message || 'Ocurrió un error al actualizar el estado del curso',
+                confirmButtonText: 'Entendido'
+            });
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al procesar la solicitud',
+            confirmButtonText: 'Entendido'
+        });
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    });
+    
+}
+
+
     // Función para actualizar el estado del curso
 function updateStatus(idCurso) {
    

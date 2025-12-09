@@ -200,7 +200,7 @@ public function store(Request $request)
     $curso = Curso::findOrFail($request->id_curso);
     $user = Auth::user();
 
-    // Get the personal data for the authenticated user
+    
     $personalData = \Modules\Comun\Entities\PersonalData::where('document', $user->document)->first();
 
     if (!$personalData) {
@@ -293,4 +293,48 @@ public function destroy($id)
     ]);
 }
 
+    /**
+     * Finaliza la edición de un curso cambiando su estado a 5 (Finalizado)
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function finalizarEdicion($id)
+    {
+        try {
+            // Buscar el curso
+            $curso = Curso::findOrFail($id);
+            
+            // Verificar que el usuario es el propietario del curso
+            $user = auth()->user();
+            $personalData = \Modules\Comun\Entities\PersonalData::where('document', $user->document)->first();
+            
+            if (!$personalData || $curso->id_persona != $personalData->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No autorizado para finalizar la edición de este curso'
+                ], 403);
+            }
+            
+            // Agregar el nuevo estado (5 = Finalizado)
+            $curso->agregarEstado(5);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Edición del curso finalizada correctamente',
+                'estado_actual' => 5
+            ]);
+            
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Curso no encontrado'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al finalizar la edición del curso: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

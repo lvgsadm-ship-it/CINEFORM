@@ -1,7 +1,4 @@
-@extends('layouts.kaiadmin-main')
-
-@push('styles')
-@endpush
+@extends('layouts.kaiadmin-menu')
 
 @section('content')
 <div class="row">
