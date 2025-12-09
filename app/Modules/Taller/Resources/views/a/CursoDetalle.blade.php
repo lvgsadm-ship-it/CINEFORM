@@ -163,7 +163,8 @@
                             // El faciliatador debe acetar el curso
                             $PorAceptar = $curso->estado_actual->id_estado == 1;
 
-                            
+                            // Verificar si el usuario es el coordinador
+                            $esCoordinador = $user->profile_id == 4;
                           
                             // Verificar si el usuario es el instructor del curso
                             $esFacilitador = $curso->id_persona == $idPersona;
@@ -187,6 +188,10 @@
                             <button class="btn btn-success w-100 mb-2" onclick="updateStatus({{ $curso->id_curso }})">
                                 <i class="fas fa-user-tie me-2"></i> Aceptar Curso
                             </button>
+                        @elseif ($EnEdicion)
+                        <a class="btn btn-warning w-100 mb-2" disabled>
+                            Curso siendo evaluado por el Facilitador    
+                        </a>
                         @elseif($esFacilitador && $EnEdicion)
                             <a class="btn btn-info w-100 mb-2" disabled>
                                 <i class="fas fa-user-tie me-2"></i> Eres el instructor de este curso
@@ -204,10 +209,15 @@
                             <button class="btn btn-warning w-100 mb-2" disabled>
                                 <i class="fas fa-user-tie me-2"></i> Curso en evaluacion   
                             </button>
+                        @elseif($EnAprobacion && $esCoordinador)
+                            <button class="btn btn-success w-100 mb-2" onclick="updateStatus({{ $curso->id_curso }})">
+                                <i class="fas fa-user-tie me-2"></i> Aprobar Contenido
+                            </button>
                         @elseif($EnAprobacion)
                             <a class="btn btn-info w-100 mb-2" disabled>
                                 <i class="fas fa-user-tie me-2"></i> Curso en evaluacion   
                             </a>
+                        
                         @elseif($esFacilitador)
                             <a class="btn btn-info w-100 mb-2" disabled>
                                 <i class="fas fa-user-tie me-2"></i> Eres el instructor de este curso
