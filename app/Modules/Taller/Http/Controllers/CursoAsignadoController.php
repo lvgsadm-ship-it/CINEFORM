@@ -23,26 +23,26 @@ class CursoAsignadoController extends BaseController
             return view('taller::a.CursosAsignados', ['cursos' => collect()]);
         }
 
-        // Primero obtenemos solo los IDs de los cursos
-        $cursosIds = Curso::where('id_persona', $user->personalData->id)
-            ->pluck('id_curso');
-
-        // Luego cargamos todo lo necesario
+        // Cargamos los cursos con sus relaciones
         $cursos = Curso::with([
-        'modalidad',
-        'estados' => function($query) {
-            $query->orderBy('curso_estado.created_at', 'desc');
-        }
+            'modalidad',
+            'estados' => function($query) {
+                $query->orderBy('curso_estado.created_at', 'desc')
+                      ->withPivot('motivo');
+            }
         ])
-            ->whereIn('id_curso', $cursosIds)
-            ->withCount(['contenidos as total_contenidos'])
-            ->orderBy('fecha_inicio', 'desc')
-            ->paginate(10);
+        ->where('id_persona', $user->personalData->id)
+        ->withCount(['contenidos as total_contenidos', 'inscripciones'])
+        ->orderBy('fecha_inicio', 'desc')
+        ->paginate(10);
 
-        // Procesamos la colección para agregar el estado actual
-        $cursos->getCollection()->transform(function($curso) {
+        // Agregamos el estado actual a cada curso
+        $cursos->getCollection()->each(function($curso) {
             $curso->estado_actual = $curso->estados->first();
-            return $curso;
+            // También podemos agregar el ID del estado directamente al modelo para facilitar el acceso
+            if ($curso->estado_actual) {
+                $curso->estado_id = $curso->estado_actual->id_estado;
+            }
         });
 
         return view('taller::a.CursosAsignados', compact('cursos'));

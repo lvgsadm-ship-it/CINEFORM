@@ -27,6 +27,7 @@
                                 @php
                                     $modalidad = $curso->modalidad->nombre_modalidad ?? 'No especificada';
                                     $modalidadIcon = $modalidad === 'Presencial' ? 'fa-building' : 'fa-laptop';
+                                    $estado = $curso->estado_id;
                                 @endphp
                                 <div class="col-md-6 col-lg-4 mb-4">
                                     <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
@@ -43,8 +44,33 @@
                                                     <i class="fas {{ $modalidadIcon }} me-1"></i>
                                                     {{ $modalidad }}
                                                 </span>
+                                            
+                                                @if($curso->estado_actual)
+                                                    @if($curso->estado_actual->id_estado == 1)
+                                                        <span class="badge bg-success">Por Aceptar</span>
+                                                    @elseif($curso->estado_actual->id_estado == 2)
+                                                        <span class="badge bg-danger">Rechazado</span>
+                                                    @elseif($curso->estado_actual->id_estado == 3)
+                                                        <span class="badge bg-warning">Declinado</span>
+                                                    @elseif($curso->estado_actual->id_estado == 4)
+                                                        <span class="badge bg-warning">En edición</span>
+                                                    @elseif($curso->estado_actual->id_estado == 5)
+                                                        <span class="badge bg-warning">En Evaluación</span>
+                                                    @elseif($curso->estado_actual->id_estado == 6)
+                                                        <span class="badge bg-success">Abierto a inscripciones</span>
+                                                    @elseif($curso->estado_actual->id_estado == 7)
+                                                        <span class="badge bg-success">En curso</span>
+                                                    @elseif($curso->estado_actual->id_estado == 8)
+                                                        <span class="badge bg-danger">Finalizado</span>
+                                                    @elseif($curso->estado_actual->id_estado == 9)
+                                                        <span class="badge bg-danger">Cerrado</span>
+                                                    @endif
+                                                @else
+                                                    <span class="badge bg-secondary">Sin estado</span>
+                                                @endif
                                             </div>
-                                        </div>
+                                            </div>
+                                        
                                         <div class="card-body">
                                             <h5 class="card-title text-truncate" title="{{ $curso->nombre }}">
                                                 {{ $curso->nombre }}
@@ -75,7 +101,7 @@
                                                     </a>
                                                 </div>
                                             </div>
-                                        </div>º
+                                        </div>  
                                     </div>
                                 </div>
                             @endforeach
