@@ -175,6 +175,8 @@
                             // Verificar si el curso está en evaluación por coordinacion     
                             $EnAprobacion = $curso->estado_actual->id_estado == 5;
                             
+                            $CuposDisponibles = $curso->cantidad_cupos;
+
                             // Verificar si el usuario ya está inscrito
                             $inscripcion = $idPersona ? 
                                 \Modules\Taller\Entities\Inscripcion::where('id_curso', $curso->id_curso)
@@ -185,7 +187,7 @@
                             <a class="btn btn-info w-100 mb-2" disabled>
                                 <i class="fas fa-user-tie me-2"></i> Eres el instructor de este curso
                             </a>
-                            <button class="btn btn-success w-100 mb-2" onclick="updateStatus({{ $curso->id_curso }})">
+                            <button class="btn btn-success w-100 mb-2" onclick="AceptarCursoFacilitador({{ $curso->id_curso }})">
                                 <i class="fas fa-user-tie me-2"></i> Aceptar Curso
                             </button>
                         @elseif ($EnEdicion)
@@ -210,7 +212,7 @@
                                 <i class="fas fa-user-tie me-2"></i> Curso en evaluacion   
                             </button>
                         @elseif($EnAprobacion && $esCoordinador)
-                            <button class="btn btn-success w-100 mb-2" onclick="updateStatus({{ $curso->id_curso }})">
+                            <button class="btn btn-success w-100 mb-2" onclick="AprobarCurso({{ $curso->id_curso }})">
                                 <i class="fas fa-user-tie me-2"></i> Aprobar Contenido
                             </button>
                         @elseif($EnAprobacion)
@@ -229,6 +231,10 @@
                             <button class="btn btn-outline-danger w-100 mb-2 cancelar-inscripcion-btn" 
                                 data-inscripcion-id="{{ $inscripcion->id_inscripcion }}">
                                 <i class="fas fa-times-circle me-2"></i> Cancelar inscripción
+                            </button>
+                        @elseif($CuposDisponibles > 0)
+                            <button class="btn btn-primary w-100 mb-2" onclick="inscribirAlCurso({{ $curso->id_curso }})">
+                                <i class="fas fa-check-circle me-2"></i> Inscribirse
                             </button>
                         @else
                             <a class="btn btn-secondary w-100 mb-2" disabled>
@@ -325,9 +331,62 @@ function finalizarEdicion(idCurso) {
     
 }
 
+function AprobarCurso(idCurso) {
+
+
+
+    fetch('{{ route("taller.cursos.updateStatus", ["curso" => $curso->id_curso]) }}', {
+    method: 'PUT',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+        'Accept': 'application/json'
+    },
+    body: JSON.stringify({ 
+        id_estado: 6 // El ID del estado al que quieres cambiar
+    })
+
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Tu solicitud esta en proceso!',
+                text: 'En la brevedad posible te daremos respuesta de tu propuesta',
+                showConfirmButton: false,
+                timer: 5000
+            }).then(() => {
+                // Recargar la página para actualizar la vista
+                window.location.reload();
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message || 'Ocurrió un error al actualizar el estado del curso',
+                confirmButtonText: 'Entendido'
+            });
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al procesar la solicitud',
+            confirmButtonText: 'Entendido'
+        });
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    });
+    
+}
 
     // Función para actualizar el estado del curso
-function updateStatus(idCurso) {
+function AceptarCursoFacilitador(idCurso) {
    
 
     const btn = event.target;
@@ -652,5 +711,6 @@ function updateStatus(idCurso) {
     });
 </script>
 @endpush
+
 
 @endsection

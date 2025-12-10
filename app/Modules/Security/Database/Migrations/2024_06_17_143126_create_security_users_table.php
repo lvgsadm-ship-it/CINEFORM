@@ -107,7 +107,27 @@ return new class extends Migration
                 'ip' => '127.0.0.1',
                 'register_date'=>now()
 
-            ]
+             ],
+             [
+                'document' => '12345678',
+                'document_type_id' => 1,
+                'full_name' => 'Pedro Julian Leon Gonzalez',
+                'email' => 'Pjulian@gmail.com',
+                'username' => 'Coordinador',
+                'password' => Hash::make('12345678'),
+                'phone' => '+58 412-9999999',
+                
+                
+                'profile_id' => 4,
+                'country_id' => 238,
+                'active' => true,
+                'change_password' => false,
+                
+                'user_id' => 1,
+                'ip' => '127.0.0.1',
+                'register_date'=>now()
+
+             ]
         ]);
     }
 

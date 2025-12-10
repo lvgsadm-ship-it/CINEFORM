@@ -83,6 +83,13 @@ return new class extends Migration
                 'document' => '29310488',
               
             ],
+            [
+                'primer_nombre' => 'Pedro',
+                'segundo_nombre' => 'Julian',
+                'primer_apellido' => 'Leon',
+                'segundo_apellido' => 'Gonzales',
+                'document' => '12345678',
+            ]
         ]);
     }
 

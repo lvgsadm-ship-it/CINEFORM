@@ -47,6 +47,14 @@ return new class extends Migration {
                 'user_id' => 3,
                 'register_date'=>now(),
                 'ip' => '127.0.0.1',
+            ],
+            [
+                'name' => 'Coordinador',
+                'description' => 'Coordinador',
+                'active' => true,
+                'user_id' => 3, 
+                'register_date'=>now(),
+                'ip' => '127.0.0.1',
             ]
         ]);
     }
