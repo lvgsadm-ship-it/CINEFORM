@@ -171,6 +171,8 @@
                             
                             // Verificar si el curso está en edicion
                             $EnEdicion = $curso->estado_actual->id_estado == 4;
+
+                            $Declinado = $curso->estado_actual->id_estado == 3;
                             
                             // Verificar si el curso está en evaluación por coordinacion     
                             $EnAprobacion = $curso->estado_actual->id_estado == 5;
@@ -190,17 +192,14 @@
                             <button class="btn btn-success w-100 mb-2" onclick="AceptarCursoFacilitador({{ $curso->id_curso }})">
                                 <i class="fas fa-user-tie me-2"></i> Aceptar Curso
                             </button>
-                        @elseif ($EnEdicion)
-                        <a class="btn btn-warning w-100 mb-2" disabled>
-                            Curso siendo evaluado por el Facilitador    
-                        </a>
+                       
                         @elseif($esFacilitador && $EnEdicion)
                             <a class="btn btn-info w-100 mb-2" disabled>
                                 <i class="fas fa-user-tie me-2"></i> Eres el instructor de este curso
                             </a>
-                            <a class="btn btn-warning w-100 mb-2" href="{{ route('taller.cursos.edit', $curso->id_curso) }}">
-                                <i class="fas fa-user-tie me-2"></i> Editar curso 
-                            </a>
+                                <a class="btn btn-warning w-100 mb-2" href="{{ route('taller.cursos.edit', $curso->id_curso) }}">
+                                    <i class="fas fa-user-tie me-2"></i> Editar curso 
+                                </a>
                             <button onclick="finalizarEdicion({{ $curso->id_curso }})" class="btn btn-primary w-100 mb-2">
                                 Finalizar Edición
                             </button>
@@ -215,15 +214,32 @@
                             <button class="btn btn-success w-100 mb-2" onclick="AprobarCurso({{ $curso->id_curso }})">
                                 <i class="fas fa-user-tie me-2"></i> Aprobar Contenido
                             </button>
+                            <button class="btn btn-danger w-100 mb-2" onclick="RechazarContenido({{ $curso->id_curso }})">
+                                <i class="fas fa-user-tie me-2"></i> Rechazar Contenido
+                            </button>
+                        @elseif($Declinado && $esFacilitador)
+                            <a class="btn btn-info w-100 mb-2" disabled>
+                                <i class="fas fa-user-tie me-2"></i> Eres el instructor de este curso
+                            </a>
+                            <a class="btn btn-warning w-100 mb-2" href="{{ route('taller.cursos.edit', $curso->id_curso) }}">
+                                <i class="fas fa-user-tie me-2"></i> Editar curso 
+                            </a>
+                            <a class="btn btn-danger w-100 mb-2" href="verMotivoRechazo({{ $curso->id_curso }})">
+                                <i class="fas fa-info-circle me-2"></i> Ver motivo de rechazo
+                            </a>
+
                         @elseif($EnAprobacion)
                             <a class="btn btn-info w-100 mb-2" disabled>
                                 <i class="fas fa-user-tie me-2"></i> Curso en evaluacion   
                             </a>
-                        
                         @elseif($esFacilitador)
                             <a class="btn btn-info w-100 mb-2" disabled>
                                 <i class="fas fa-user-tie me-2"></i> Eres el instructor de este curso
                             </a>
+                         @elseif ($EnEdicion)
+                        <a class="btn btn-warning w-100 mb-2" disabled>
+                            Curso siendo evaluado por el Facilitador    
+                        </a>
                         @elseif($inscripcion)
                             <a class="btn btn-success w-100 mb-2" disabled>
                                 <i class="fas fa-check-circle me-2"></i> Ya estás inscrito
@@ -232,6 +248,7 @@
                                 data-inscripcion-id="{{ $inscripcion->id_inscripcion }}">
                                 <i class="fas fa-times-circle me-2"></i> Cancelar inscripción
                             </button>
+                        
                         @elseif($CuposDisponibles > 0)
                             <button class="btn btn-primary w-100 mb-2" onclick="inscribirAlCurso({{ $curso->id_curso }})">
                                 <i class="fas fa-check-circle me-2"></i> Inscribirse
@@ -276,7 +293,118 @@
 
 @push('scripts')
 <script>
-
+function verMotivoRechazo(cursoId, motivo, cursoNombre = '') {
+    Swal.fire({
+        title: `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-times-circle text-danger me-2"></i>
+                <span>Motivo de Rechazo</span>
+            </div>
+        `,
+        html: `
+            <div class="text-start">
+                ${cursoNombre ? `<p class="mb-3"><strong>Curso:</strong> ${cursoNombre}</p>` : ''}
+                <div class="alert alert-light border">
+                    <p class="mb-0">${motivo || 'No se especificó un motivo'}</p>
+                </div>
+                <div class="mt-3 small text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Este es el motivo por el cual el curso fue rechazado.
+                </div>
+            </div>
+        `,
+        icon: 'info',
+        showCloseButton: true,
+        showConfirmButton: false,
+        customClass: {
+            popup: 'swal-modal-motivo',
+            closeButton: 'swal-close-btn'
+        },
+        width: '600px',
+        padding: '1.5rem',
+        backdrop: true,
+        allowOutsideClick: true,
+        allowEscapeKey: true
+    });
+}
+function RechazarContenido(idCurso, btnElement) {
+    const btn = btnElement || event?.target;
+    const originalText = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    
+    Swal.fire({
+        title: 'Motivo del rechazo',
+        text: 'Ingrese el motivo del rechazo (mínimo 10 caracteres):',
+        input: 'textarea',
+        inputPlaceholder: 'Escriba aquí...',
+        showCancelButton: true,
+        confirmButtonText: 'Rechazar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#d33',
+        showLoaderOnConfirm: true,
+        
+        inputValidator: (value) => {
+            if (!value || value.trim().length < 10) {
+                return 'Debe ingresar al menos 10 caracteres';
+            }
+            return null;
+        },
+        
+        preConfirm: async (motivo) => {
+            try {
+                const url = '{{ route("taller.cursos.updateStatus", ["curso" => ":id"]) }}'
+                    .replace(':id', idCurso);
+                
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        id_estado: 3,
+                        motivo: motivo.trim()
+                    })
+                });
+                
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                
+                const data = await response.json();
+                if (!data.success) throw new Error(data.message);
+                
+                return data;
+                
+            } catch (error) {
+                Swal.showValidationMessage(error.message);
+                throw error;
+            }
+        }
+        
+    }).then((result) => {
+        // Restaurar botón siempre
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        
+        if (result.isConfirmed) {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Rechazado!',
+                text: 'Curso rechazado exitosamente.',
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.reload();
+            });
+        }
+        
+    }).catch(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    });
+}
 function finalizarEdicion(idCurso) {
 
 
