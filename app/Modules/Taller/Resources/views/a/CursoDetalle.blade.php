@@ -176,6 +176,15 @@
                             
                             // Verificar si el curso está en evaluación por coordinacion     
                             $EnAprobacion = $curso->estado_actual->id_estado == 5;
+
+                            // Verificar si el curso está finalizado
+                            $Finalizado = $curso->estado_actual->id_estado == 8;
+
+                            // Verificar si el curso esta en progreso
+                            $EnProgreso = $curso->estado_actual->id_estado == 7;
+
+                            // Verificar si el curso esta cerrado
+                            $Cerrado = $curso->estado_actual->id_estado == 9;
                             
                             $CuposDisponibles = $curso->cantidad_cupos;
 
@@ -192,7 +201,17 @@
                             <button class="btn btn-success w-100 mb-2" onclick="AceptarCursoFacilitador({{ $curso->id_curso }})">
                                 <i class="fas fa-user-tie me-2"></i> Aceptar Curso
                             </button>
+<<<<<<< HEAD
                        
+=======
+                        @elseif($Cerrado)
+                        <a href="" class="btn btn-danger w-100 mb-2">El curso ya esta cerrado</a>
+                        <a href="" class="btn btn-success w-100 mb-2">Emitir certificado</a>
+                        @elseif ($EnEdicion)
+                        <a class="btn btn-warning w-100 mb-2" disabled>
+                            Curso siendo evaluado por el Facilitador    
+                        </a>
+>>>>>>> daad9100988e0bd295a8dafaa678de52fa7e2e9c
                         @elseif($esFacilitador && $EnEdicion)
                             <a class="btn btn-info w-100 mb-2" disabled>
                                 <i class="fas fa-user-tie me-2"></i> Eres el instructor de este curso
@@ -236,10 +255,20 @@
                             <a class="btn btn-info w-100 mb-2" disabled>
                                 <i class="fas fa-user-tie me-2"></i> Eres el instructor de este curso
                             </a>
+<<<<<<< HEAD
                          @elseif ($EnEdicion)
                         <a class="btn btn-warning w-100 mb-2" disabled>
                             Curso siendo evaluado por el Facilitador    
                         </a>
+=======
+                        @elseif($Finalizado)
+                            <a class="btn btn-warning w-100 mb-2" disabled>
+                                <i class="fas fa-user-tie me-2"></i> El curso ya se finalizo, contactar con el profesor para cualquier necesidad.
+                            </a>
+                            <a class="btn btn-success w-100 mb-2" disabled>
+                                <i class="fas fa-user-tie me-2"></i> Emitir Certificado
+                            </a>
+>>>>>>> daad9100988e0bd295a8dafaa678de52fa7e2e9c
                         @elseif($inscripcion)
                             <a class="btn btn-success w-100 mb-2" disabled>
                                 <i class="fas fa-check-circle me-2"></i> Ya estás inscrito

@@ -23,6 +23,8 @@
                                 @php
                                     $modalidad = $curso->modalidad->nombre_modalidad ?? 'No especificada';
                                     $modalidadIcon = strtolower($modalidad) === 'presencial' ? 'fa-building' : 'fa-laptop';
+                                    $estado = $curso->estado_id;
+
                                 @endphp
                                 <div class="col-md-6 col-lg-4 mb-4">
                                     <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
@@ -39,8 +41,23 @@
                                                     <i class="fas {{ $modalidadIcon }} me-1"></i>
                                                     {{ $modalidad }}
                                                 </span>
+                                            
+                                                @if($curso->estado_actual)
+                                                    @if($curso->estado_actual->id_estado == 6)
+                                                        <span class="badge bg-success">Abierto a inscripciones</span>
+                                                    @elseif($curso->estado_actual->id_estado == 7)
+                                                        <span class="badge bg-success">En curso</span>
+                                                    @elseif($curso->estado_actual->id_estado == 8)
+                                                        <span class="badge bg-danger">Finalizado</span>
+                                                    @elseif($curso->estado_actual->id_estado == 9)
+                                                        <span class="badge bg-danger">Cerrado</span>
+                                                    @endif
+                                                @else
+                                                    <span class="badge bg-secondary">Sin estado</span>
+                                                @endif
                                             </div>
-                                        </div>
+                                            </div>
+                                        
                                         <div class="card-body">
                                             <h5 class="card-title">{{ $curso->nombre }}</h5>
                                             <p class="card-text text-muted">
