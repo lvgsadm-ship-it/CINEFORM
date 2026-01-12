@@ -69,7 +69,7 @@ class CursoController extends BaseController
     {
         try {
             $curso = Curso::findOrFail($id);
-            $curso->agregarEstado($request->id_estado);
+            $curso->agregarEstado($request->id_estado, $request->motivo);
 
             return response()->json([
                 'success' => true,

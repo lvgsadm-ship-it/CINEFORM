@@ -225,19 +225,38 @@
                                 <a class="btn btn-primary w-100 mb-2" href="{{ route('taller.cursos.edit', $curso->id_curso) }}">
                                     <i class="fas fa-user-tie me-2"></i> Editar 
                                 </a>
+                            @elseif($Declinado && $esCoordinador)
+                            <i class="fas fa-user-tie me-2"></i> Contenido sugerido Declinado
+
+                            <button class="btn btn-danger w-100 mb-2" 
+                                data-motivo="{{ $curso->estado_actual->pivot->motivo ?? '' }}"
+                                data-nombre="{{ $curso->nombre }}"
+                                onclick="verMotivoRechazo({{ $curso->id_curso }}, this.dataset.motivo, this.dataset.nombre)">
+                                Motivo de rechazo
+                            </button>
                             @elseif($Declinado && $esFacilitador)
                             <i class="fas fa-user-tie me-2"></i> Contenido sugerido Declinado
 
-                            <button class="btn btn-danger w-100 mb-2" onclick="verMotivoRechazo({{ $curso->id_curso }})">Motivo de rechazo</button>
+                            <button class="btn btn-danger w-100 mb-2" 
+                                data-motivo="{{ $curso->estado_actual->pivot->motivo ?? '' }}"
+                                data-nombre="{{ $curso->nombre }}"
+                                onclick="verMotivoRechazo({{ $curso->id_curso }}, this.dataset.motivo, this.dataset.nombre)">
+                                Motivo de rechazo
+                            </button>
 
                             <a class="btn btn-primary w-100 mb-2" href="{{ route('taller.cursos.edit', $curso->id_curso) }}">
                                 <i class="fas fa-user-tie me-2"></i> Editar 
                             </a>
+
+                            <button class="btn btn-success w-100 mb-2" onclick="finalizarEdicion({{ $curso->id_curso }})">
+                                    <i class="fas fa-user-tie me-2"></i> Finalizar edicion 
+                                </button>
+                                
                             @elseif($EnAprobacion && $esCoordinador)
                             
-                            <button class="btn btn-success w-100 mb-2" onclick="aprobarCurso({{ $curso->id_curso }})">Aprobar Curso</button>
+                            <button class="btn btn-success w-100 mb-2" onclick="AprobarCurso({{ $curso->id_curso }})">Aprobar Curso</button>
                             
-                            <button class="btn btn-danger w-100 mb-2" onclick="rechazarCurso({{ $curso->id_curso }})">Rechazar Curso</button>
+                            <button class="btn btn-danger w-100 mb-2" onclick="RechazarContenido({{ $curso->id_curso }})">Rechazar Curso</button>
 
                             @elseif($EnAprobacion && $esFacilitador)
 
@@ -321,36 +340,44 @@
         <script>
             function verMotivoRechazo(cursoId, motivo, cursoNombre = '') {
                 Swal.fire({
-                    title: `
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-times-circle text-danger me-2"></i>
-                        <span>Motivo de Rechazo</span>
-                    </div>
-                `,
                     html: `
-                    <div class="text-start">
-                        ${cursoNombre ? `<p class="mb-3"><strong>Curso:</strong> ${cursoNombre}</p>` : ''}
-                        <div class="alert alert-light border">
-                            <p class="mb-0">${motivo || 'No se especificó un motivo'}</p>
+                        <div class="text-center mb-4">
+                            <div class="icon-box mb-3 mx-auto bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <i class="fas fa-exclamation-triangle fa-3x"></i>
+                            </div>
+                            <h3 class="fw-bold text-dark">Motivo del Rechazo</h3>
+                            ${cursoNombre ? `<p class="text-muted small text-uppercase fw-bold mb-0">${cursoNombre}</p>` : ''}
                         </div>
-                        <div class="mt-3 small text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Este es el motivo por el cual el curso fue rechazado.
+
+                        <div class="card border-0 bg-light shadow-sm mb-3">
+                            <div class="card-body text-start p-4">
+                                <h6 class="text-danger fw-bold mb-2">
+                                    <i class="fas fa-comment-dots me-2"></i>Observación del Coordinador:
+                                </h6>
+                                <p class="mb-0 text-dark" style="font-size: 1.1rem; line-height: 1.6; white-space: pre-line;">
+                                    ${motivo || 'No se ha especificado un motivo detallado para el rechazo.'}
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                `,
-                    icon: 'info',
+
+                        <p class="text-muted small mb-0">
+                            Por favor, realiza las correcciones necesarias y envía el curso a revisión nuevamente.
+                        </p>
+                    `,
                     showCloseButton: true,
-                    showConfirmButton: false,
+                    showConfirmButton: true,
+                    confirmButtonText: 'Entendido, corregiré el curso',
+                    confirmButtonColor: '#343a40',
+                    buttonsStyling: true,
                     customClass: {
-                        popup: 'swal-modal-motivo',
-                        closeButton: 'swal-close-btn'
+                        popup: 'rounded-4 shadow-lg',
+                        confirmButton: 'btn btn-dark px-4 py-2 rounded-pill fw-bold',
+                        closeButton: 'focus-ring focus-ring-danger'
                     },
-                    width: '600px',
-                    padding: '1.5rem',
-                    backdrop: true,
-                    allowOutsideClick: true,
-                    allowEscapeKey: true
+                    width: '550px',
+                    padding: '2rem',
+                    background: '#ffffff',
+                    backdrop: `rgba(0,0,0,0.4)`
                 });
             }
             function RechazarContenido(idCurso, btnElement) {
