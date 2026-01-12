@@ -11,9 +11,11 @@
 |
 */
 
-Route::prefix('comun')->group(function() {
+use Illuminate\Support\Facades\Route;
+use Modules\Comun\Http\Controllers\ComunController;
 
-    Route::get('/', 'ComunController@index');
+Route::prefix('comun')->group(function () {
+    Route::get('/', [ComunController::class, 'index']);
 });
 
 

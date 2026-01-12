@@ -4,8 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -13,7 +12,7 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::create('Taller_curso_evaluaciones', function (Blueprint $table){
+        Schema::create('Taller_curso_evaluaciones', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('id_curso');
             $table->unsignedBigInteger('id_persona');

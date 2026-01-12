@@ -4,7 +4,7 @@ namespace Modules\Comun\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Modules\Security\Entities\User;
+use Modules\Security\Entities\User;
 
 
 class PersonalData extends Model
@@ -18,10 +18,10 @@ class PersonalData extends Model
         'segundo_apellido',
         'document'
     ];
-    
+
     protected $table = "comun_personas";
     public $timestamps = false;
-    
+
     /**
      * Get the user's full name.
      *
@@ -31,30 +31,30 @@ class PersonalData extends Model
     {
         return trim(implode(' ', array_filter([
             $this->primer_nombre,
-         
+
             $this->primer_apellido,
-      
+
         ])));
     }
-    
+
     protected static function newFactory()
     {
 
         return \Modules\Comun\Database\factories\PersonalDataFactory::new();
     }
     public function securityUser()
-{
-    return $this->hasOne(\App\Models\User::class, 'document', 'document');
-}
+    {
+        return $this->hasOne(User::class, 'document', 'document');
+    }
 
-public function user()
-{
-    return $this->belongsTo(User::class, 'document', 'document');
-}
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'document', 'document');
+    }
 
-public function cursos()
-{
-    return $this->hasMany(\Modules\Taller\Entities\Curso::class, 'id_persona', 'id');
-}
+    public function cursos()
+    {
+        return $this->hasMany(\Modules\Taller\Entities\Curso::class, 'id_persona', 'id');
+    }
 
 }
