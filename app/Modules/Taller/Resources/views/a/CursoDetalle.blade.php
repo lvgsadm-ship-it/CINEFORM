@@ -263,7 +263,10 @@
                             <a class="btn btn-info w-100 mb-2" disabled>
                                     <i class="fas fa-user-tie me-2"></i> Contenido sugerido en evaluación
                                 </a>        
-                                              
+                            @elseif($EnProgreso)
+                            <a class="btn btn-success w-100 mb-2" href="{{ route('taller.cursos.contenido', ['curso' => $curso->id_curso]) }}">
+                                    <i class="fas fa-user-tie me-2"></i> Ver contenidos
+                                </a>
                             @elseif($Cerrado)
                              
                             <i class="fas fa-user-tie me-2"></i> Curso cerrado

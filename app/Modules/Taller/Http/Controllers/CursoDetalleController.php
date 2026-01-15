@@ -17,7 +17,9 @@ class CursoDetalleController extends BaseController
     {
         $curso = Curso::with([
             'modalidad',
-            'contenidos',
+            'contenidos' => function ($query) {
+                $query->orderBy('orden', 'asc')->orderBy('id_contenido_curso', 'asc');
+            },
             'inscripciones.persona',
             'persona' // Load full persona relationship
         ])->find($id);

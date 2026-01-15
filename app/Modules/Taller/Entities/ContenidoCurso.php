@@ -11,10 +11,10 @@ class ContenidoCurso extends Model
 
     protected $table = 'taller_contenido_cursos';
     protected $primaryKey = 'id_contenido_curso';
-    
+
     // Deshabilitar los timestamps de Laravel ya que usamos columnas personalizadas
     public $timestamps = false;
-    
+
     protected $fillable = [
         'id_curso',
         'titulo',
@@ -22,21 +22,29 @@ class ContenidoCurso extends Model
         'descripcion',
         'url_contenido',
         'orden',
+        'es_evaluacion',
+        'id_tipo_evaluacion',
+        'ponderacion',
         'creado_por',
         'creado_en',
         'actualizado_por',
         'actualizado_en'
     ];
-    
+
     // Nombres de las columnas de timestamp personalizadas
     const CREATED_AT = 'creado_en';
     const UPDATED_AT = 'actualizado_en';
-    
+
     // Campos que no existen en la base de datos pero podrían usarse en el futuro
     protected $appends = [];
 
     public function curso()
     {
         return $this->belongsTo(Curso::class, 'id_curso', 'id_curso');
+    }
+
+    public function tipoEvaluacion()
+    {
+        return $this->belongsTo(TipoEvaluacion::class, 'id_tipo_evaluacion', 'id_tipo_evaluacion');
     }
 }

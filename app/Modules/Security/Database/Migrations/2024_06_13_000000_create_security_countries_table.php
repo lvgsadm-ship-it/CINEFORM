@@ -43,7 +43,7 @@ return new class extends Migration {
             ["name" => "Barbados", "dial_code" => "+1", "iso2" => "bb", "default" => 0],
             ["name" => "Baréin", "dial_code" => "+973", "iso2" => "bh", "default" => 0],
             ["name" => "Bélgica", "dial_code" => "+32", "iso2" => "be", "default" => 0],
-            ["name" => "Belice", "dial_code" => "+5git pull origin feature/develop_cl01", "iso2" => "bz", "default" => 0],
+            ["name" => "Belice", "dial_code" => "+501", "iso2" => "bz", "default" => 0],
             ["name" => "Benín", "dial_code" => "+229", "iso2" => "bj", "default" => 0],
             ["name" => "Bermudas", "dial_code" => "+1", "iso2" => "bm", "default" => 0],
             ["name" => "Bielorrusia", "dial_code" => "+375", "iso2" => "by", "default" => 0],

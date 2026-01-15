@@ -44,15 +44,11 @@ class CursoController extends BaseController
         $curso = Curso::with([
             'modalidad',
             'contenidos' => function ($query) {
-                $query->orderBy('orden', 'asc'); // Asumiendo que hay un campo orden
+                $query->orderBy('orden', 'asc')->orderBy('id_contenido_curso', 'asc')->with('tipoEvaluacion');
             },
             'persona',
             'estados'
         ])->findOrFail($id);
-
-        // Aquí se podría validar si el usuario está inscrito
-        // $user = $this->getUsuarioAutenticado();
-        // ... validación ...
 
         // Determinar el contenido actual
         $contenidoActual = null;
@@ -62,7 +58,20 @@ class CursoController extends BaseController
             $contenidoActual = $curso->contenidos->first();
         }
 
-        return view('taller::a.CursoContenido', compact('curso', 'contenidoActual'));
+        // Verificar si es facilitador
+        $personalData = $this->getUsuarioAutenticado()->personalData;
+        $esFacilitador = $curso->id_persona == $personalData->id;
+
+        // Si es estudiante y es una evaluación, buscar calificación
+        $calificacion = null;
+        if (!$esFacilitador && $contenidoActual && $contenidoActual->es_evaluacion) {
+            $calificacion = DB::table('taller_calificaciones')
+                ->where('id_contenido_curso', $contenidoActual->id_contenido_curso)
+                ->where('id_persona', $personalData->id)
+                ->first();
+        }
+
+        return view('taller::a.CursoContenido', compact('curso', 'contenidoActual', 'esFacilitador', 'calificacion'));
     }
 
     public function updateStatus(Request $request, $id)

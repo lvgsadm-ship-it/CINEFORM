@@ -10,7 +10,7 @@ class Estado extends Model
 {
     protected $table = 'estados';
     protected $primaryKey = 'id_estado';
-    
+
     protected $fillable = [
         'nombre',
         'descripcion',
@@ -21,9 +21,9 @@ class Estado extends Model
      * Get all cursos that have this estado.
      */
     public function cursos()
-{
-    return $this->belongsToMany(Curso::class, 'curso_estado', 'id_estado', 'id_curso')
-        ->withPivot(['created_at', 'motivo'])  // Añadir 'motivo' aquí
-        ->orderBy('curso_estado.created_at', 'desc');
-}
+    {
+        return $this->belongsToMany(Curso::class, 'curso_estado', 'id_estado', 'id_curso')
+            ->withPivot(['created_at', 'motivo'])  // Añadir 'motivo' aquí
+            ->orderBy('curso_estado.created_at', 'desc');
+    }
 }

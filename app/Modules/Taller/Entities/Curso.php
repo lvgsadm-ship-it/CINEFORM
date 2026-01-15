@@ -6,7 +6,6 @@ use App\Enums\EstadoCurso;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
-use Modules\Taller\Entities\Curso;
 
 class Curso extends Model
 {
@@ -148,10 +147,10 @@ class Curso extends Model
             DB::table('curso_estado')
                 ->where('id_curso', $this->id_curso)
                 ->update([
-                    'id_estado' => $idEstado,
-                    'motivo' => $motivo,
-                    'updated_at' => now()
-                ]);
+                        'id_estado' => $idEstado,
+                        'motivo' => $motivo,
+                        'updated_at' => now()
+                    ]);
         }
         return $this;
     }

@@ -66,5 +66,11 @@ Route::prefix('taller')->group(function () {
         Route::put('/taller/cursos/{curso}/finalizar', [CursoController::class, 'finalizarEdicion'])
             ->name('taller.cursos.finalizarEdicion');
 
+        // Rutas de Calificaciones
+        Route::get('/cursos/{curso}/contenido/{contenido}/calificar', [\Modules\Taller\Http\Controllers\CalificacionController::class, 'index'])
+            ->name('taller.calificaciones.index');
+        Route::post('/cursos/{curso}/contenido/{contenido}/calificar', [\Modules\Taller\Http\Controllers\CalificacionController::class, 'store'])
+            ->name('taller.calificaciones.store');
+
     });
 });
