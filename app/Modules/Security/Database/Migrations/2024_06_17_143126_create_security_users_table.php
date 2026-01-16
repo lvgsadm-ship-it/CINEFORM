@@ -6,8 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -17,33 +16,34 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('document_type_id');
             $table->string('document', 20)->nullable();
-            $table->string('full_name', 200)->nullable();;
+            $table->string('full_name', 200)->nullable();
+            ;
             $table->string('email', 150)->unique();
             $table->string('username', 50)->unique();
             $table->string('password');
             $table->string('phone', 20)->nullable();
             $table->unsignedBigInteger('country_id')->nullable();
-            
+
             $table->unsignedBigInteger('profile_id');
             $table->boolean('active')->default(true);
-            
+
             $table->boolean('change_password')->default(false);
             $table->string('token', 50)->default('');
             $table->timestamp('date_change_password')->nullable();
-            
-            
-            
+
+
+
             $table->unsignedBigInteger('user_id')->nullable();
-            
+
             $table->timestamp('register_date')->default(now());
             $table->ipAddress('ip');
-            
-            
-            
+
+
+
             $table->foreign('document_type_id')->references('id')->on('security_document_types');
             $table->foreign('profile_id')->references('id')->on('security_profiles');
             $table->foreign('country_id')->references('id')->on('security_countries');
-            
+
         });
 
         DB::table('security_users')->insert([
@@ -55,16 +55,16 @@ return new class extends Migration
                 'username' => 'admin',
                 'password' => Hash::make('12345678'),
                 'phone' => '+58 412-7777777',
-                
-                
+
+
                 'profile_id' => 1,
                 'country_id' => 238,
                 'active' => true,
                 'change_password' => false,
-                
+
                 'user_id' => 1,
                 'ip' => '127.0.0.1',
-                'register_date'=>now()
+                'register_date' => now()
 
             ],
             [
@@ -75,20 +75,20 @@ return new class extends Migration
                 'username' => 'Facilitador',
                 'password' => Hash::make('12345678'),
                 'phone' => '+58 412-8888888',
-                
-                
+
+
                 'profile_id' => 2,
                 'country_id' => 238,
                 'active' => true,
                 'change_password' => false,
-                
+
                 'user_id' => 2,
                 'ip' => '127.0.0.1',
-                'register_date'=>now()
+                'register_date' => now()
 
             ],
 
-             [
+            [
                 'document' => '29310488',
                 'document_type_id' => 1,
                 'full_name' => 'Zoe Anais Quintero Medina',
@@ -96,19 +96,59 @@ return new class extends Migration
                 'username' => 'Participante',
                 'password' => Hash::make('12345678'),
                 'phone' => '+58 412-9999999',
-                
-                
+
+
                 'profile_id' => 3,
                 'country_id' => 238,
                 'active' => true,
                 'change_password' => false,
-                
+
                 'user_id' => 3,
                 'ip' => '127.0.0.1',
-                'register_date'=>now()
+                'register_date' => now()
 
-             ],
-             [
+            ],
+            [
+                'document' => '12345679',
+                'document_type_id' => 1,
+                'full_name' => 'Jose Luis Garcia',
+                'email' => 'jluis@gmail.com',
+                'username' => 'Participante2',
+                'password' => Hash::make('12345678'),
+                'phone' => '+58 412-9999999',
+
+
+                'profile_id' => 3,
+                'country_id' => 238,
+                'active' => true,
+                'change_password' => false,
+
+                'user_id' => 3,
+                'ip' => '127.0.0.1',
+                'register_date' => now()
+
+            ],
+            [
+                'document' => '12345680',
+                'document_type_id' => 1,
+                'full_name' => 'Maria Julian leon Gonzales',
+                'email' => 'Mjulian@gmail.com',
+                'username' => 'Participante3',
+                'password' => Hash::make('12345678'),
+                'phone' => '+58 412-9999999',
+
+
+                'profile_id' => 3,
+                'country_id' => 238,
+                'active' => true,
+                'change_password' => false,
+
+                'user_id' => 3,
+                'ip' => '127.0.0.1',
+                'register_date' => now()
+
+            ],
+            [
                 'document' => '12345678',
                 'document_type_id' => 1,
                 'full_name' => 'Pedro Julian Leon Gonzalez',
@@ -116,18 +156,18 @@ return new class extends Migration
                 'username' => 'Coordinador',
                 'password' => Hash::make('12345678'),
                 'phone' => '+58 412-9999999',
-                
-                
+
+
                 'profile_id' => 4,
                 'country_id' => 238,
                 'active' => true,
                 'change_password' => false,
-                
+
                 'user_id' => 1,
                 'ip' => '127.0.0.1',
-                'register_date'=>now()
+                'register_date' => now()
 
-             ]
+            ]
         ]);
     }
 
