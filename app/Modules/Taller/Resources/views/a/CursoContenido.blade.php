@@ -12,7 +12,7 @@ Incluye una barra lateral de navegación entre lecciones y un área principal pa
     {{-- Contenedor fluido con altura mínima para asegurar footer al fondo --}}
     <div class="container-fluid py-4" style="min-height: 85vh;">
         <div class="mb-3">
-             <a href="{{ route('taller.cursos.show', $curso->id_curso) }}" class="btn btn-light shadow-sm border">
+            <a href="{{ route('taller.cursos.show', $curso->id_curso) }}" class="btn btn-light shadow-sm border">
                 <i class="fas fa-arrow-left me-2"></i> Volver a Detalles del Curso
             </a>
         </div>
@@ -88,7 +88,7 @@ Incluye una barra lateral de navegación entre lecciones y un área principal pa
 
                             @php
                                 // Determinar el tipo de contenido y configurar el botón de acción
-                                $tipo = strtolower($contenidoActual->tipo_contenido ?? 'texto');
+                                $tipo = strtolower($contenidoActual->tipo_contenido);
                                 $url = $contenidoActual->url_contenido;
 
                                 // Configuración por defecto (Enlace)
@@ -131,7 +131,7 @@ Incluye una barra lateral de navegación entre lecciones y un área principal pa
                                             $btnIcon = 'fa-external-link-alt';
                                             $btnText = 'Contenido sugerido';
                                         }
-                                       
+
                                     }
                                 }
                             @endphp
@@ -151,14 +151,15 @@ Incluye una barra lateral de navegación entre lecciones y un área principal pa
                                     <span class="text-muted small"><i class="far fa-calendar-alt me-1"></i>
                                         {{ $contenidoActual->created_at ? $contenidoActual->created_at->format('d/m/Y') : 'N/A' }}</span>
                                 </div>
-                                <a href="{{ $url }}" target="_blank" class="btn {{ $btnClass }} rounded-pill px-4 btn-action">
+                                <a href="{{ $url }}" class="btn {{ $btnClass }} rounded-pill px-4 btn-action">
                                     <i class="fas {{ $btnIcon }} me-2"></i> {{ $btnText }}
                                 </a>
                             </div>
 
                             <!-- Resultado de Evaluación (Solo Estudiantes con nota) -->
                             @if(isset($calificacion) && $calificacion)
-                                <div class="alert {{ $calificacion->calificacion >= 60 ? 'alert-success' : 'alert-danger' }} border-0 shadow-sm mt-4">
+                                <div
+                                    class="alert {{ $calificacion->calificacion >= 60 ? 'alert-success' : 'alert-danger' }} border-0 shadow-sm mt-4 rounded-4">
                                     <div class="d-flex align-items-center mb-2">
                                         <div class="h3 mb-0 me-3">
                                             @if($calificacion->calificacion >= 60)
@@ -169,14 +170,16 @@ Incluye una barra lateral de navegación entre lecciones y un área principal pa
                                         </div>
                                         <div>
                                             <h5 class="alert-heading fw-bold mb-0">Evaluación Calificada</h5>
-                                            <p class="mb-0 text-muted small">Fecha de calificación: {{ \Carbon\Carbon::parse($calificacion->actualizado_en ?? $calificacion->creado_en)->format('d/m/Y') }}</p>
+                                            <p class="mb-0 text-muted small">Fecha de calificación:
+                                                {{ \Carbon\Carbon::parse($calificacion->actualizado_en ?? $calificacion->creado_en)->format('d/m/Y') }}
+                                            </p>
                                         </div>
                                         <div class="ms-auto text-end">
                                             <span class="display-4 fw-bold">{{ floatval($calificacion->calificacion) }}</span>
                                             <span class="text-muted d-block small">Nota Final</span>
                                         </div>
                                     </div>
-                                    
+
                                     @if($calificacion->observacion)
                                         <hr>
                                         <p class="mb-1 fw-bold"><i class="fas fa-comment-alt me-2"></i>Feedback del Facilitador:</p>

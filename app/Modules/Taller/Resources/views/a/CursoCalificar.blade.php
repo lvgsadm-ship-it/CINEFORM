@@ -55,9 +55,9 @@
 
         <div class="row">
             <div class="col-12">
-                <div class="card border-0 shadow-sm" style="border-radius: 1rem;">
+                <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 1.5rem;">
                     <!-- Toolbar & Filters -->
-                    <div class="card-header bg-white border-0 py-4 px-4 pb-0">
+                    <div class="card-header bg-white border-0 py-4 px-4 pb-0" style="border-radius: 1.5rem 1.5rem 0 0;">
                         <div class="row g-3 align-items-center justify-content-between">
                             <div class="col-12 col-md-6">
                                 <h5 class="mb-1 fw-bold text-dark">Estudiantes Inscritos</h5>
@@ -129,7 +129,8 @@
                                                             <h6 class="mb-0 fw-bold text-dark">{{ $estudiante->primer_nombre }}
                                                                 {{ $estudiante->segundo_nombre }}
                                                                 {{ $estudiante->primer_apellido }}
-                                                                {{ $estudiante->segundo_apellido }}</h6>
+                                                                {{ $estudiante->segundo_apellido }}
+                                                            </h6>
                                                             <div class="small text-muted d-flex align-items-center mt-1">
                                                                 <i class="far fa-id-card me-1"></i>
                                                                 {{ $estudiante->document ?? 'N/A' }}
