@@ -3,8 +3,6 @@
 namespace Modules\Taller\Entities;
 
 use Illuminate\Database\Eloquent\Model;
-use Modules\Taller\Entities\Curso;
-use Modules\Taller\Entities\Estado;
 
 class Estado extends Model
 {
@@ -13,8 +11,7 @@ class Estado extends Model
 
     protected $fillable = [
         'nombre',
-        'descripcion',
-        'motivo_rechazo'
+        'descripcion'
     ];
 
     /**
@@ -23,7 +20,7 @@ class Estado extends Model
     public function cursos()
     {
         return $this->belongsToMany(Curso::class, 'curso_estado', 'id_estado', 'id_curso')
-            ->withPivot(['created_at', 'motivo'])  // Añadir 'motivo' aquí
+            ->withPivot(['created_at', 'motivo'])
             ->orderBy('curso_estado.created_at', 'desc');
     }
 }

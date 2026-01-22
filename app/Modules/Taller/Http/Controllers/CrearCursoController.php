@@ -31,15 +31,17 @@ class CrearCursoController extends BaseController
         // Obtener tipos de evaluación
         $tiposEvaluacion = \Modules\Taller\Entities\TipoEvaluacion::all();
 
-        // Obtener Facilitadores (Perfil 2 según migration create_security_profiles_table)
+        // Obtener Facilitadores (Perfil 2) con sus datos personales y especializaciones
         $facilitadores = User::where('profile_id', 2)
-            ->with('personalData') // Usar la relación correcta definida en User model
+            ->with(['personalData.especializaciones'])
             ->get()
             ->filter(function ($user) {
-                return $user->personalData != null; // Filtrar usuarios que tengan datos personales
+                return $user->personalData != null;
             });
 
-        return view('taller::a.CursoCrear', compact('modalidades', 'tiposEvaluacion', 'facilitadores'));
+        $especializaciones = \Modules\Comun\Entities\Especializacion::where('status', 'Activo')->get();
+
+        return view('taller::a.CursoCrear', compact('modalidades', 'tiposEvaluacion', 'facilitadores', 'especializaciones'));
     }
 
     /**

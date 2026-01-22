@@ -25,9 +25,8 @@ Route::prefix('taller')->group(function () {
 
     // Rutas de gestión de cursos
     Route::middleware(['auth'])->group(function () {
-        // Ruta para mostrar formulario de creación - DEBE IR ANTES de /{curso} para evitar conflicto con wildcard
-        Route::get('/crear', [Modules\Taller\Http\Controllers\CrearCursoController::class, 'create'])->name('taller.cursos.create');
-        Route::post('/crear', [Modules\Taller\Http\Controllers\CrearCursoController::class, 'store'])->name('taller.cursos.store_new');
+        Route::get('/crear-curso', [Modules\Taller\Http\Controllers\CrearCursoController::class, 'create'])->name('taller.cursos.create');
+        Route::post('/crear-curso', [Modules\Taller\Http\Controllers\CrearCursoController::class, 'store'])->name('taller.cursos.store_new');
 
         // Ruta para ver el contenido de un curso
         Route::get('/cursos/{curso}/contenido/{contenido_id?}', [CursoController::class, 'contenido'])->name('taller.cursos.contenido');

@@ -67,66 +67,83 @@
                         <!-- Fila: Facilitador con Búsqueda Integrada -->
                         <div class="row">
                             <div class="col-md-12">
-                                <div class="form-group position-relative" id="custom-select-container">
-                                    <label for="buscador_facilitador">Facilitador Asignado *</label>
-                                    
-                                    <!-- Input Oculto para el valor real (Form Post) -->
-                                    <input type="hidden" name="id_persona" id="id_persona" value="{{ old('id_persona') }}" required>
-
-                                    <!-- Input Principal: Actúa como Buscador y Display -->
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                                        <input type="text" class="form-control border-start-0 ps-0" 
-                                               id="buscador_facilitador" 
-                                               placeholder="Escriba para buscar por nombre o cédula..." 
-                                               autocomplete="off"
-                                               onfocus="showFacilitatorDropdown()"
-                                               style="box-shadow: none;">
-                                        <span class="input-group-text bg-white" onclick="toggleFacilitatorDropdown()" style="cursor: pointer;">
-                                            <i class="fas fa-chevron-down text-muted"></i>
-                                        </span>
-                                    </div>
-
-                                    <!-- Dropdown de Resultados -->
-                                    <div id="facilitator-dropdown" class="shadow-lg rounded-bottom border border-top-0 d-none" 
-                                         style="position: absolute; width: 100%; z-index: 1050; background: white; margin-top: -1px;">
+                                <div class="card border-light shadow-sm mb-3">
+                                    <div class="card-body">
+                                        <label class="fw-bold mb-2">Asignar Facilitador *</label>
                                         
-                                        <!-- Lista de Opciones -->
-                                        <div id="facilitator-list" style="max-height: 250px; overflow-y: auto;">
+                                        <!-- Filtros -->
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-md-6">
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
+                                                    <input type="text" class="form-control bg-light border-start-0" 
+                                                           id="filtro_nombre_cedula" 
+                                                           placeholder="Buscar por nombre o cédula..." 
+                                                           autocomplete="off">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <select id="filtro_especializacion" class="form-select bg-light">
+                                                    <option value="">Todas las especializaciones</option>
+                                                    @foreach($especializaciones as $esp)
+                                                        <option value="{{ $esp->id }}">{{ $esp->nombre }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Input Oculto para el valor real -->
+                                        <input type="hidden" name="id_persona" id="id_persona" value="{{ old('id_persona') }}" required>
+
+                                        <!-- Lista de Facilitadores -->
+                                        <div id="facilitator-container" class="border rounded bg-white" style="max-height: 300px; overflow-y: auto;">
                                             @foreach($facilitadores as $facilitador)
-                                                <div class="facilitator-option p-3 border-bottom border-light cursor-pointer hover-bg-light"
-                                                     onclick="selectFacilitator('{{ $facilitador->personalData->id }}', '{{ $facilitador->personalData->primer_nombre }} {{ $facilitador->personalData->primer_apellido }}', '{{ $facilitador->personalData->document }}')"
+                                                <div class="facilitator-item p-3 border-bottom cursor-pointer hover-bg-light {{ old('id_persona') == $facilitador->personalData->id ? 'bg-primary-subtle border-primary' : '' }}"
+                                                     onclick="selectFacilitator(this, '{{ $facilitador->personalData->id }}', '{{ $facilitador->personalData->primer_nombre }} {{ $facilitador->personalData->primer_apellido }}')"
                                                      data-name="{{ strtolower($facilitador->personalData->primer_nombre . ' ' . $facilitador->personalData->primer_apellido) }}"
-                                                     data-doc="{{ $facilitador->personalData->document }}">
+                                                     data-doc="{{ $facilitador->personalData->document }}"
+                                                     data-specializations="{{ $facilitador->personalData->especializaciones->pluck('id')->join(',') }}">
                                                     
                                                     <div class="d-flex align-items-center">
-                                                        <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                                                            <i class="fas fa-user"></i>
+                                                        <div class="avatar-sm me-3">
+                                                            <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                                <i class="fas fa-user-tie"></i>
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <h6 class="mb-0 text-dark font-weight-bold">
-                                                                {{ $facilitador->personalData->primer_nombre }} {{ $facilitador->personalData->primer_apellido }}
-                                                            </h6>
-                                                            <small class="text-muted">
-                                                                <i class="fas fa-id-card me-1"></i> {{ $facilitador->personalData->document }} 
-                                                                <span class="mx-1">•</span> 
-                                                                {{ $facilitador->email }}
-                                                            </small>
+                                                        <div class="flex-grow-1">
+                                                            <div class="d-flex justify-content-between">
+                                                                <h6 class="mb-0 text-dark font-weight-bold">
+                                                                    {{ $facilitador->personalData->primer_nombre }} {{ $facilitador->personalData->primer_apellido }}
+                                                                </h6>
+                                                                <span class="badge bg-info-subtle text-info border border-info">
+                                                                    C.I: {{ $facilitador->personalData->document }}
+                                                                </span>
+                                                            </div>
+                                                            <div class="small text-muted">
+                                                                @if($facilitador->personalData->especializaciones->count() > 0)
+                                                                    <i class="fas fa-graduation-cap me-1"></i>
+                                                                    {{ $facilitador->personalData->especializaciones->pluck('nombre')->join(', ') }}
+                                                                @else
+                                                                    <span class="fst-italic">Sin especializaciones registradas</span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        <div class="ms-3 check-icon {{ old('id_persona') == $facilitador->personalData->id ? '' : 'd-none' }}">
+                                                            <i class="fas fa-check-circle text-success fs-4"></i>
                                                         </div>
                                                     </div>
                                                 </div>
                                             @endforeach
                                             
-                                            <!-- Empty State -->
-                                            <div id="no-results" class="p-4 text-center text-muted d-none">
-                                                <i class="fas fa-search mb-2"></i><br>
-                                                No se encontraron resultados para su búsqueda
+                                            <div id="no-results-facilitators" class="p-4 text-center text-muted d-none">
+                                                <i class="fas fa-user-slash mb-2 fs-2"></i><br>
+                                                No se encontraron facilitadores que coincidan con los filtros
                                             </div>
                                         </div>
+                                        @error('id_persona')
+                                            <div class="text-danger small mt-1">{{ $message }}</div>
+                                        @enderror
                                     </div>
-                                    @error('id_persona')
-                                        <div class="text-danger small mt-1">{{ $message }}</div>
-                                    @enderror
                                 </div>
                             </div>
                         </div>
@@ -214,64 +231,66 @@
 
                     @push('scripts')
                         <script>
-                            // --- Custom Facilitator Dropdown Logic ---
-                            function toggleFacilitatorDropdown() {
-                                const dropdown = document.getElementById('facilitator-dropdown');
-                                dropdown.classList.toggle('d-none');
-                            }
+                            // --- Facilitator Search & Filter Logic ---
+                            function selectFacilitator(element, id, name) {
+                                // Remover clase activa de todos
+                                document.querySelectorAll('.facilitator-item').forEach(item => {
+                                    item.classList.remove('bg-primary-subtle', 'border-primary');
+                                    item.querySelector('.check-icon').classList.add('d-none');
+                                });
 
-                            function showFacilitatorDropdown() {
-                                document.getElementById('facilitator-dropdown').classList.remove('d-none');
-                            }
+                                // Agregar clase activa al seleccionado
+                                element.classList.add('bg-primary-subtle', 'border-primary');
+                                element.querySelector('.check-icon').classList.remove('d-none');
 
-                            function selectFacilitator(id, name, documentNumber) {
+                                // Actualizar valor oculto
                                 document.getElementById('id_persona').value = id;
-                                // Mostrar nombre seleccionado en el input principal
-                                document.getElementById('buscador_facilitador').value = `${name} - ${documentNumber}`;
-                                document.getElementById('facilitator-dropdown').classList.add('d-none');
                             }
 
-                            const searchInput = document.getElementById('buscador_facilitador');
-                            
-                            // Setup Search Filtering
-                            searchInput.addEventListener('keyup', function() {
-                                // Si el usuario escribe, borramos la selección anterior para obligar a reseleccionar
-                                document.getElementById('id_persona').value = '';
-                                
-                                const searchText = this.value.toLowerCase();
-                                const items = document.querySelectorAll('.facilitator-option');
+                            function filterFacilitators() {
+                                const searchText = document.getElementById('filtro_nombre_cedula').value.toLowerCase();
+                                const specId = document.getElementById('filtro_especializacion').value;
+                                const items = document.querySelectorAll('.facilitator-item');
                                 let hasVisible = false;
-
-                                showFacilitatorDropdown(); // Asegurar que se ve al escribir
 
                                 items.forEach(item => {
                                     const name = item.getAttribute('data-name');
                                     const doc = item.getAttribute('data-doc');
+                                    const specs = item.getAttribute('data-specializations').split(',');
 
-                                    if (name.includes(searchText) || doc.includes(searchText)) {
-                                        item.style.display = 'block';
+                                    const matchesSearch = name.includes(searchText) || doc.includes(searchText);
+                                    const matchesSpec = specId === "" || specs.includes(specId);
+
+                                    if (matchesSearch && matchesSpec) {
+                                        item.classList.remove('d-none');
                                         hasVisible = true;
                                     } else {
-                                        item.style.display = 'none';
+                                        item.classList.add('d-none');
                                     }
                                 });
 
-                                const noResults = document.getElementById('no-results');
+                                const noResults = document.getElementById('no-results-facilitators');
                                 if (hasVisible) {
                                     noResults.classList.add('d-none');
                                 } else {
                                     noResults.classList.remove('d-none');
                                 }
-                            });
+                            }
 
-                            // Close on Click Outside
-                            document.addEventListener('click', function(e) {
-                                const container = document.getElementById('custom-select-container');
-                                if (container && !container.contains(e.target)) {
-                                    document.getElementById('facilitator-dropdown').classList.add('d-none');
+                            document.getElementById('filtro_nombre_cedula').addEventListener('keyup', filterFacilitators);
+                            document.getElementById('filtro_especializacion').addEventListener('change', filterFacilitators);
+
+                            // Highlight selected on load if any
+                            window.addEventListener('load', () => {
+                                const selectedId = document.getElementById('id_persona').value;
+                                if (selectedId) {
+                                    const selectedItem = document.querySelector(`.facilitator-item[onclick*="'${selectedId}'"]`);
+                                    if (selectedItem) {
+                                        selectedItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                    }
                                 }
                             });
-                            // --- End Custom Dropdown Logic ---
+                            // --- End Facilitator Logic ---
 
 
                             // Usamos json_encode para pasar los tipos de evaluación a JS

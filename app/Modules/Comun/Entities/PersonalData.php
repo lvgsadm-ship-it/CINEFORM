@@ -57,4 +57,9 @@ class PersonalData extends Model
         return $this->hasMany(\Modules\Taller\Entities\Curso::class, 'id_persona', 'id');
     }
 
+    public function especializaciones()
+    {
+        return $this->belongsToMany(Especializacion::class, 'comun_personas_especializacion', 'id_persona', 'id_especializacion')
+            ->withPivot('anos_experiencia');
+    }
 }
