@@ -215,7 +215,6 @@ Incluye una barra lateral de navegación entre lecciones y un área principal pa
 
     @push('styles')
         <style>
-            /* Fuente personalizada si está disponible, sino fallback limpio */
             .card {
                 border-radius: 16px;
                 border: 1px solid rgba(0, 0, 0, 0.05);

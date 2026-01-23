@@ -38,11 +38,14 @@
                                 // Verificar si el curso está en evaluación por coordinacion     
                                 $EnAprobacion = $curso->estado_actual->id_estado == 5;
 
+                                // Verificar si el curso está en inscripciones
+                                $Inscripciones = $curso->estado_actual->id_estado == 6;
+
+                                // Verificar si el curso está en PROGRESO
+                                $EnProgreso = $curso->estado_actual->id_estado == 7;
+
                                 // Verificar si el curso está finalizado
                                 $Finalizado = $curso->estado_actual->id_estado == 8;
-
-                                // Verificar si el curso esta en progreso
-                                $EnProgreso = $curso->estado_actual->id_estado == 7;
 
                                 // Verificar si el curso esta cerrado
                                 $Cerrado = $curso->estado_actual->id_estado == 9;
@@ -56,6 +59,37 @@
                                         ->first() : null;
                             @endphp
 @endauth
+  @push('styles')
+        <style>
+           
+            .card {
+                border-radius: 10px;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            .bg-gradient-primary {
+                background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
+            }
+
+            .list-group-item {
+                border-left: 0;
+                border-right: 0;
+            }
+
+            .list-group-item:first-child {
+                border-top: 0;
+            }
+
+            .list-group-item:last-child {
+                border-bottom: 0;
+            }
+        </style>
+    @endpush
 
 @section('content')
     <div class="container py-5">
@@ -170,9 +204,9 @@
                         </h5>
                         <p class="text-muted mb-3">Instructor</p>
                         <div class="d-flex justify-content-center gap-2">
-                            <a href="#" class="btn btn-outline-primary btn-sm">
+                            <button onclick="mostrarContactoProfesor('{{ $curso->persona->nombre_completo ?? 'No disponible' }}', '{{ $curso->persona->user->email ?? 'No disponible' }}', '{{ $curso->persona->user->cell_phone ?? 'No disponible' }}')" class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-envelope me-1"></i> Contactar
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -209,97 +243,132 @@
                     <div class="card-footer bg-white border-top-0">
                             {{-- Bloque de Botones de Acción según Estado y Rol --}}
                             @auth
-                            @if($PorAceptar && $esFacilitador)
-                                <a class="btn btn-info w-100 mb-2" disabled>
+                            @if($PorAceptar && $esFacilitador) {{-- Curso por aceptar Facilitador --}}
+
+                                    <a class="btn btn-info w-100 mb-2" disabled>
                                     <i class="fas fa-user-tie me-2"></i> Eres el instructor de este curso
-                                </a>
-                                <button class="btn btn-success w-100 mb-2"
+                                    </a>
+                                    <button class="btn btn-success w-100 mb-2"
                                     onclick="AceptarCursoFacilitador({{ $curso->id_curso }})">
                                     <i class="fas fa-user-tie me-2"></i> Aceptar Curso
-                                </button>
+                                    </button>
 
-                            @elseif($EnEdicion && $esFacilitador)
+                            @elseif($EnEdicion && $esFacilitador) {{-- Curso en edicion Facilitador --}}
                                 <button class="btn btn-success w-100 mb-2" onclick="finalizarEdicion({{ $curso->id_curso }})">
                                     <i class="fas fa-user-tie me-2"></i> Finalizar edicion 
-                                </button>
+                                    </button>
                                 <a class="btn btn-primary w-100 mb-2" href="{{ route('taller.cursos.edit', $curso->id_curso) }}">
                                     <i class="fas fa-user-tie me-2"></i> Editar 
-                                </a>
-                            @elseif($Declinado && $esCoordinador)
-                            <i class="fas fa-user-tie me-2"></i> Contenido sugerido Declinado
+                                    </a>
+                            @elseif($Declinado && $esCoordinador) {{-- Curso Declinado Coordinador --}}
+                                    <i class="fas fa-user-tie me-2"></i> Contenido sugerido Declinado
 
-                            <button class="btn btn-danger w-100 mb-2" 
-                                data-motivo="{{ $curso->estado_actual->pivot->motivo ?? '' }}"
-                                data-nombre="{{ $curso->nombre }}"
-                                onclick="verMotivoRechazo({{ $curso->id_curso }}, this.dataset.motivo, this.dataset.nombre)">
-                                Motivo de rechazo
-                            </button>
-                            @elseif($Declinado && $esFacilitador)
-                            <i class="fas fa-user-tie me-2"></i> Contenido sugerido Declinado
+                                    <button class="btn btn-danger w-100 mb-2" 
+                                    data-motivo="{{ $curso->estado_actual->pivot->motivo ?? '' }}"
+                                    data-nombre="{{ $curso->nombre }}"
+                                    onclick="verMotivoRechazo({{ $curso->id_curso }}, this.dataset.motivo, this.dataset.nombre)">
+                                    Motivo de rechazo
+                                    </button>
+                            @elseif($Declinado && $esFacilitador) {{-- Curso Declinado Facilitador --}}
+                                    <i class="fas fa-user-tie me-2"></i> Contenido sugerido Declinado
 
-                            <button class="btn btn-danger w-100 mb-2" 
-                                data-motivo="{{ $curso->estado_actual->pivot->motivo ?? '' }}"
-                                data-nombre="{{ $curso->nombre }}"
-                                onclick="verMotivoRechazo({{ $curso->id_curso }}, this.dataset.motivo, this.dataset.nombre)">
-                                Motivo de rechazo
-                            </button>
+                                    <button class="btn btn-danger w-100 mb-2" 
+                                    data-motivo="{{ $curso->estado_actual->pivot->motivo ?? '' }}"
+                                    data-nombre="{{ $curso->nombre }}"
+                                    onclick="verMotivoRechazo({{ $curso->id_curso }}, this.dataset.motivo, this.dataset.nombre)">
+                                    Motivo de rechazo
+                                    </button>
 
-                            <a class="btn btn-primary w-100 mb-2" href="{{ route('taller.cursos.edit', $curso->id_curso) }}">
-                                <i class="fas fa-user-tie me-2"></i> Editar 
-                            </a>
+                                    <a class="btn btn-primary w-100 mb-2" href="{{ route('taller.cursos.edit', $curso->id_curso) }}">
+                                    <i class="fas fa-user-tie me-2"></i> Editar 
+                                    </a>
 
-                            <button class="btn btn-success w-100 mb-2" onclick="finalizarEdicion({{ $curso->id_curso }})">
+                                    <button class="btn btn-success w-100 mb-2" onclick="finalizarEdicion({{ $curso->id_curso }})">
                                     <i class="fas fa-user-tie me-2"></i> Finalizar edicion 
-                                </button>
+                                    </button>
                                 
-                            @elseif($EnAprobacion && $esCoordinador)
+                            @elseif($EnAprobacion && $esCoordinador) {{-- Curso en evaluacion por Coordinador --}}
                             
-                            <button class="btn btn-success w-100 mb-2" onclick="AprobarCurso({{ $curso->id_curso }})">Aprobar Curso</button>
+                                    <button class="btn btn-success w-100 mb-2" onclick="AprobarCurso({{ $curso->id_curso }})">Aprobar Curso</button>
                             
-                            <button class="btn btn-danger w-100 mb-2" onclick="RechazarContenido({{ $curso->id_curso }})">Rechazar Curso</button>
+                                    <button class="btn btn-danger w-100 mb-2" onclick="RechazarContenido({{ $curso->id_curso }})">Rechazar Curso</button>
 
-                            @elseif($EnAprobacion && $esFacilitador)
+                            @elseif($EnAprobacion && $esFacilitador) {{-- Vista de espera de Aprobacion --}}
 
-                            <a class="btn btn-info w-100 mb-2" disabled>
+                                    <a class="btn btn-info w-100 mb-2" disabled>
                                     <i class="fas fa-user-tie me-2"></i> Contenido sugerido en evaluación
-                                </a>        
-                            @elseif($EnProgreso)
-                            <a class="btn btn-success w-100 mb-2" href="{{ route('taller.cursos.contenido', ['curso' => $curso->id_curso]) }}">
+                                    </a>        
+                           
+                            @elseif($Inscripciones && $esCoordinador) {{-- Curso en Inscripciones. Cierre de las mismas por Coordinador--}}
+                                    <a class="btn btn-info w-100 mb-2" disabled>
+                                    <i class="fas fa-user-tie me-2"></i> Inscripciones en curso 
+                                    </a>
+                                    <button class="btn btn-success w-100 mb-2" onclick="FinalizarInscripciones({{ $curso->id_curso }})"> Finalizar Inscripciones </button>
+                           
+                            
+                            @elseif($Inscripciones && $esFacilitador) {{-- Curso en Inscripciones por Facilitador --}}
+                                    <a class="btn btn-info w-100 mb-2" disabled>
+                                    <i class="fas fa-user-tie me-2"></i> Inscripciones en curso 
+                                    </a>
+                            @elseif($EnProgreso && $esCoordinador) {{-- Curso en progreso. Edicion de contingencia o finalizacion de curso --}}
+                                    <a class="btn btn-info w-100 mb-2" href="{{ route('taller.cursos.contenido', ['curso' => $curso->id_curso]) }}">
                                     <i class="fas fa-user-tie me-2"></i> Ver contenidos
-                                </a>
+                                    </a>
+                            
+                                    <button class="btn btn-danger w-100 mb-2" onclick="FinalizarCurso({{ $curso->id_curso }})"> Finalizar Curso </button>
+                            
+                                    <a href="{{ route('taller.cursos.edit', $curso->id_curso) }}" class="btn btn-success w-100 mb-2"> Edicion</a>
+                            
+                            
+                            @elseif($EnProgreso && $esFacilitador) {{-- Curso en progreso. Edicion de contingencia o finalizacion de curso --}}
+                            
+                                    <a class="btn btn-success w-100 mb-2" href="{{ route('taller.cursos.contenido', ['curso' => $curso->id_curso]) }}">
+                                    <i class="fas fa-user-tie me-2"></i> Ver contenidos
+                                    </a>
+
+                             @elseif($EnProgreso) {{-- Curso en Progreso --}}
+                                    <a class="btn btn-success w-100 mb-2" href="{{ route('taller.cursos.contenido', ['curso' => $curso->id_curso]) }}">
+                                    <i class="fas fa-user-tie me-2"></i> Ver contenidos
+                                    </a>
+                                        
                             @elseif($Cerrado)
                              
-                            <i class="fas fa-user-tie me-2"></i> Curso cerrado
+                                    <i class="fas fa-user-tie me-2"></i> Curso cerrado
                             
                             @elseif($Finalizado)
-                                <a class="btn btn-warning w-100 mb-2" disabled>
-                                    <i class="fas fa-user-tie me-2"></i> El curso ya se finalizo, contactar con el profesor para
+                                    <a class="btn btn-info w-100 mb-2" disabled>
+                                    <i></i> El curso ya se finalizo, contactar con el profesor para
                                     cualquier necesidad.
-                                </a>
-                                <a class="btn btn-success w-100 mb-2" disabled>
-                                    <i class="fas fa-user-tie me-2"></i> Emitir Certificado
-                                </a>
+                                    </a>
+                                    {{-- Apartado con el objetivo de hacer conexion a la ya existente emision de certificados --}}
+                                    
+                                    <a class="btn btn-success w-100 mb-2" disabled>  
+                                    <i class="fas fa-user-tie me-2"></i> Emitir Certificado  
+                                    </a>
+
+                                    {{-- Apartado con el objetivo de hacer conexion a la ya existente emision de certificados --}}
+                                    
                             @elseif ($EnEdicion)
-                                <a class="btn btn-warning w-100 mb-2" disabled>
-                                    Curso siendo evaluado por el Facilitador
-                                </a>
+                                    <a class="btn btn-warning w-100 mb-2" disabled>
+                                    <i class="fas fa-user-tie me-2"></i> Curso siendo evaluado por el Facilitador
+                                    </a>
                             @elseif($inscripcion)
-                                <a class="btn btn-success w-100 mb-2" disabled>
+                                    <a class="btn btn-success w-100 mb-2" disabled>
                                     <i class="fas fa-check-circle me-2"></i> Ya estás inscrito
-                                </a>
-                                <button class="btn btn-outline-danger w-100 mb-2 cancelar-inscripcion-btn"
+                                    </a>
+                                    <button class="btn btn-outline-danger w-100 mb-2 cancelar-inscripcion-btn"
                                     data-inscripcion-id="{{ $inscripcion->id_inscripcion }}">
                                     <i class="fas fa-times-circle me-2"></i> Cancelar inscripción
-                                </button>
+                                    </button>
 
                             @elseif($CuposDisponibles > 0)
-                                <button class="btn btn-primary w-100 mb-2" onclick="inscribirAlCurso({{ $curso->id_curso }})">
+                                    <button class="btn btn-primary w-100 mb-2" onclick="inscribirAlCurso({{ $curso->id_curso }})">
                                     <i class="fas fa-check-circle me-2"></i> Inscribirse
-                                </button>
+                                    </button>
                             @else
-                                <a class="btn btn-secondary w-100 mb-2" disabled>
+                                    <a class="btn btn-secondary w-100 mb-2" disabled>
                                     <i class="fas fa-times-circle me-2"></i> No hay cupos disponibles
-                                </a>
+                                    </a>
                             @endif
                         @endauth
                     </div>
@@ -308,79 +377,109 @@
         </div>
     </div>
 
-    @push('styles')
-        <style>
-            .card {
-                border-radius: 10px;
-                transition: transform 0.3s ease, box-shadow 0.3s ease;
-            }
-
-            .card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
-            }
-
-            .bg-gradient-primary {
-                background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
-            }
-
-            .list-group-item {
-                border-left: 0;
-                border-right: 0;
-            }
-
-            .list-group-item:first-child {
-                border-top: 0;
-            }
-
-            .list-group-item:last-child {
-                border-bottom: 0;
-            }
-        </style>
-    @endpush
-
     @push('scripts')
         <script>
             function verMotivoRechazo(cursoId, motivo, cursoNombre = '') {
                 Swal.fire({
                     html: `
-                        <div class="text-center mb-4">
-                            <div class="icon-box mb-3 mx-auto bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
-                                <i class="fas fa-exclamation-triangle fa-3x"></i>
+                        <div class="rejection-container text-center">
+                            <!-- Cabecera con icono dinámico -->
+                            <div class="mb-4">
+                                <div class="d-inline-flex align-items-center justify-content-center bg-danger-subtle text-danger rounded-circle mb-3 shadow-sm" style="width: 90px; height: 90px;">
+                                    <i class="fas fa-exclamation-circle fa-4x animate__animated animate__pulse animate__infinite"></i>
+                                </div>
+                                <h2 class="fw-bold text-dark mb-1">Propuesta Declinada</h2>
+                                ${cursoNombre ? `<span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill small fw-bold mt-2 shadow-sm">${cursoNombre}</span>` : ''}
                             </div>
-                            <h3 class="fw-bold text-dark">Motivo del Rechazo</h3>
-                            ${cursoNombre ? `<p class="text-muted small text-uppercase fw-bold mb-0">${cursoNombre}</p>` : ''}
-                        </div>
 
-                        <div class="card border-0 bg-light shadow-sm mb-3">
-                            <div class="card-body text-start p-4">
-                                <h6 class="text-danger fw-bold mb-2">
-                                    <i class="fas fa-comment-dots me-2"></i>Observación del Coordinador:
+                            <!-- Caja de observación estilo "Feedback Card" -->
+                            <div class="feedback-card text-start p-4 mb-4 rounded-4 position-relative" style="background: #fffcfc; border: 1px solid #ffebeb; box-shadow: 0 10px 30px rgba(220, 53, 69, 0.05);">
+                                <div class="position-absolute top-0 end-0 p-3 opacity-10">
+                                  
+                                </div>
+                                <h6 class="text-danger fw-bold text-uppercase small mb-3 letter-spacing-1">
+                                    <i></i> Observaciones de Coordinación
                                 </h6>
-                                <p class="mb-0 text-dark" style="font-size: 1.1rem; line-height: 1.6; white-space: pre-line;">
-                                    ${motivo || 'No se ha especificado un motivo detallado para el rechazo.'}
+                                <div class="observation-text text-secondary" style="font-size: 1.1rem; line-height: 1.7; min-height: 60px;">
+                                    ${motivo || 'El curso no cumple con los requisitos actuales del programa. Por favor, revise el contenido detalladamente.'}
+                                </div>
+                            </div>
+
+                            <!-- Mensaje de acción -->
+                            <div class="d-flex align-items-center justify-content-center bg-light p-3 rounded-4 mb-2 border border-white shadow-sm">
+                                <div class="me-3 p-2 bg-white rounded-circle">
+                                    <i class="fas fa-lightbulb text-warning"></i>
+                                </div>
+                                <p class="text-muted small mb-0 text-start">
+                                    Realiza los ajustes solicitados y <strong>vuelve a enviar el curso</strong> desde el botón de edición.
                                 </p>
                             </div>
                         </div>
-
-                        <p class="text-muted small mb-0">
-                            Por favor, realiza las correcciones necesarias y envía el curso a revisión nuevamente.
-                        </p>
                     `,
                     showCloseButton: true,
                     showConfirmButton: true,
-                    confirmButtonText: 'Entendido, corregiré el curso',
-                    confirmButtonColor: '#343a40',
+                    confirmButtonText: '<i class="fas fa-check-circle me-2"></i> Entendido, corregiré el curso',
+                    confirmButtonColor: '#dc3545',
                     buttonsStyling: true,
                     customClass: {
-                        popup: 'rounded-4 shadow-lg',
-                        confirmButton: 'btn btn-dark px-4 py-2 rounded-pill fw-bold',
+                        popup: 'rounded-5 shadow-2xl border-0',
+                        confirmButton: 'btn btn-danger px-5 py-3 rounded-pill fw-bold shadow-lg transform-hover',
                         closeButton: 'focus-ring focus-ring-danger'
                     },
-                    width: '550px',
-                    padding: '2rem',
+                    width: '520px',
+                    padding: '2.5rem',
                     background: '#ffffff',
-                    backdrop: `rgba(0,0,0,0.4)`
+                    backdrop: `rgba(220, 53, 69, 0.1)`,
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown animate__faster'
+                    }
+                });
+            }
+
+            function mostrarContactoProfesor(nombre, email, telefono) {
+                Swal.fire({
+                    title: '<span class="fw-bold">Datos de Contacto</span>',
+                    html: `
+                        <div class="text-center mb-4">
+                            <div class="avatar-lg mb-3 mx-auto">
+                                <img src="{{ asset('assets/img/avatar.png') }}" alt="Profesor" class="rounded-circle img-thumbnail" style="width: 100px; height: 100px;">
+                            </div>
+                            <h4 class="text-primary mb-1">${nombre}</h4>
+                            <p class="text-muted">Instructor del Curso</p>
+                        </div>
+                        <div class="card border-0 bg-light shadow-sm">
+                            <div class="card-body text-start p-4">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="bg-white p-2 rounded-circle shadow-sm me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-envelope text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Correo Electrónico</small>
+                                        <span class="fw-bold text-dark">${email}</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-white p-2 rounded-circle shadow-sm me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-phone text-success"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted d-block">Teléfono / WhatsApp</small>
+                                        <span class="fw-bold text-dark">${telefono}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-muted small mt-3">
+                            <i class="fas fa-info-circle me-1"></i> Por favor, contacta al profesor solo en horarios administrativos.
+                        </p>
+                    `,
+                    showCloseButton: true,
+                    confirmButtonText: 'Cerrar',
+                    confirmButtonColor: '#5e72e4',
+                    customClass: {
+                        popup: 'rounded-4 shadow-lg',
+                        confirmButton: 'btn btn-primary px-5 rounded-pill'
+                    }
                 });
             }
             function RechazarContenido(idCurso, btnElement) {
@@ -391,19 +490,33 @@
                 btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
                 Swal.fire({
-                    title: 'Motivo del rechazo',
-                    text: 'Ingrese el motivo del rechazo (mínimo 10 caracteres):',
+                    title: '<div class="text-center mb-2"><i class="fas fa-file-signature text-danger fa-2x mb-3 animate__animated animate__shakeX"></i><h3 class="fw-bold">Declinar Propuesta</h3></div>',
+                    html: '<p class="text-muted">Por favor, detalla los motivos para rechazar esta propuesta. Esta observación será visible para el facilitador.</p>',
                     input: 'textarea',
-                    inputPlaceholder: 'Escriba aquí...',
+                    inputPlaceholder: 'Escriba las observaciones detalladamente aquí...',
+                    inputAttributes: {
+                        'aria-label': 'Motivo del rechazo',
+                        'style': 'height: 280px; width: 100% !important; border-radius: 20px; border: 2px solid #495057; padding: 20px; background-color: #fffefe; font-size: 1.1rem; margin: 0 auto; display: block; box-shadow: inset 0 4px 10px rgba(0,0,0,0.03), 0 10px 25px rgba(220, 53, 69, 0.08);'
+                    },
                     showCancelButton: true,
-                    confirmButtonText: 'Rechazar',
-                    cancelButtonText: 'Cancelar',
-                    confirmButtonColor: '#d33',
+                    confirmButtonText: '<i class="fas fa-times-circle me-2"></i> Confirmar Rechazo',
+                    cancelButtonText: 'Regresar',
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#f8f9fa',
                     showLoaderOnConfirm: true,
+                    customClass: {
+                        popup: 'rounded-5 shadow-2xl border-0',
+                        confirmButton: 'btn btn-danger px-5 py-3 rounded-pill fw-bold transform-hover',
+                        cancelButton: 'btn btn-light px-5 py-3 rounded-pill fw-bold text-muted border ms-2',
+                        input: 'form-control shadow-none border-0 mx-0 w-100'
+                    },
+                    width: '850px',
+                    padding: '2rem 3rem',
+                    backdrop: `rgba(220, 53, 69, 0.1)`,
 
                     inputValidator: (value) => {
                         if (!value || value.trim().length < 10) {
-                            return 'Debe ingresar al menos 10 caracteres';
+                            return 'Por favor, ingrese un motivo más descriptivo (mínimo 10 caracteres)';
                         }
                         return null;
                     },
@@ -434,7 +547,7 @@
                             return data;
 
                         } catch (error) {
-                            Swal.showValidationMessage(error.message);
+                            Swal.showValidationMessage(`Error en el servidor: ${error.message}`);
                             throw error;
                         }
                     }
@@ -447,10 +560,13 @@
                     if (result.isConfirmed) {
                         Swal.fire({
                             icon: 'success',
-                            title: '¡Rechazado!',
-                            text: 'Curso rechazado exitosamente.',
-                            timer: 2000,
-                            showConfirmButton: false
+                            title: '<h4 class="fw-bold">Acción Registrada</h4>',
+                            text: 'La propuesta ha sido declinada y el facilitador ha sido notificado.',
+                            timer: 3000,
+                            showConfirmButton: false,
+                            customClass: {
+                                popup: 'rounded-4 shadow-lg'
+                            }
                         }).then(() => {
                             window.location.reload();
                         });
@@ -461,6 +577,110 @@
                     btn.innerHTML = originalText;
                 });
             }
+            function FinalizarCurso(idCurso) {
+
+                fetch('{{ route("taller.cursos.updateStatus", ["curso" => $curso->id_curso]) }}', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id_estado: 8 // El ID del estado al que quieres cambiar
+                    })
+
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Finalizado el curso!',
+                                text: 'El curso ha sido finalizado exitosamente.',
+                                showConfirmButton: false,
+                                timer: 5000
+                            }).then(() => {
+                                // Recargar la página para actualizar la vista
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: data.message || 'Ocurrió un error al actualizar el estado del curso',
+                                confirmButtonText: 'Entendido'
+                            });
+                            btn.disabled = false;
+                            btn.innerHTML = originalText;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Ocurrió un error al procesar la solicitud',
+                            confirmButtonText: 'Entendido'
+                        });
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                    });
+
+            }
+
+            function FinalizarInscripciones(idCurso) {
+
+                fetch('{{ route("taller.cursos.updateStatus", ["curso" => $curso->id_curso]) }}', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id_estado: 7 // El ID del estado al que quieres cambiar
+                    })
+
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Finalizada las inscripciones!',
+                                text: 'Las inscripciones han sido finalizadas exitosamente.',
+                                showConfirmButton: false,
+                                timer: 5000
+                            }).then(() => {
+                                // Recargar la página para actualizar la vista
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: data.message || 'Ocurrió un error al actualizar el estado del curso',
+                                confirmButtonText: 'Entendido'
+                            });
+                            btn.disabled = false;
+                            btn.innerHTML = originalText;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Ocurrió un error al procesar la solicitud',
+                            confirmButtonText: 'Entendido'
+                        });
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                    });
+
+            }
+
             function finalizarEdicion(idCurso) {
 
 

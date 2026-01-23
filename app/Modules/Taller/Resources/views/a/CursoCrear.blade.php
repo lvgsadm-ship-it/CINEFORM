@@ -280,7 +280,6 @@
                             document.getElementById('filtro_nombre_cedula').addEventListener('keyup', filterFacilitators);
                             document.getElementById('filtro_especializacion').addEventListener('change', filterFacilitators);
 
-                            // Highlight selected on load if any
                             window.addEventListener('load', () => {
                                 const selectedId = document.getElementById('id_persona').value;
                                 if (selectedId) {
@@ -290,10 +289,10 @@
                                     }
                                 }
                             });
-                            // --- End Facilitator Logic ---
+          
 
 
-                            // Usamos json_encode para pasar los tipos de evaluación a JS
+                        
                             const tiposEvaluacion = {!! json_encode($tiposEvaluacion) !!};
 
                             function getTipoOptions() {

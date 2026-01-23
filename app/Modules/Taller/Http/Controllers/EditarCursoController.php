@@ -39,11 +39,18 @@ class EditarCursoController extends BaseController
             'curso_id' => $curso->id_curso,
             'curso_id_persona' => $curso->id_persona,
             'usuario_actual_id' => $persona->id,
-            'son_iguales' => $curso->id_persona == $persona->id ? 'Sí' : 'No'
+            'son_iguales' => $curso->id_persona == $persona->id ? 'Sí' : 'No',
+            'es_coordinador' => Auth::user()->profile_id == 4 ? 'Sí' : 'No'
         ]);
 
-        // Verificar que el usuario autenticado es el Facilitador del curso
-        if ($curso->id_persona != $persona->id) {
+        // Verificar que el usuario autenticado es el Facilitador del curso o un Coordinador
+        if (Auth::user()->profile_id == 4) {
+            Log::info('Usuario autenticado es el Coordinador de la institucion', [
+                'usuario_actual' => $persona->id,
+                'documento_usuario' => $persona->document,
+                'usuario' => Auth::user()
+            ]);
+        } elseif ($curso->id_persona != $persona->id) {
             Log::warning('Intento de edición no autorizado', [
                 'curso_id' => $curso->id_curso,
                 'usuario_esperado' => $curso->id_persona,
@@ -118,8 +125,8 @@ class EditarCursoController extends BaseController
                     ->withErrors(['error' => 'El curso solicitado no existe.']);
             }
 
-            // Verificar que el usuario es el propietario del curso
-            if ($curso->id_persona != $idPersona) {
+            // Verificar que el usuario es el propietario del curso o un Coordinador
+            if ($user->profile_id != 4 && $curso->id_persona != $idPersona) {
                 Log::warning('Intento de edición no autorizado', [
                     'curso_id' => $id,
                     'usuario_esperado' => $curso->id_persona,

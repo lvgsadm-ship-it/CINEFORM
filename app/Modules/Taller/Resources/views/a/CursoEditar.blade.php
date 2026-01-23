@@ -57,7 +57,7 @@
                             <textarea class="form-control" id="descripcion" name="descripcion"
                                 rows="3">{{ old('descripcion', $curso->descripcion) }}</textarea>
                         </div>
-
+                    
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -83,7 +83,25 @@
                                 </div>
                             </div>
                         </div>
+                        @if(Auth::user()->profile_id == 4)
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="fecha_inicio">Fecha de inicio</label>
+                                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio"
+                                        value="{{ old('fecha_inicio', $curso->fecha_inicio ? $curso->fecha_inicio->format('Y-m-d') : '') }}">
+                                </div>
+                            </div>
 
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="fecha_fin">Fecha de finalización</label>
+                                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin"
+                                        value="{{ old('fecha_fin', $curso->fecha_fin ? $curso->fecha_fin->format('Y-m-d') : '') }}">
+                                </div>
+                            </div>
+                        </div>
+                        @else
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -103,7 +121,7 @@
                                 </div>
                             </div>
                         </div>
-
+                        @endif
                         <div class="card mt-4">
                             <div class="card-header">
                                 <h5 class="card-title">Contenidos del Curso</h5>

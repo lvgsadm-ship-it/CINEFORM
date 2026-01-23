@@ -35,10 +35,7 @@ return new class extends Migration {
             $table->timestamp('creado_en')->useCurrent();
             $table->timestamp('actualizado_en')->nullable()->useCurrentOnUpdate();
 
-            // Claves foráneas (Asumiendo nombres de tablas estándar, ajustar si es necesario)
-            // No agregamos constraints estrictos (foreign) si hay dudas sobre nombres de tablas de otros módulos
-            // pero idealmente:
-            // $table->foreign('id_contenido_curso')->references('id_contenido_curso')->on('taller_contenido_cursos');
+            $table->foreign('id_contenido_curso')->references('id_contenido_curso')->on('taller_contenido_cursos');
         });
     }
 
