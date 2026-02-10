@@ -175,7 +175,7 @@ Incluye una barra lateral de navegación entre lecciones y un área principal pa
                                             </p>
                                         </div>
                                         <div class="ms-auto text-end">
-                                            <span class="display-4 fw-bold">{{ floatval($calificacion->calificacion) }}</span>
+                                            <span class="display-4 fw-bold">{{ floatval($calificacion->calificacion) }}/100</span>
                                             <span class="text-muted d-block small">Nota Final</span>
                                         </div>
                                     </div>

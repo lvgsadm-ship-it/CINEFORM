@@ -4,8 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -19,8 +18,10 @@ return new class extends Migration
             $table->string('titulo');
             $table->text('descripcion_breve');
             $table->text('descripcion');
-          //  $table->string('tipo_contenido');
-           $table->string('url_contenido');
+            $table->string('url_contenido');
+            $table->boolean('es_evaluacion')->default(false);
+            $table->unsignedBigInteger('id_tipo_evaluacion')->nullable();
+            $table->decimal('ponderacion', 5, 2)->nullable();
             $table->integer('orden');
             $table->unsignedBigInteger('creado_por');
             $table->timestamp('creado_en')->useCurrent();
@@ -32,11 +33,12 @@ return new class extends Migration
         DB::table('taller_contenido_cursos')->insert([
             [
                 'id_curso' => 1,
-                'titulo' => 'Contenido 1',
-                'descripcion_breve' => 'Descripción breve del contenido 1',
-                'descripcion' => 'Descripción del contenido 1',
-              //  'tipo_contenido' => 'Video', 
-              
+                'titulo' => 'Tipos de lentes y Cámaras',
+                'descripcion_breve' => 'Tipos de lentes, Cámaras y situaciones en las que deben ser utilizados',
+                'descripcion' => 'Tipos de lentes, Cámaras y situaciones en las que deben ser utilizados',
+                'es_evaluacion' => true,
+                'ponderacion' => 50,
+                'id_tipo_evaluacion' => 1,
                 'url_contenido' => 'https://www.youtube.com/watch?v=123456789',
                 'orden' => 1,
                 'creado_por' => 1,
@@ -46,11 +48,43 @@ return new class extends Migration
             ],
             [
                 'id_curso' => 1,
-                'titulo' => 'Contenido 2',
-                'descripcion_breve' => 'Descripción breve del contenido 2',
-                'descripcion' => 'Descripción del contenido 2',
-               // 'tipo_contenido' => 'Video',
+                'titulo' => 'Tipos de iluminacion',
+                'descripcion_breve' => 'Tipos de iluminacion y situaciones en las que deben ser utilizados',
+                'descripcion' => 'Tipos de iluminacion y situaciones en las que deben ser utilizados',
+                'es_evaluacion' => true,
+                'ponderacion' => 50,
+                'id_tipo_evaluacion' => 1,
                 'url_contenido' => 'https://www.youtube.com/watch?v=987654321',
+                'orden' => 2,
+                'creado_por' => 1,
+                'creado_en' => now(),
+                'actualizado_por' => 1,
+                'actualizado_en' => now(),
+            ],
+            [
+                'id_curso' => 2,
+                'titulo' => 'Que es el cine ?',
+                'descripcion_breve' => 'Conceptualización del cine y manejo de conceptos basicos',
+                'descripcion' => 'Conceptualización del cine y manejo de conceptos basicos',
+                'es_evaluacion' => true,
+                'ponderacion' => 50,
+                'id_tipo_evaluacion' => 1,
+                'url_contenido' => 'https://www.youtube.com/watch?v=123456789',
+                'orden' => 1,
+                'creado_por' => 1,
+                'creado_en' => now(),
+                'actualizado_por' => 1,
+                'actualizado_en' => now(),
+            ],
+            [
+                'id_curso' => 2,
+                'titulo' => 'Tipos de Cine',
+                'descripcion_breve' => 'Manejo de las variaciones del cine',
+                'descripcion' => 'Manejo de las variaciones del cine',
+                'es_evaluacion' => true,
+                'ponderacion' => 50,
+                'id_tipo_evaluacion' => 1,
+                'url_contenido' => 'https://www.youtube.com/watch?v=123456789',
                 'orden' => 2,
                 'creado_por' => 1,
                 'creado_en' => now(),

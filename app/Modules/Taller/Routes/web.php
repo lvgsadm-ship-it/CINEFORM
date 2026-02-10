@@ -58,15 +58,15 @@ Route::prefix('taller')->group(function () {
         Route::delete('/inscripciones/{inscripcion}', [InscripcionController::class, 'destroy'])
             ->name('taller.inscripciones.destroy');
 
-        Route::get('/prueba', [PersonalDataController::class, 'DatosPersonales'])
-            ->name('taller.Prueba');
+        // Vista de todos los cursos con filtros
+        Route::get('/lista-cursos', [CursoController::class, 'index'])->name('taller.cursos.principal');
 
         // Ruta para actualizar el estado del curso
-        Route::put('/taller/cursos/{curso}/status', [CursoController::class, 'updateStatus'])
+        Route::put('/cursos/{curso}/status', [CursoController::class, 'updateStatus'])
             ->name('taller.cursos.updateStatus');
 
         // Ruta para finalizar la edición del curso
-        Route::put('/taller/cursos/{curso}/finalizar', [CursoController::class, 'finalizarEdicion'])
+        Route::put('/cursos/{curso}/finalizar', [CursoController::class, 'finalizarEdicion'])
             ->name('taller.cursos.finalizarEdicion');
 
         // Rutas de Calificaciones

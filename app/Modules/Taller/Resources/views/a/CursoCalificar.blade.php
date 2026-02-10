@@ -141,10 +141,10 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div
-                                                        class="input-group input-group-sm border rounded-3 overflow-hidden {{ isset($estudiante->calificacion) ? ($estudiante->calificacion >= 60 ? 'border-success' : 'border-danger') : 'border-light' }}">
+                                                        class="input-group input-group-sm border rounded-3 overflow-hidden {{ isset($estudiante->calificacion) ? ($estudiante->calificacion >= 80  ? 'border-success' : 'border-danger') : 'border-light' }}">
                                                         <input type="number"
                                                             name="calificaciones[{{ $estudiante->id_persona }}][nota]"
-                                                            class="form-control border-0 text-center fw-bold fs-6 py-2 {{ isset($estudiante->calificacion) ? ($estudiante->calificacion >= 60 ? 'text-success' : 'text-danger') : '' }}"
+                                                            class="form-control border-0 text-center fw-bold fs-6 py-2 {{ isset($estudiante->calificacion) ? ($estudiante->calificacion >= 80 ? 'text-success' : 'text-danger') : '' }}"
                                                             value="{{ $estudiante->calificacion }}" min="0" max="100"
                                                             step="0.01" placeholder="-" style="background: #f8f9fa;">
                                                         <span
@@ -250,5 +250,25 @@
                 border-color: #5e72e4;
             }
         </style>
+    @endpush
+
+    @push('scripts')
+        <script>
+            document.addEventListener('input', function (e) {
+                if (e.target.matches('input[name^="calificaciones"][name$="[nota]"]')) {
+                    const val = parseFloat(e.target.value);
+                    if (val > 100) {
+                        e.target.value = 100;
+
+                        // Feedback visual rápido
+                        e.target.classList.add('is-invalid');
+                        setTimeout(() => e.target.classList.remove('is-invalid'), 1000);
+                    }
+                    if (val < 0) {
+                        e.target.value = 0;
+                    }
+                }
+            });
+        </script>
     @endpush
 @endsection

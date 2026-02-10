@@ -3,12 +3,8 @@
         <!-- Logo Header -->
         <div class="logo-header" data-background-color="dark">
             <a href="{{route('home')}}" class="logo">
-                <img
-                    src="{{asset('template/kaiadmin/assets/img/kaiadmin/logo.jpeg')}}"
-                    alt="navbar brand"
-                    class="navbar-brand"
-                    height="40"
-                    />
+                <img src="{{asset('template/kaiadmin/assets/img/kaiadmin/logo.jpeg')}}" alt="navbar brand"
+                    class="navbar-brand" height="40" />
             </a>
             <div class="nav-toggle">
                 <button class="btn btn-toggle toggle-sidebar">
@@ -33,29 +29,29 @@
                     </span>
                     <h4 class="text-section text-center">MENU</h4>
                 </li>
-                
-                @foreach(Auth::user()->captureMenu() as $key =>$value)
-                <li class="nav-item">
-                    <a data-bs-toggle="collapse" href="#menu{{$key}}">
-                        <i class="{{$value['icon']}}"></i>
-                        <p>{{__($value['name'])}}</p>
-                        <span class="caret"></span>
-                    </a>
-                    <div class="collapse" id="menu{{$key}}">
-                        <ul class="nav nav-collapse">
-                            @foreach($value['get_process'] as $value2)
-                            <li>
-                                <a href="{{route($value2['route'])}}">
-                                    <span class="sub-item">{{__($value2['name'])}}</span>
-                                </a>
-                            </li>
-                            @endforeach
-                            
-                        </ul>
-                    </div>
-                </li>
+
+                @foreach(Auth::user()->captureMenu() as $key => $value)
+                    <li class="nav-item">
+                        <a data-bs-toggle="collapse" href="#menu{{$key}}">
+                            <i class="{{$value['icon']}}"></i>
+                            <p>{{__($value['name'])}}</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div class="collapse" id="menu{{$key}}">
+                            <ul class="nav nav-collapse">
+                                @foreach($value['get_process'] as $value2)
+                                    <li>
+                                        <a href="{{route($value2['route'])}}">
+                                            <span class="sub-item">{{__($value2['name'])}}</span>
+                                        </a>
+                                    </li>
+                                @endforeach
+
+                            </ul>
+                        </div>
+                    </li>
                 @endforeach
-                
+
             </ul>
         </div>
     </div>

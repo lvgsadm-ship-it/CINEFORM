@@ -16,49 +16,75 @@ class EditarCursoController extends BaseController
      * Muestra el formulario de edición del curso
      *
      * @param  int  $id
-     * @return \Illuminate\View\View|\Illuminate\Http\Response
+     * @return \Illuminate\View\View|\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
     public function edit($id)
     {
         Log::info('Iniciando edición de curso', ['curso_id' => $id, 'user_id' => Auth::id()]);
 
-        $curso = Curso::findOrFail($id);
+        $curso = Curso::with('estados')->findOrFail($id);
 
         // Obtener los datos de la persona autenticada
         $persona = PersonalData::where('document', Auth::user()->document)->first();
+        $esCoordinador = Auth::user()->profile_id == 4;
 
-        if (!$persona) {
-            Log::error('No se encontraron datos personales para el usuario', [
+        if (!$persona && !$esCoordinador) {
+            Log::error('No se encontraron datos personales para el usuario (No Coordinador)', [
                 'user_id' => Auth::id(),
                 'document' => Auth::user()->document
             ]);
             abort(403, 'No se encontraron tus datos de perfil. Por favor, contacta al administrador.');
         }
 
+        $idPersona = $persona ? $persona->id : null;
+
         Log::info('Datos del curso', [
             'curso_id' => $curso->id_curso,
             'curso_id_persona' => $curso->id_persona,
-            'usuario_actual_id' => $persona->id,
-            'son_iguales' => $curso->id_persona == $persona->id ? 'Sí' : 'No',
-            'es_coordinador' => Auth::user()->profile_id == 4 ? 'Sí' : 'No'
+            'usuario_actual_id' => $idPersona,
+            'son_iguales' => ($idPersona && $curso->id_persona == $idPersona) ? 'Sí' : 'No',
+            'es_coordinador' => $esCoordinador ? 'Sí' : 'No'
         ]);
 
         // Verificar que el usuario autenticado es el Facilitador del curso o un Coordinador
-        if (Auth::user()->profile_id == 4) {
+        if ($esCoordinador) {
             Log::info('Usuario autenticado es el Coordinador de la institucion', [
-                'usuario_actual' => $persona->id,
-                'documento_usuario' => $persona->document,
                 'usuario' => Auth::user()
             ]);
-        } elseif ($curso->id_persona != $persona->id) {
+        } elseif (!$idPersona || $curso->id_persona != $idPersona) {
             Log::warning('Intento de edición no autorizado', [
                 'curso_id' => $curso->id_curso,
                 'usuario_esperado' => $curso->id_persona,
-                'usuario_actual' => $persona->id,
-                'documento_usuario' => $persona->document,
+                'usuario_actual' => $idPersona,
                 'usuario' => Auth::user()
             ]);
             abort(403, 'No tienes permiso para editar este curso.');
+        }
+
+        // ✅ VALIDACIÓN DE ESTADOS EDITABLES
+        // Estados permitidos para edición:
+        // 1 = Por Aceptar, 3 = Declinado, 4 = En Edición, 7 = En Progreso (solo coordinador)
+        $estadoActual = $curso->estado_actual->id_estado ?? null;
+
+        $estadosEditablesFacilitador = [3, 4]; // Declinado, En Edición
+        $estadosEditablesCoordinador = [3, 4, 7]; // Declinado, En Edición, En Progreso
+
+        $estadosPermitidos = $esCoordinador ? $estadosEditablesCoordinador : $estadosEditablesFacilitador;
+
+        // Si el estado no permite edición, redirigir a vista de detalle con mensaje
+        if (!in_array($estadoActual, $estadosPermitidos)) {
+            $nombreEstado = $this->obtenerNombreEstado($estadoActual);
+
+            Log::warning('Intento de edición en estado no permitido', [
+                'curso_id' => $id,
+                'estado_actual' => $estadoActual,
+                'estados_permitidos' => $estadosPermitidos,
+                'es_coordinador' => $esCoordinador
+            ]);
+
+            return redirect()
+                ->route('taller.cursos.show', $curso->id_curso)
+                ->with('warning', "No se puede editar el curso en estado '$nombreEstado'. Solo se puede editar cuando está Declinado o En Edición.");
         }
 
         // Obtener las modalidades para el select
@@ -73,9 +99,43 @@ class EditarCursoController extends BaseController
         // Cargar los contenidos del curso ordenados
         $contenidos = $curso->contenidos()->orderBy('orden')->orderBy('id_contenido_curso')->get();
 
+        // Determinar si el usuario es facilitador del curso
+        $esFacilitador = $idPersona && $curso->id_persona == $idPersona;
+
         Log::info('Permiso de edición concedido');
-        return view('taller::a.CursoEditar', compact('curso', 'modalidades', 'contenidos', 'tiposEvaluacion'));
+        return view('taller::a.CursoEditar', compact(
+            'curso',
+            'modalidades',
+            'contenidos',
+            'tiposEvaluacion',
+            'esCoordinador',
+            'esFacilitador'
+        ));
     }
+
+    /**
+     * Obtiene el nombre legible del estado
+     *
+     * @param int|null $idEstado ID del estado
+     * @return string Nombre del estado
+     */
+    private function obtenerNombreEstado(?int $idEstado): string
+    {
+        $estados = [
+            1 => 'Por Aceptar',
+            2 => 'Aceptado',
+            3 => 'Declinado',
+            4 => 'En Edición',
+            5 => 'En Aprobación',
+            6 => 'Inscripciones',
+            7 => 'En Progreso',
+            8 => 'Finalizado',
+            9 => 'Cerrado'
+        ];
+
+        return $estados[$idEstado] ?? 'Desconocido';
+    }
+
 
     /**
      * Actualiza un curso existente
@@ -102,9 +162,10 @@ class EditarCursoController extends BaseController
 
             // Obtener los datos de la persona asociada al usuario
             $persona = \Modules\Comun\Entities\PersonalData::where('document', $user->document)->first();
+            $isCoordinator = $user->profile_id == 4;
 
-            if (!$persona) {
-                Log::error('No se encontraron datos de persona para el usuario', [
+            if (!$persona && !$isCoordinator) {
+                Log::error('No se encontraron datos de persona para el usuario (No Coordinador)', [
                     'user_id' => $user->id,
                     'document' => $user->document
                 ]);
@@ -113,7 +174,7 @@ class EditarCursoController extends BaseController
                     ->withErrors(['error' => 'No se encontró tu perfil de persona. Contacta al administrador.']);
             }
 
-            $idPersona = $persona->id;
+            $idPersona = $persona ? $persona->id : null;
 
             // Buscar el curso con sus relaciones
             $curso = Curso::with('contenidos')->find($id);
@@ -126,7 +187,7 @@ class EditarCursoController extends BaseController
             }
 
             // Verificar que el usuario es el propietario del curso o un Coordinador
-            if ($user->profile_id != 4 && $curso->id_persona != $idPersona) {
+            if (!$isCoordinator && (!$idPersona || $curso->id_persona != $idPersona)) {
                 Log::warning('Intento de edición no autorizado', [
                     'curso_id' => $id,
                     'usuario_esperado' => $curso->id_persona,
@@ -137,6 +198,36 @@ class EditarCursoController extends BaseController
                 return back()
                     ->withInput()
                     ->withErrors(['error' => 'No tienes permiso para editar este curso.']);
+            }
+
+            // Validación: El dueño solo puede editar si el curso está en estado válido (Por Aceptar, Borrador)
+            // Se asume 1: Por Aceptar (recién creado), 4: Borrador, 6: Borrador (alternativo)
+
+            // Obtener ID del estado actual
+            $estadoActual = null;
+            if ($curso->estado_actual) { // Accesor definido en modelo
+                $estadoActual = $curso->estado_actual->id_estado;
+            } elseif (isset($curso->estado_id)) {
+                $estadoActual = $curso->estado_id;
+            } else {
+                // Try loading connection
+                $estadoObj = $curso->estadoActual()->first();
+                if ($estadoObj)
+                    $estadoActual = $estadoObj->id_estado;
+            }
+
+            // Estados permitidos para edición por facilitador: 1 (Por Aceptar), 4 (Borrador), 6 (Borrador)
+            $estadosPermitidos = [1, 4, 6];
+
+            if (!$isCoordinator && !in_array($estadoActual, $estadosPermitidos)) {
+                Log::warning('Intento de edición en estado no permitido', [
+                    'curso_id' => $id,
+                    'estado_actual' => $estadoActual,
+                    'estados_permitidos' => $estadosPermitidos
+                ]);
+                return back()
+                    ->withInput()
+                    ->withErrors(['error' => 'Solo se puede editar el curso cuando está en estado pendiente o borrador. Estado actual: ' . $estadoActual]);
             }
 
             // Validación de campos del curso
@@ -164,6 +255,28 @@ class EditarCursoController extends BaseController
             ]);
 
             DB::beginTransaction();
+
+            // Validar que la suma de las ponderaciones no sea mayor a 100
+            if (isset($validatedData['contenidos']) && is_array($validatedData['contenidos'])) {
+                $totalPonderacion = 0;
+                foreach ($validatedData['contenidos'] as $contenidoData) {
+                    if (isset($contenidoData['es_evaluacion']) && $contenidoData['es_evaluacion'] == 1) {
+                        $totalPonderacion += (float) ($contenidoData['ponderacion'] ?? 0);
+                    }
+                }
+
+                if ($totalPonderacion > 100) {
+                    DB::rollBack();
+                    return back()
+                        ->withInput()
+                        ->withErrors(['error' => 'La suma de las ponderaciones de las evaluaciones no puede ser mayor al 100%. Total actual: ' . $totalPonderacion . '%']);
+                } else if ($totalPonderacion < 100) {
+                    DB::rollBack();
+                    return back()
+                        ->withInput()
+                        ->withErrors(['error' => 'La suma de las ponderaciones de las evaluaciones es menor al 100%. Total actual: ' . $totalPonderacion . '%']);
+                }
+            }
 
             // Actualizar el curso
             $curso->update([
@@ -204,18 +317,23 @@ class EditarCursoController extends BaseController
                     try {
                         $esEvaluacion = isset($contenidoData['es_evaluacion']) ? (bool) $contenidoData['es_evaluacion'] : false;
 
+                        // Asegurar que descripcion no sea null (requerido por DB)
+                        $descripcion = $contenidoData['descripcion'] ?? $contenidoData['descripcion_breve'] ?? $contenidoData['titulo'] ?? '';
+
                         $dataToSave = [
                             'titulo' => $contenidoData['titulo'],
                             'url_contenido' => $contenidoData['url_contenido'],
-                            'descripcion' => $contenidoData['descripcion'] ?? $contenidoData['descripcion_breve'] ?? null,
+                            'descripcion' => $descripcion,
                             'orden' => isset($contenidoData['orden']) ? (int) $contenidoData['orden'] : $index + 1,
                             'es_evaluacion' => $esEvaluacion,
                             'id_tipo_evaluacion' => $esEvaluacion ? ($contenidoData['id_tipo_evaluacion'] ?? null) : null,
                             'ponderacion' => $esEvaluacion ? ($contenidoData['ponderacion'] ?? null) : null
                         ];
 
-                        if (isset($contenidoData['descripcion_breve'])) {
-                            $dataToSave['descripcion_breve'] = $contenidoData['descripcion_breve'];
+                        // Asegurar que descripcion_breve no sea null
+                        $dataToSave['descripcion_breve'] = $contenidoData['descripcion_breve'] ?? mb_substr($descripcion, 0, 100);
+                        if (empty($dataToSave['descripcion_breve'])) {
+                            $dataToSave['descripcion_breve'] = mb_substr($contenidoData['titulo'], 0, 100);
                         }
 
                         if (!empty($contenidoData['id'])) {
@@ -230,7 +348,6 @@ class EditarCursoController extends BaseController
                             }
                         } else {
                             // Crear nuevo contenido
-                            $dataToSave['descripcion_breve'] = $dataToSave['descripcion_breve'] ?? mb_substr($dataToSave['descripcion'] ?? '', 0, 100) . '...';
                             $dataToSave['creado_por'] = Auth::id();
                             $dataToSave['actualizado_por'] = Auth::id();
 

@@ -7,9 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 
+use App\Helpers\Encryptor;
 class Curso extends Model
 {
     use HasFactory;
+    public function getCryptIdAttribute()
+    {
+
+        return Encryptor::encrypt($this->id_curso);
+    }
+
+    protected $appends = ['crypt_id'];
 
     protected $table = 'taller_cursos';
     protected $primaryKey = 'id_curso';
@@ -147,10 +155,10 @@ class Curso extends Model
             DB::table('curso_estado')
                 ->where('id_curso', $this->id_curso)
                 ->update([
-                        'id_estado' => $idEstado,
-                        'motivo' => $motivo,
-                        'updated_at' => now()
-                    ]);
+                    'id_estado' => $idEstado,
+                    'motivo' => $motivo,
+                    'updated_at' => now()
+                ]);
         }
         return $this;
     }

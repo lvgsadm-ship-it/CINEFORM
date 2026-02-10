@@ -10,7 +10,8 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Traits\EncryptationId;
 use Modules\Comun\Entities\PersonalData;
 
-class User extends Authenticatable {
+class User extends Authenticatable
+{
 
     use HasApiTokens,
         HasFactory,
@@ -52,60 +53,70 @@ class User extends Authenticatable {
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-            // 'password' => 'hashed',
+        // 'password' => 'hashed',
     ];
 
-    public function getCellPhoneAttribute() {
+    public function getCellPhoneAttribute()
+    {
         return $this->getCountry->dial_code . ' ' . $this->phone;
     }
-    public function getFullDocumentAttribute() {
+    public function getFullDocumentAttribute()
+    {
         return $this->getDocumentType->code . '-' . $this->document;
     }
-    
-    function getProfile() {
+
+    function getProfile()
+    {
         return $this->belongsTo(Profile::class, 'profile_id');
     }
-    
-    function getCountry() {
+
+    function getCountry()
+    {
         return $this->belongsTo(Countries::class, 'country_id');
     }
-    
-    
-    function getOffices() {
+
+
+    function getOffices()
+    {
         return $this->belongsToMany(\Modules\Library\Entities\Offices::class, 'library_office_users', 'user_id', 'office_id');
     }
-    
-    public function getDocumentType() {
+
+    public function getDocumentType()
+    {
         return $this->belongsTo(DocumentType::class, 'document_type_id');
     }
 
-    public function getModules() {
+    public function getModules()
+    {
         $Modules = Modulo::join('security_menus', 'security_menus.module_id', '=', 'security_modules.id')
-                ->join('security_processes', 'security_processes.menu_id', '=', 'security_menus.id')
-                ->join('security_profile_processes', 'security_profile_processes.process_id', '=', 'security_processes.id')
-                ->where('security_profile_processes.profile_id', $this->profile_id)
-                ->groupBy("security_modules.id", "security_modules.name", "security_modules.description", "security_modules.icon", "security_modules.order")
-                ->select('security_modules.*')
-                ->get()
-        //->toSql()
+            ->join('security_processes', 'security_processes.menu_id', '=', 'security_menus.id')
+            ->join('security_profile_processes', 'security_profile_processes.process_id', '=', 'security_processes.id')
+            ->where('security_profile_processes.profile_id', $this->profile_id)
+            ->groupBy("security_modules.id", "security_modules.name", "security_modules.description", "security_modules.icon", "security_modules.order")
+            ->select('security_modules.*')
+            ->get()
+            //->toSql()
         ;
         return $Modules;
     }
 
-    public function getProcesses() {
+    public function getProcesses()
+    {
         $Processes = Modulo::join('security_menus', 'security_menus.module_id', '=', 'security_modules.id')
-                ->join('security_processes', 'security_processes.menu_id', '=', 'security_menus.id')
-                ->join('security_profile_processes', 'security_profiles_processes.process_id', '=', 'security_processes.id')
-                ->where('security_profile_processes.profile_id', $this->profile_id)
-                ->groupBy("security_processes.id", "security_processes.name", "security_processes.description", "security_processes.icon", "security_processes.route", "security_processes.actions", "security_processes.order")
-                ->select('security_processes.*')
-                ->get()
-        //->toSql()
+            ->join('security_processes', 'security_processes.menu_id', '=', 'security_menus.id')
+            ->join('security_profile_processes', 'security_profiles_processes.process_id', '=', 'security_processes.id')
+            ->where('security_profile_processes.profile_id', $this->profile_id)
+            ->groupBy("security_processes.id", "security_processes.name", "security_processes.description", "security_processes.icon", "security_processes.route", "security_processes.actions", "security_processes.order")
+            ->select('security_processes.*')
+            ->get()
+            //->toSql()
         ;
         return $Processes;
     }
 
-    public function captureMenu() {
+    public function captureMenu()
+    {
+
         if (!session()->get('MODULE') == null) {
             return $this->getMenu(session()->get('MODULE'));
         } else {
@@ -113,7 +124,8 @@ class User extends Authenticatable {
         }
     }
 
-    public function getMenu($Module) {
+    public function getMenu($Module)
+    {
         $Menu = Menu::orderBy('order')->where("module_id", $Module)->with('getProcess')->get()->toArray();
         foreach ($Menu as $key => $value) {
             foreach ($value['get_process'] as $key2 => $value2) {
@@ -129,12 +141,13 @@ class User extends Authenticatable {
         return $Menu;
     }
 
-public function personalData()
-{
-    return $this->hasOne(PersonalData::class, 'document', 'document');
-}
+    public function personalData()
+    {
+        return $this->hasOne(PersonalData::class, 'document', 'document');
+    }
 
-    public function getShortNameAttribute() {
+    public function getShortNameAttribute()
+    {
         if ($this->document_type->is_natural === false) {
             $name = ucwords(Lower($this->full_name));
         } else {
@@ -144,7 +157,8 @@ public function personalData()
         return $name;
     }
 
-    public function verifyPermission($route = null) {
+    public function verifyPermission($route = null)
+    {
 
         $position_point = strpos($route, '.');
         if ($position_point === false) {
@@ -159,10 +173,10 @@ public function personalData()
         }
 
         $has_permision = Process::join("security_profile_processes", "security_profile_processes.process_id", "security_processes.id")
-                ->select("*")
-                ->where("route", $routeFather)
-                ->where("profile_id", $this->profile_id)
-                ->first();
+            ->select("*")
+            ->where("route", $routeFather)
+            ->where("profile_id", $this->profile_id)
+            ->first();
 
         if ($has_permision != null) {
             if ($routeSon == '') {

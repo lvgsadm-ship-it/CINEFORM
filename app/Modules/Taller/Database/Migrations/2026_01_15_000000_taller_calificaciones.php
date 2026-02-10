@@ -12,7 +12,7 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create('taller_calificaciones', function (Blueprint $table) {
+        Schema::create('taller_calificaciones', function (Blueprint $table) {  
             $table->id('id_calificacion');
 
             // Relación con el Curso (para facilitar búsquedas)

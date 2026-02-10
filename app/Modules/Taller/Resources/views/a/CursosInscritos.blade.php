@@ -20,10 +20,6 @@
                         @if($cursosInscritos->count() > 0)
                             <div class="row">
                                 @foreach($cursosInscritos as $curso)
-                                    @php
-                                        $modalidad = $curso->modalidad->nombre_modalidad ?? 'No especificada';
-                                        $modalidadIcon = strtolower($modalidad) === 'presencial' ? 'fa-building' : 'fa-laptop';
-                                    @endphp
                                     <div class="col-md-6 col-lg-4 mb-4">
                                         <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
                                             <div class="position-relative">
@@ -38,23 +34,13 @@
                                                 @endif
                                                 <div class="position-absolute top-0 end-0 m-2">
                                                     <span class="badge bg-primary">
-                                                        <i class="fas {{ $modalidadIcon }} me-1"></i>
-                                                        {{ $modalidad }}
+                                                        <i class="fas {{ $curso->modalidadIcon }} me-1"></i>
+                                                        {{ $curso->modalidadNombre }}
                                                     </span>
 
-                                                    @if($curso->estado_actual)
-                                                        @if($curso->estado_actual->id_estado == 6)
-                                                            <span class="badge bg-success">Abierto a inscripciones</span>
-                                                        @elseif($curso->estado_actual->id_estado == 7)
-                                                            <span class="badge bg-success">En curso</span>
-                                                        @elseif($curso->estado_actual->id_estado == 8)
-                                                            <span class="badge bg-danger">Finalizado</span>
-                                                        @elseif($curso->estado_actual->id_estado == 9)
-                                                            <span class="badge bg-danger">Cerrado</span>
-                                                        @endif
-                                                    @else
-                                                        <span class="badge bg-secondary">Sin estado</span>
-                                                    @endif
+                                                    <span class="badge {{ $curso->badgeClass }}">
+                                                        {{ $curso->estadoTexto }}
+                                                    </span>
                                                 </div>
                                             </div>
 

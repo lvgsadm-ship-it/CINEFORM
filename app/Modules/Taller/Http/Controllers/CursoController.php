@@ -8,29 +8,11 @@ use Modules\Taller\Entities\Inscripcion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Modules\Taller\Services\CondicionalBuscadorCurso;
+
 
 class CursoController extends BaseController
 {
-
-    /**
-     * Muestra la lista de cursos paginados
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    /**
-     * Actualiza el estado de un curso
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    /**
-     * Actualiza el estado de un curso
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
-     */
 
     /**
      * Display the course content for enrolled students.
@@ -50,7 +32,6 @@ class CursoController extends BaseController
             'estados'
         ])->findOrFail($id);
 
-        // Determinar el contenido actual
         $contenidoActual = null;
         if ($contenido_id) {
             $contenidoActual = $curso->contenidos->where('id_contenido_curso', $contenido_id)->first();
@@ -97,8 +78,10 @@ class CursoController extends BaseController
      *
      * @return \Illuminate\View\View|\Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
+        $esCoordinador = Auth::user()->profile_id == 4;
+
         if ($this->usuarioSinDatosPersonales()) {
             return response()->json([
                 'success' => false,
@@ -106,24 +89,91 @@ class CursoController extends BaseController
             ], 404);
         }
 
-        // Obtener la persona asociada al usuario autenticado
-        $persona = $this->getUsuarioAutenticado()->personalData;
+        // Inicializar el servicio que resuelve qué vista mostrar
+        $condicional = new CondicionalBuscadorCurso();
+        $vistaParcial = $condicional->resolverVista($esCoordinador);
 
-        // Obtener cursos que están en estado de inscripción (id_estado = 6) con conteo de contenidos
-        $cursos = Curso::with(['modalidad', 'inscripciones', 'estados'])
-            ->withCount('contenidos')
-            ->whereHas('estados', function ($query) {
-                $query->where('estados.id_estado', 6)
-                    ->whereIn('curso_estado.id', function ($q) {
-                        $q->select(DB::raw('MAX(id)'))
-                            ->from('curso_estado')
-                            ->groupBy('id_curso');
-                    });
-            })
-            ->orderBy('fecha_inicio', 'desc')
-            ->paginate(12);
+        // Verificar si el usuario es facilitador (esto se determinará a nivel de curso individual)
+        // Por ahora, inicializamos como false ya que estamos viendo la lista
+        $esFacilitador = false;
 
-        return view('taller::a.Cursos', compact('cursos'));
+        $query = Curso::with(['modalidad', 'inscripciones', 'estados', 'persona'])
+            ->withCount(['contenidos', 'inscripciones']);
+
+        // Si NO es coordinador, filtrar solo cursos con estado >= 6
+        if (!$esCoordinador) {
+            $query->whereHas('estados', function ($q) {
+                $q->where('estados.id_estado', '>=', 6);
+            });
+        }
+
+        // Determinar qué vista se está cargando
+        $routeName = $request->route()->getName();
+        $isPrincipalView = ($routeName === 'taller.cursos.principal');
+
+        // Filtro por búsqueda (nombre o descripción)
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nombre', 'like', '%' . $request->search . '%')
+                    ->orWhere('descripcion', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Filtro por estado específico
+        if ($request->has('id_estado') && !empty($request->id_estado)) {
+            $query->whereHas('estados', function ($q) use ($request) {
+                $q->where('estados.id_estado', $request->id_estado);
+            });
+        }
+
+        $cursos = $query->orderBy('fecha_inicio', 'desc')
+            ->paginate(12)
+            ->withQueryString();
+
+        // Procesar cada curso para agregar propiedades calculadas
+        $this->procesarCursosParaVista($cursos);
+
+        // Si es coordinador, obtener TODOS los estados, sino solo los >= 6
+        $estados = $esCoordinador
+            ? \Modules\Taller\Entities\Estado::all()
+            : \Modules\Taller\Entities\Estado::where('id_estado', '>=', 6)->get();
+
+        // Retornar la vista correspondiente
+        $view = $isPrincipalView ? 'taller::a.CursosPrincipal' : 'taller::a.Cursos';
+        return view($view, compact('vistaParcial', 'cursos', 'estados', 'esCoordinador', 'esFacilitador'));
+    }
+
+    /**
+     * Procesa cada curso para agregar propiedades calculadas necesarias en la vista
+     *
+     * @param \Illuminate\Pagination\LengthAwarePaginator $cursos
+     * @return void
+     */
+    private function procesarCursosParaVista($cursos)
+    {
+        foreach ($cursos as $curso) {
+            $estadoActual = $curso->estado_actual;
+            $estadoId = $estadoActual ? $estadoActual->id_estado : 0;
+
+            // Agregar propiedades calculadas al objeto curso
+            $curso->estadoNombre = $estadoActual ? str_replace('_', ' ', $estadoActual->nombre) : 'Sin estado';
+            $curso->modalidad = $curso->modalidad->nombre_modalidad ?? 'No especificada';
+            $curso->modalidadIcon = $curso->modalidad === 'Presencial' ? 'fa-building' : 'fa-laptop';
+
+            // Determinar la clase CSS del badge según el estado
+            $curso->badgeClass = match ($estadoId) {
+                1 => 'bg-warning',      // Pendiente
+                2 => 'bg-warning',      // Borrador
+                3 => 'bg-warning',      // Declinado
+                4 => 'bg-warning',      // En Edición
+                5 => 'bg-warning',      // En Aprobación
+                6 => 'bg-success',      // Inscripción
+                7 => 'bg-success',      // En curso
+                8 => 'bg-danger',       // Finalizado
+                9 => 'bg-danger',       // Cerrado
+                default => 'bg-secondary'
+            };
+        }
     }
 
     /**
@@ -187,8 +237,9 @@ class CursoController extends BaseController
         // Verificar si el usuario es el facilitador o un participante
         $esFacilitador = $curso->id_persona == $persona->id;
         $esParticipante = $curso->inscripciones->contains('id_persona', $persona->id);
+        $esCoordinador = Auth::user()->profile_id == 4;
 
-        if (!$esFacilitador && !$esParticipante) {
+        if (!$esFacilitador && !$esParticipante && !$esCoordinador) {
             return response()->json([
                 'success' => false,
                 'message' => 'No tienes permiso para ver este curso'

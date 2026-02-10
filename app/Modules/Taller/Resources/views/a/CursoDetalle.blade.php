@@ -2,94 +2,50 @@
 
 @section('title', 'Detalles del Curso')
 
-{{-- 
-    Vista: CursoDetalle
-    Descripción: Página principal de información del curso.
-    Funcionalidades:
-    - Muestra detalles generales (descripción, instructor, horarios).
-    - Gestiona lógica de inscripción (inscribirse/cancelar).
-    - Muestra acciones administrativas para Facilitadores y Coordinadores.
-    - Lista el contenido del curso con enlaces al visor (CursoContenido).
+{{--
+Vista: CursoDetalle
+Descripción: Página principal de información del curso.
+Funcionalidades:
+- Muestra detalles generales (descripción, instructor, horarios).
+- Gestiona lógica de inscripción (inscribirse/cancelar).
+- Muestra acciones administrativas para Facilitadores y Coordinadores.
+- Lista el contenido del curso con enlaces al visor (CursoContenido).
+
+NOTA: Todas las consultas y cálculos se realizan en el controlador (CursoDetalleController).
+      Esta vista solo recibe y presenta los datos.
 --}}
 
- @auth
-                            @php
-                                // Obtener el ID de la persona desde los datos personales
-                                $user = auth()->user();
-                                $personalData = \Modules\Comun\Entities\PersonalData::where('document', $user->document)->first();
-                                $idPersona = $personalData ? $personalData->id : null;
+@push('styles')
+    <style>
+        .card {
+            border-radius: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
 
-                                // --- Lógica de Estados y Roles ---
-                                
-                                // El faciliatador debe acetar el curso
-                                $PorAceptar = $curso->estado_actual->id_estado == 1;
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+        }
 
-                                // Verificar si el usuario es el coordinador
-                                $esCoordinador = $user->profile_id == 4;
+        .bg-gradient-primary {
+            background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
+        }
 
-                                // Verificar si el usuario es el instructor del curso
-                                $esFacilitador = $curso->id_persona == $idPersona;
+        .list-group-item {
+            border-left: 0;
+            border-right: 0;
+        }
 
-                                // Verificar si el curso está en edicion
-                                $EnEdicion = $curso->estado_actual->id_estado == 4;
+        .list-group-item:first-child {
+            border-top: 0;
+        }
 
-                                $Declinado = $curso->estado_actual->id_estado == 3;
+        .list-group-item:last-child {
+            border-bottom: 0;
+        }
+    </style>
+@endpush
 
-                                // Verificar si el curso está en evaluación por coordinacion     
-                                $EnAprobacion = $curso->estado_actual->id_estado == 5;
-
-                                // Verificar si el curso está en inscripciones
-                                $Inscripciones = $curso->estado_actual->id_estado == 6;
-
-                                // Verificar si el curso está en PROGRESO
-                                $EnProgreso = $curso->estado_actual->id_estado == 7;
-
-                                // Verificar si el curso está finalizado
-                                $Finalizado = $curso->estado_actual->id_estado == 8;
-
-                                // Verificar si el curso esta cerrado
-                                $Cerrado = $curso->estado_actual->id_estado == 9;
-
-                                $CuposDisponibles = $curso->cantidad_cupos;
-
-                                // Verificar si el usuario ya está inscrito
-                                $inscripcion = $idPersona ?
-                                    \Modules\Taller\Entities\Inscripcion::where('id_curso', $curso->id_curso)
-                                        ->where('id_persona', $idPersona)
-                                        ->first() : null;
-                            @endphp
-@endauth
-  @push('styles')
-        <style>
-           
-            .card {
-                border-radius: 10px;
-                transition: transform 0.3s ease, box-shadow 0.3s ease;
-            }
-
-            .card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
-            }
-
-            .bg-gradient-primary {
-                background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
-            }
-
-            .list-group-item {
-                border-left: 0;
-                border-right: 0;
-            }
-
-            .list-group-item:first-child {
-                border-top: 0;
-            }
-
-            .list-group-item:last-child {
-                border-bottom: 0;
-            }
-        </style>
-    @endpush
 
 @section('content')
     <div class="container py-5">
@@ -99,7 +55,23 @@
                 <!-- Tarjeta de información principal -->
                 <div class="card shadow-sm mb-4 border-0">
                     <div class="card-header bg-gradient-primary text-white">
-                        <h2 class="h4 mb-0">{{ $curso->nombre }}</h2>
+                        <div class="d-flex justify-content-between align-items-center flex-wrap">
+                            <h2 class="h4 mb-0">{{ $curso->nombre }}</h2>
+                            @if(isset($inscripcion) && $inscripcion && $debeMostrarPromedio)
+                                <div class="mt-2 mt-md-0 d-flex align-items-center">
+                                    <div class="me-3 text-end">
+                                        <div class="small opacity-75">Tu Promedio Actual</div>
+                                        <div class="fw-bold fs-5">{{ number_format($promedioEstudiante, 2) }} / 100</div>
+                                    </div>
+                                    <span
+                                        class="badge {{ $promedioEstudiante >= 80 ? 'bg-success' : 'bg-danger' }} px-3 py-2 rounded-pill shadow-sm">
+                                        <i
+                                            class="fas {{ $promedioEstudiante >= 80 ? 'fa-chart-line' : 'fa-exclamation-triangle' }} me-1"></i>
+                                        {{ $promedioEstudiante >= 80 ? 'Por encima del promedio necesario' : 'Por debajo del promedio necesario' }}
+                                    </span>
+                                </div>
+                            @endif
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="mb-4">
@@ -139,7 +111,8 @@
                                     <div>
                                         <h6 class="mb-0">Modalidad</h6>
                                         <p class="mb-0 fw-bold">
-                                            {{ $curso->modalidad->nombre_modalidad ?? 'No especificada' }}</p>
+                                            {{ $curso->modalidad->nombre_modalidad ?? 'No especificada' }}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -160,7 +133,8 @@
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div>
                                                 <h6 class="mb-1">
-                                                    <a href="{{ route('taller.cursos.contenido', ['curso' => $curso->id_curso, 'contenido_id' => $contenido->id_contenido_curso]) }}" class="text-decoration-none">
+                                                    <a href="{{ route('taller.cursos.contenido', ['curso' => $curso->id_curso, 'contenido_id' => $contenido->id_contenido_curso]) }}"
+                                                        class="text-decoration-none">
                                                         {{ $contenido->titulo }}
                                                     </a>
                                                 </h6>
@@ -204,7 +178,9 @@
                         </h5>
                         <p class="text-muted mb-3">Instructor</p>
                         <div class="d-flex justify-content-center gap-2">
-                            <button onclick="mostrarContactoProfesor('{{ $curso->persona->nombre_completo ?? 'No disponible' }}', '{{ $curso->persona->user->email ?? 'No disponible' }}', '{{ $curso->persona->user->cell_phone ?? 'No disponible' }}')" class="btn btn-outline-primary btn-sm">
+                            <button
+                                onclick="mostrarContactoProfesor('{{ $curso->persona->nombre_completo ?? 'No disponible' }}', '{{ $curso->persona->user->email ?? 'No disponible' }}', '{{ $curso->persona->user->cell_phone ?? 'No disponible' }}')"
+                                class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-envelope me-1"></i> Contactar
                             </button>
                         </div>
@@ -212,7 +188,7 @@
                 </div>
 
                 <!-- Información Adicional 
-                (fecha de inicio, fecha de fin, cupos, categoria) -->
+                                                                                        (fecha de inicio, fecha de fin, cupos, categoria) -->
                 <div class="card shadow-sm border-0">
                     <div class="card-header bg-white border-bottom">
                         <h5 class="mb-0">Información del Curso</h5>
@@ -241,134 +217,12 @@
                         </ul>
                     </div>
                     <div class="card-footer bg-white border-top-0">
-                            {{-- Bloque de Botones de Acción según Estado y Rol --}}
-                            @auth
-                            @if($PorAceptar && $esFacilitador) {{-- Curso por aceptar Facilitador --}}
-
-                                    <a class="btn btn-info w-100 mb-2" disabled>
-                                    <i class="fas fa-user-tie me-2"></i> Eres el instructor de este curso
-                                    </a>
-                                    <button class="btn btn-success w-100 mb-2"
-                                    onclick="AceptarCursoFacilitador({{ $curso->id_curso }})">
-                                    <i class="fas fa-user-tie me-2"></i> Aceptar Curso
-                                    </button>
-
-                            @elseif($EnEdicion && $esFacilitador) {{-- Curso en edicion Facilitador --}}
-                                <button class="btn btn-success w-100 mb-2" onclick="finalizarEdicion({{ $curso->id_curso }})">
-                                    <i class="fas fa-user-tie me-2"></i> Finalizar edicion 
-                                    </button>
-                                <a class="btn btn-primary w-100 mb-2" href="{{ route('taller.cursos.edit', $curso->id_curso) }}">
-                                    <i class="fas fa-user-tie me-2"></i> Editar 
-                                    </a>
-                            @elseif($Declinado && $esCoordinador) {{-- Curso Declinado Coordinador --}}
-                                    <i class="fas fa-user-tie me-2"></i> Contenido sugerido Declinado
-
-                                    <button class="btn btn-danger w-100 mb-2" 
-                                    data-motivo="{{ $curso->estado_actual->pivot->motivo ?? '' }}"
-                                    data-nombre="{{ $curso->nombre }}"
-                                    onclick="verMotivoRechazo({{ $curso->id_curso }}, this.dataset.motivo, this.dataset.nombre)">
-                                    Motivo de rechazo
-                                    </button>
-                            @elseif($Declinado && $esFacilitador) {{-- Curso Declinado Facilitador --}}
-                                    <i class="fas fa-user-tie me-2"></i> Contenido sugerido Declinado
-
-                                    <button class="btn btn-danger w-100 mb-2" 
-                                    data-motivo="{{ $curso->estado_actual->pivot->motivo ?? '' }}"
-                                    data-nombre="{{ $curso->nombre }}"
-                                    onclick="verMotivoRechazo({{ $curso->id_curso }}, this.dataset.motivo, this.dataset.nombre)">
-                                    Motivo de rechazo
-                                    </button>
-
-                                    <a class="btn btn-primary w-100 mb-2" href="{{ route('taller.cursos.edit', $curso->id_curso) }}">
-                                    <i class="fas fa-user-tie me-2"></i> Editar 
-                                    </a>
-
-                                    <button class="btn btn-success w-100 mb-2" onclick="finalizarEdicion({{ $curso->id_curso }})">
-                                    <i class="fas fa-user-tie me-2"></i> Finalizar edicion 
-                                    </button>
-                                
-                            @elseif($EnAprobacion && $esCoordinador) {{-- Curso en evaluacion por Coordinador --}}
-                            
-                                    <button class="btn btn-success w-100 mb-2" onclick="AprobarCurso({{ $curso->id_curso }})">Aprobar Curso</button>
-                            
-                                    <button class="btn btn-danger w-100 mb-2" onclick="RechazarContenido({{ $curso->id_curso }})">Rechazar Curso</button>
-
-                            @elseif($EnAprobacion && $esFacilitador) {{-- Vista de espera de Aprobacion --}}
-
-                                    <a class="btn btn-info w-100 mb-2" disabled>
-                                    <i class="fas fa-user-tie me-2"></i> Contenido sugerido en evaluación
-                                    </a>        
-                           
-                            @elseif($Inscripciones && $esCoordinador) {{-- Curso en Inscripciones. Cierre de las mismas por Coordinador--}}
-                                    <a class="btn btn-info w-100 mb-2" disabled>
-                                    <i class="fas fa-user-tie me-2"></i> Inscripciones en curso 
-                                    </a>
-                                    <button class="btn btn-success w-100 mb-2" onclick="FinalizarInscripciones({{ $curso->id_curso }})"> Finalizar Inscripciones </button>
-                           
-                            
-                            @elseif($Inscripciones && $esFacilitador) {{-- Curso en Inscripciones por Facilitador --}}
-                                    <a class="btn btn-info w-100 mb-2" disabled>
-                                    <i class="fas fa-user-tie me-2"></i> Inscripciones en curso 
-                                    </a>
-                            @elseif($EnProgreso && $esCoordinador) {{-- Curso en progreso. Edicion de contingencia o finalizacion de curso --}}
-                                    <a class="btn btn-info w-100 mb-2" href="{{ route('taller.cursos.contenido', ['curso' => $curso->id_curso]) }}">
-                                    <i class="fas fa-user-tie me-2"></i> Ver contenidos
-                                    </a>
-                            
-                                    <button class="btn btn-danger w-100 mb-2" onclick="FinalizarCurso({{ $curso->id_curso }})"> Finalizar Curso </button>
-                            
-                                    <a href="{{ route('taller.cursos.edit', $curso->id_curso) }}" class="btn btn-success w-100 mb-2"> Edicion</a>
-                            
-                            
-                            @elseif($EnProgreso && $esFacilitador) {{-- Curso en progreso. Edicion de contingencia o finalizacion de curso --}}
-                            
-                                    <a class="btn btn-success w-100 mb-2" href="{{ route('taller.cursos.contenido', ['curso' => $curso->id_curso]) }}">
-                                    <i class="fas fa-user-tie me-2"></i> Ver contenidos
-                                    </a>
-
-                             @elseif($EnProgreso) {{-- Curso en Progreso --}}
-                                    <a class="btn btn-success w-100 mb-2" href="{{ route('taller.cursos.contenido', ['curso' => $curso->id_curso]) }}">
-                                    <i class="fas fa-user-tie me-2"></i> Ver contenidos
-                                    </a>
-                                        
-                            @elseif($Cerrado)
-                             
-                                    <i class="fas fa-user-tie me-2"></i> Curso cerrado
-                            
-                            @elseif($Finalizado)
-                                    <a class="btn btn-info w-100 mb-2" disabled>
-                                    <i></i> El curso ya se finalizo, contactar con el profesor para
-                                    cualquier necesidad.
-                                    </a>
-                                    {{-- Apartado con el objetivo de hacer conexion a la ya existente emision de certificados --}}
-                                    
-                                    <a class="btn btn-success w-100 mb-2" disabled>  
-                                    <i class="fas fa-user-tie me-2"></i> Emitir Certificado  
-                                    </a>
-
-                                    {{-- Apartado con el objetivo de hacer conexion a la ya existente emision de certificados --}}
-                                    
-                            @elseif ($EnEdicion)
-                                    <a class="btn btn-warning w-100 mb-2" disabled>
-                                    <i class="fas fa-user-tie me-2"></i> Curso siendo evaluado por el Facilitador
-                                    </a>
-                            @elseif($inscripcion)
-                                    <a class="btn btn-success w-100 mb-2" disabled>
-                                    <i class="fas fa-check-circle me-2"></i> Ya estás inscrito
-                                    </a>
-                                    <button class="btn btn-outline-danger w-100 mb-2 cancelar-inscripcion-btn"
-                                    data-inscripcion-id="{{ $inscripcion->id_inscripcion }}">
-                                    <i class="fas fa-times-circle me-2"></i> Cancelar inscripción
-                                    </button>
-
-                            @elseif($CuposDisponibles > 0)
-                                    <button class="btn btn-primary w-100 mb-2" onclick="inscribirAlCurso({{ $curso->id_curso }})">
-                                    <i class="fas fa-check-circle me-2"></i> Inscribirse
-                                    </button>
-                            @else
-                                    <a class="btn btn-secondary w-100 mb-2" disabled>
-                                    <i class="fas fa-times-circle me-2"></i> No hay cupos disponibles
-                                    </a>
+                        @auth
+                            @if($vistaParcial)
+                                @include("taller::a.$vistaParcial", [
+                                    'curso' => $curso,
+                                    'inscripcion' => $inscripcion
+                                ])
                             @endif
                         @endauth
                     </div>
@@ -382,40 +236,38 @@
             function verMotivoRechazo(cursoId, motivo, cursoNombre = '') {
                 Swal.fire({
                     html: `
-                        <div class="rejection-container text-center">
-                            <!-- Cabecera con icono dinámico -->
-                            <div class="mb-4">
-                                <div class="d-inline-flex align-items-center justify-content-center bg-danger-subtle text-danger rounded-circle mb-3 shadow-sm" style="width: 90px; height: 90px;">
-                                    <i class="fas fa-exclamation-circle fa-4x animate__animated animate__pulse animate__infinite"></i>
-                                </div>
-                                <h2 class="fw-bold text-dark mb-1">Propuesta Declinada</h2>
-                                ${cursoNombre ? `<span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill small fw-bold mt-2 shadow-sm">${cursoNombre}</span>` : ''}
-                            </div>
+                                <div class="rejection-container text-center">
+                                    <!-- Cabecera con icono dinámico -->
+                                    <div class="mb-4">
+                                        <div class="d-inline-flex align-items-center justify-content-center bg-danger-subtle text-danger rounded-circle mb-3 shadow-sm" style="width: 90px; height: 90px;">
+                                            <i class="fas fa-exclamation-circle fa-4x animate__animated animate__pulse animate__infinite"></i>
+                                        </div>
+                                        <h2 class="fw-bold text-dark mb-1">Propuesta Declinada</h2>
+                                        ${cursoNombre ? `<span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill small fw-bold mt-2 shadow-sm">${cursoNombre}</span>` : ''}
+                                    </div>
 
-                            <!-- Caja de observación estilo "Feedback Card" -->
-                            <div class="feedback-card text-start p-4 mb-4 rounded-4 position-relative" style="background: #fffcfc; border: 1px solid #ffebeb; box-shadow: 0 10px 30px rgba(220, 53, 69, 0.05);">
-                                <div class="position-absolute top-0 end-0 p-3 opacity-10">
-                                  
-                                </div>
-                                <h6 class="text-danger fw-bold text-uppercase small mb-3 letter-spacing-1">
-                                    <i></i> Observaciones de Coordinación
-                                </h6>
-                                <div class="observation-text text-secondary" style="font-size: 1.1rem; line-height: 1.7; min-height: 60px;">
-                                    ${motivo || 'El curso no cumple con los requisitos actuales del programa. Por favor, revise el contenido detalladamente.'}
-                                </div>
-                            </div>
+                                    <!-- Caja de observación estilo "Feedback Card" -->
+                                    <div class="feedback-card text-start p-4 mb-4 rounded-4 position-relative" style="background: #fffcfc; border: 1px solid #ffebeb; box-shadow: 0 10px 30px rgba(220, 53, 69, 0.05);">
+                                        <div class="position-absolute top-0 end-0 p-3 opacity-10">
 
-                            <!-- Mensaje de acción -->
-                            <div class="d-flex align-items-center justify-content-center bg-light p-3 rounded-4 mb-2 border border-white shadow-sm">
-                                <div class="me-3 p-2 bg-white rounded-circle">
-                                    <i class="fas fa-lightbulb text-warning"></i>
+                                        </div>
+                                        <h6 class="text-danger fw-bold text-uppercase small mb-3 letter-spacing-1">
+                                            <i></i> Observaciones de Coordinación
+                                        </h6>
+                                        <div class="observation-text text-secondary" style="font-size: 1.1rem; line-height: 1.7; min-height: 60px; max-height: 300px; overflow-y: auto; white-space: pre-wrap;">${motivo || 'El curso no cumple con los requisitos actuales del programa. Por favor, revise el contenido detalladamente.'}</div>
+                                    </div>
+
+                                    <!-- Mensaje de acción -->
+                                    <div class="d-flex align-items-center justify-content-center bg-light p-3 rounded-4 mb-2 border border-white shadow-sm">
+                                        <div class="me-3 p-2 bg-white rounded-circle">
+                                            <i class="fas fa-lightbulb text-warning"></i>
+                                        </div>
+                                        <p class="text-muted small mb-0 text-start">
+                                            Realiza los ajustes solicitados y <strong>vuelve a enviar el curso</strong> desde el botón de edición.
+                                        </p>
+                                    </div>
                                 </div>
-                                <p class="text-muted small mb-0 text-start">
-                                    Realiza los ajustes solicitados y <strong>vuelve a enviar el curso</strong> desde el botón de edición.
-                                </p>
-                            </div>
-                        </div>
-                    `,
+                            `,
                     showCloseButton: true,
                     showConfirmButton: true,
                     confirmButtonText: '<i class="fas fa-check-circle me-2"></i> Entendido, corregiré el curso',
@@ -440,39 +292,39 @@
                 Swal.fire({
                     title: '<span class="fw-bold">Datos de Contacto</span>',
                     html: `
-                        <div class="text-center mb-4">
-                            <div class="avatar-lg mb-3 mx-auto">
-                                <img src="{{ asset('assets/img/avatar.png') }}" alt="Profesor" class="rounded-circle img-thumbnail" style="width: 100px; height: 100px;">
-                            </div>
-                            <h4 class="text-primary mb-1">${nombre}</h4>
-                            <p class="text-muted">Instructor del Curso</p>
-                        </div>
-                        <div class="card border-0 bg-light shadow-sm">
-                            <div class="card-body text-start p-4">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-white p-2 rounded-circle shadow-sm me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-envelope text-primary"></i>
+                                <div class="text-center mb-4">
+                                    <div class="avatar-lg mb-3 mx-auto">
+                                        <img src="{{ asset('assets/img/avatar.png') }}" alt="Profesor" class="rounded-circle img-thumbnail" style="width: 100px; height: 100px;">
                                     </div>
-                                    <div>
-                                        <small class="text-muted d-block">Correo Electrónico</small>
-                                        <span class="fw-bold text-dark">${email}</span>
-                                    </div>
+                                    <h4 class="text-primary mb-1">${nombre}</h4>
+                                    <p class="text-muted">Instructor del Curso</p>
                                 </div>
-                                <div class="d-flex align-items-center">
-                                    <div class="bg-white p-2 rounded-circle shadow-sm me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-phone text-success"></i>
+                                <div class="card border-0 bg-light shadow-sm">
+                                    <div class="card-body text-start p-4">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="bg-white p-2 rounded-circle shadow-sm me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-envelope text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <small class="text-muted d-block">Correo Electrónico</small>
+                                                <span class="fw-bold text-dark">${email}</span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-white p-2 rounded-circle shadow-sm me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-phone text-success"></i>
+                                            </div>
+                                            <div>
+                                                <small class="text-muted d-block">Teléfono / WhatsApp</small>
+                                                <span class="fw-bold text-dark">${telefono}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <small class="text-muted d-block">Teléfono / WhatsApp</small>
-                                        <span class="fw-bold text-dark">${telefono}</span>
-                                    </div>
+                                    <p class="text-muted small mt-3">
+                                        <i class="fas fa-info-circle me-1"></i> Por favor, contacta al profesor solo en horarios administrativos.
+                                    </p>
                                 </div>
-                            </div>
-                        </div>
-                        <p class="text-muted small mt-3">
-                            <i class="fas fa-info-circle me-1"></i> Por favor, contacta al profesor solo en horarios administrativos.
-                        </p>
-                    `,
+                            `,
                     showCloseButton: true,
                     confirmButtonText: 'Cerrar',
                     confirmButtonColor: '#5e72e4',
@@ -598,6 +450,57 @@
                                 icon: 'success',
                                 title: '¡Finalizado el curso!',
                                 text: 'El curso ha sido finalizado exitosamente.',
+                                showConfirmButton: false,
+                                timer: 5000
+                            }).then(() => {
+                                // Recargar la página para actualizar la vista
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: data.message || 'Ocurrió un error al actualizar el estado del curso',
+                                confirmButtonText: 'Entendido'
+                            });
+                            btn.disabled = false;
+                            btn.innerHTML = originalText;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Ocurrió un error al procesar la solicitud',
+                            confirmButtonText: 'Entendido'
+                        });
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                    });
+
+            }
+            function CerrarCurso(idCurso) {
+
+                fetch('{{ route("taller.cursos.updateStatus", ["curso" => $curso->id_curso]) }}', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id_estado: 9 // El ID del estado al que quieres cambiar
+                    })
+
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Curso cerrado!',
+                                text: 'El curso ha sido cerrado exitosamente.',
                                 showConfirmButton: false,
                                 timer: 5000
                             }).then(() => {
@@ -968,13 +871,22 @@
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Ocurrió un error al procesar tu solicitud',
-                            confirmButtonText: 'Entendido'
-                        });
+                        if (error.status === 403) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'El curso ya ha iniciado, no se puede gestionar el cupo.',
+                                confirmButtonText: 'Entendido'
+                            });
+                        } else {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Ocurrió un error al procesar tu solicitud',
+                                confirmButtonText: 'Entendido'
+                            });
+                        }
                         btn.disabled = false;
                         btn.innerHTML = originalText;
                     });
