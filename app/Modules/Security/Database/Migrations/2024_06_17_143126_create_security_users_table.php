@@ -16,11 +16,11 @@ return new class extends Migration
        Schema::create('security_users', function (Blueprint $table) {
             $table->id(); // id int [pk, increment]
             $table->string('username', 300)->unique()->notNullable(); // username varchar(300) unique not null
+            $table->string('email', 300)->unique()->notNullable(); // username varchar(300) unique not null
             $table->string('password'); // password varchar not null
             $table->boolean('change_password')->default(false)->notNullable();
             $table->string('token', 50)->default('')->notNullable();
             $table->timestamp('date_change_password')->nullable();
-            $table->unsignedBigInteger('id_persona')->nullable(); // id_persona bigint not null (foreign key)
             $table->timestamp('register_date')->notNullable();
             $table->unsignedBigInteger('active')->default(0);
             $table->string('ip', 45)->notNullable(); // ip varchar(45)        
@@ -29,8 +29,9 @@ return new class extends Migration
 
         DB::table('security_users')->insert([
             [
-                'username' => 'lvgsadm@gmail.com',
-                'password' => Hash::make('12345678'),   
+                'username' => 'lvgs',
+                'email' => 'lvgsadm@gmail.com',
+                'password' => Hash::make('123'),   
                 'change_password' => false,                
                 'id' => 1,
                 'ip' => '127.0.0.1',

@@ -21,9 +21,10 @@
                         <thead>
                             <tr>
                                 <th>{{__('ID')}}</th>
-                                <th>{{__('username')}}</th>
-                                <th>{{__('password')}}</th>
-                                <th>{{__('Profile')}}</th>
+                                <th>{{__('user_name')}}</th>
+                                <th>{{__('email')}}</th>
+                                {{-- <th>{{__('password')}}</th> 
+                                <th>{{__('Profile')}}</th> --}}
                                 <th>{{__('Actions')}}</th>
 
                             </tr>
@@ -77,9 +78,10 @@
             },
             columns: [
                 {data: 'DT_RowIndex'},
-                {data: 'username'},
-                {data: 'password'},
-                {data: 'get_perfiles'},
+                {data: 'username'},                
+                {data: 'email'},
+               //{data: 'password'},
+               // {data: 'get_perfiles'},
                 {data: 'action'},
             ],
             language: {

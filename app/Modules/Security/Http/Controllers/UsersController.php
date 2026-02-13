@@ -30,7 +30,7 @@ class UsersController extends Controller {
                         ->Where('active', '0')
                         ->orderBy("id", "desc")
                         //->with('getProfile')
-                        ->with('getPerfiles')
+                   //     ->with('getPerfiles') DEBO AJSUTAR A UN ARRAY DE PERFILES
                         ->get();
             } else {
                 $cond = $request->search;

@@ -14,7 +14,8 @@ return new class extends Migration
     public function up()
     {
          Schema::create('comun.personas', function (Blueprint $table) {
-            $table->id('id_persona');
+            $table->id('id_persona');            
+            $table->foreignId('user_id')->constrained('security_users')->onDelete('cascade');
             $table->foreignId('tipo_dni')->constrained('public.security_document_types');
             $table->string('dni')->nullable();
             $table->string('pasaporte')->nullable();
@@ -39,6 +40,7 @@ return new class extends Migration
         });
 
         DB::table('comun.personas')->insert([
+            'user_id' => 1,
             'tipo_dni' => 1,
             'dni' => '14587567',
             'genero' => 2,

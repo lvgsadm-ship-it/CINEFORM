@@ -1,17 +1,17 @@
 @extends('layouts.kaiadmin-select-profile')
-
 @section('content')
 <body>
     <h3>Selecciona tu perfil</h3>
     <div class="row">
-        @foreach($perfiles as $perfil)
-            <button>{{ $perfil->name }}</button>
+        @foreach ($perfiles as $perfil)
+            <a href="{{ route('usuario.set_perfil', ['id' => $perfil->id]) }}" class="btn btn-primary btn-block btn-lg">
+                {{ __($perfil->name) }}
+            </a>
         @endforeach
+       {{--  @foreach($perfiles as $perfil)
+            <button>{{ $perfil->name }}</button>
+        @endforeach --}}
     </div>
-
-    <style>
-        /* Estilos que afectan solo esta vista */
-    </style>
 </body>
 <style>
     input[type=text]:focus,  input[type=password]:focus{

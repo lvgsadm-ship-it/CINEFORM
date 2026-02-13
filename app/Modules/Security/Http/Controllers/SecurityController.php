@@ -492,7 +492,7 @@ class SecurityController extends Controller {
             // $type = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username'; //Detecta el tipo de login: si el username es un emal válido, usa el campo email para buscar usuario, si no el campo username.
             $type = 'username'; 
             $user = User::where($type, strtolower($request->username))
-                    //->orWhere('email', strtolower($request->username))
+                    ->orWhere('email', strtolower($request->username))
                     ->first(); //Busca en la base de datos el usuario cuyo campo (email o username) coincide con el valor recibido, en minúscula.
 
             //dd($user);
@@ -514,8 +514,9 @@ class SecurityController extends Controller {
                             'date_change_password' => null,
                         ]);//Si el login es exitoso, actualiza el usuario logueado para quitar flags temporales relacionados con el cambio de contraseña y limpiar tokens.
 
-                        $perfiles = Auth::user()->getProfiles();
-                        dd($perfiles);
+                        //$perfiles = Auth::user()->getProfiles();
+                        $perfiles = Auth::user()->getProfiles(); //$user->profiles; // Ya gracias a la relación
+                        //dd($perfiles);
                         if ($perfiles->count() <= 1) {
                             // Obtener el primer perfil si existe, usando método first()
                             $perfil = $perfiles->first();
@@ -530,7 +531,8 @@ class SecurityController extends Controller {
 
                             //dd("Mostrar seleccion");
                             //return to_route('registro.home');
-                            return view('registro.home', compact('perfiles'));
+                            //return view('registro.home', compact('perfiles'));
+                            return view('Registro::personas.home', compact('perfiles'));
                         }
 
                         if (Auth::user()->getModules()->count() == 1) {

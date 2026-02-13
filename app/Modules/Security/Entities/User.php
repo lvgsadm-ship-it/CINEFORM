@@ -24,6 +24,7 @@ class User extends Authenticatable {
     protected $table = "security_users";
     protected $fillable = [
         'username',
+        'email',
         'password',
     ];
     public $timestamps = false;
@@ -74,7 +75,7 @@ class User extends Authenticatable {
         return $this->belongsTo(DocumentType::class, 'document_type_id');
     }
 
-    public function getPerfiles()
+  /*   public function getPerfiles()
     {
         return $this->belongsToMany(
             \Modules\Security\Entities\Profile::class,
@@ -84,11 +85,29 @@ class User extends Authenticatable {
         )
         ->select('security_profiles.*')
         ->withPivot('id_rol','status', 'fecha_aprobacion', 'aprobado_por', 'creado_por', 'creado_en', 'actualizado_por', 'actualizado_en');        
+    } 
+    
+    public function getPerfilesArray()
+    {
+        $perfiles = $this->getPerfiles()->get(); // obtiene los perfiles relacionados
+        $resultado = [];
+    
+        foreach ($perfiles as $perfil) {
+            unset($resultado[$perfil]);
+        }
+    
+        return $resultado;
     }
+        */
 
     public function getProfiles()
     {
         return $this->hasMany(ProfileUser::class, 'id_users');  
+    }
+    
+    public function getPersona()
+    {
+        return $this->hasOne(\Modules\Registro\Entities\Personas::class, 'user_id','id'); // Ajusta foreign key si es necesario
     }
     
     public function getModules() {
@@ -147,18 +166,6 @@ class User extends Authenticatable {
             }
         }
         return $Menu;
-    }
-
-    public function getPerfilesArray()
-    {
-        $perfiles = $this->getPerfiles()->get(); // obtiene los perfiles relacionados
-        $resultado = [];
-    
-        foreach ($perfiles as $perfil) {
-            unset($resultado[$perfil]);
-        }
-    
-        return $resultado;
     }
 
     public function getShortNameAttribute() {

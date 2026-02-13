@@ -40,6 +40,10 @@ class Personas extends Model
         return \Modules\Registro\Database\factories\PersonasFactory::new();
     } */
 /***********************************************************************************************************/
+    public function user() //relación inversa
+    {
+        return $this->belongsTo(\Modules\Security\Entities\User::class);
+    }
       public function getCellPhoneAttribute() {
         return $this->getCountry->dial_code . ' ' . $this->phone;
     }
