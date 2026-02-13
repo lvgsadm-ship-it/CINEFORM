@@ -1,5 +1,6 @@
 {
     "Security": true,
     "Comun": true,
-    "Taller": true
+    "Taller": true,
+    "Participante": true
 }

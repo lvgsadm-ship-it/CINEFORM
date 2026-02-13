@@ -1,4 +1,5 @@
 php artisan module:make <module-name> # Crea un nuevo módulo
+php artisan module:delete <module-name> # Elimina un módulo
 php artisan module:make-controller <controller-name> Invoice
 php artisan module:make-model <model-name> Invoice -m # crea el modelo y una migración
 php artisan module:make-rule <rule-name> Invoice
