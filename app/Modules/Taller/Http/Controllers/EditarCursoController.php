@@ -231,28 +231,45 @@ class EditarCursoController extends BaseController
             }
 
             // Validación de campos del curso
-            $validatedData = $request->validate([
-                'nombre' => 'required|string|max:255',
-                'id_modalidad' => 'required|exists:modalidad,id_modalidad',
-                'descripcion' => 'nullable|string',
-                'duracion' => 'nullable|integer|min:1',
-                'horas' => 'nullable|integer|min:1',
-                'cantidad_cupos' => 'nullable|integer|min:0',
-                'fecha_inicio' => 'nullable|date',
-                'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
-                'status' => 'boolean',
-                'contenidos' => 'nullable|array',
-                'contenidos.*.id' => 'nullable|integer',
-                'contenidos.*.titulo' => 'required|string|max:255',
-                // 'contenidos.*.tipo_contenido' => 'required|in:video,documento,enlace',
-                'contenidos.*.url_contenido' => 'required|url',
-                'contenidos.*.descripcion' => 'nullable|string',
-                'contenidos.*.descripcion_breve' => 'nullable|string',
-                'contenidos.*.orden' => 'nullable|integer|min:0',
-                'contenidos.*.es_evaluacion' => 'nullable|boolean',
-                'contenidos.*.id_tipo_evaluacion' => 'nullable|exists:tipo_evaluaciones,id_tipo_evaluacion',
-                'contenidos.*.ponderacion' => 'nullable|numeric|min:0|max:100'
-            ]);
+            if ($isCoordinator) {
+                $validatedData = $request->validate([
+                    'nombre' => 'required|string|max:255',
+                    'id_modalidad' => 'required|exists:modalidad,id_modalidad',
+                    'descripcion' => 'nullable|string',
+                    'duracion' => 'nullable|integer|min:1',
+                    'horas' => 'nullable|integer|min:1',
+                    'cantidad_cupos' => 'nullable|integer|min:0',
+                    'fecha_inicio' => 'nullable|date',
+                    'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
+                    'lugar' => 'nullable|string|max:255',
+                    'id_tipo_evaluacion' => 'nullable|exists:tipo_evaluacion,id_tipo_evaluacion',
+                    'id_estado' => 'nullable|exists:estado_curso,id_estado',
+                    'id_persona' => 'nullable|exists:personal_data,id_persona',
+                    'id_institucion' => 'nullable|exists:institucion,id_institucion',
+                    'id_area' => 'nullable|exists:area,id_area',
+                    'id_categoria' => 'nullable|exists:categoria,id_categoria',
+                    'id_subcategoria' => 'nullable|exists:subcategoria,id_subcategoria',
+                    'id_modalidad_inscripcion' => 'nullable|exists:modalidad_inscripcion,id_modalidad_inscripcion',
+                    'id_modalidad_evaluacion' => 'nullable|exists:modalidad_evaluacion,id_modalidad_evaluacion',
+                    'id_modalidad_evaluacion' => 'nullable|exists:modalidad_evaluacion,id_modalidad_evaluacion',
+                ]);
+            } else {
+                $validatedData = $request->validate([
+
+                    'descripcion' => 'nullable|string',
+                    'contenidos' => 'nullable|array',
+                    'contenidos.*.id' => 'nullable|integer',
+                    'contenidos.*.titulo' => 'required|string|max:255',
+                    // 'contenidos.*.tipo_contenido' => 'required|in:video,documento,enlace',
+                    'contenidos.*.url_contenido' => 'required|url',
+                    'contenidos.*.descripcion' => 'nullable|string',
+                    'contenidos.*.descripcion_breve' => 'nullable|string',
+                    'contenidos.*.orden' => 'nullable|integer|min:0',
+                    'contenidos.*.es_evaluacion' => 'nullable|boolean',
+                    'contenidos.*.id_tipo_evaluacion' => 'nullable|exists:tipo_evaluaciones,id_tipo_evaluacion',
+                    'contenidos.*.ponderacion' => 'nullable|numeric|min:0|max:100'
+                ]);
+            }
 
             DB::beginTransaction();
 
@@ -277,19 +294,33 @@ class EditarCursoController extends BaseController
                         ->withErrors(['error' => 'La suma de las ponderaciones de las evaluaciones es menor al 100%. Total actual: ' . $totalPonderacion . '%']);
                 }
             }
+            if ($isCoordinator) {
+                $curso->update([
+                    'nombre' => $validatedData['nombre'],
+                    'id_modalidad' => $validatedData['id_modalidad'],
+                    'descripcion' => $validatedData['descripcion'] ?? null,
+                    'duracion' => $validatedData['duracion'] ?? null,
+                    'horas' => $validatedData['horas'] ?? null,
+                    'cantidad_cupos' => $validatedData['cantidad_cupos'] ?? null,
+                    'fecha_inicio' => $validatedData['fecha_inicio'] ?? null,
+                    'fecha_fin' => $validatedData['fecha_fin'] ?? null,
+                    'lugar' => $validatedData['lugar'] ?? null,
+                    'id_tipo_evaluacion' => $validatedData['id_tipo_evaluacion'] ?? null,
+                    'id_estado' => $validatedData['id_estado'] ?? null,
+                    'id_persona' => $validatedData['id_persona'] ?? null,
+                    'id_institucion' => $validatedData['id_institucion'] ?? null,
+                    'id_area' => $validatedData['id_area'] ?? null,
+                    'id_categoria' => $validatedData['id_categoria'] ?? null,
+                    'id_subcategoria' => $validatedData['id_subcategoria'] ?? null,
+                    'id_modalidad_inscripcion' => $validatedData['id_modalidad_inscripcion'] ?? null,
+                    'id_modalidad_evaluacion' => $validatedData['id_modalidad_evaluacion'] ?? null,
+                ]);
+            } else {
+                $curso->update([
+                    'descripcion' => $validatedData['descripcion'] ?? null,
+                ]);
+            }
 
-            // Actualizar el curso
-            $curso->update([
-                'nombre' => $validatedData['nombre'],
-                'id_modalidad' => $validatedData['id_modalidad'],
-                'descripcion' => $validatedData['descripcion'] ?? null,
-                'duracion' => $validatedData['duracion'] ?? null,
-                'horas' => $validatedData['horas'] ?? null,
-                'cantidad_cupos' => $validatedData['cantidad_cupos'] ?? null,
-                'fecha_inicio' => $validatedData['fecha_inicio'] ?? null,
-                'fecha_fin' => $validatedData['fecha_fin'] ?? null,
-                'status' => $request->has('status') ? 1 : 0,
-            ]);
 
             Log::info('Curso actualizado', ['curso_id' => $curso->id_curso]);
 

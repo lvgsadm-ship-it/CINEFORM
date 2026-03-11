@@ -114,7 +114,7 @@ Incluye una barra lateral de navegación entre lecciones y un área principal pa
 
                                     if (isset($esFacilitador) && $esFacilitador) {
                                         $btnClass = 'btn-primary text-white';
-                                        $btnIcon = 'fa-check-double';
+                                         $btnIcon = 'fa-check-double';
                                         $btnText = 'Calificar ' . $tipoNombre;
                                         $url = route('taller.calificaciones.index', ['curso' => $curso->id_curso, 'contenido' => $contenidoActual->id_contenido_curso]);
                                     } else {

@@ -159,23 +159,6 @@
     @endpush
 
     <style>
-        /* Eliminar el fondo amarillo del autocompletado del navegador */
-        input:-webkit-autofill,
-        input:-webkit-autofill:hover,
-        input:-webkit-autofill:focus,
-        input:-webkit-autofill:active {
-            -webkit-box-shadow: 0 0 0 30px white inset !important;
-            box-shadow: 0 0 0 30px white inset !important;
-            -webkit-text-fill-color: #495057 !important;
-        }
-
-        /* Para navegadores que no son Webkit */
-        input:-moz-autofill,
-        input:-moz-autofill-preview {
-            background-color: white !important;
-            color: #495057 !important;
-        }
-
         .hover-shadow:hover {
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
             transform: translateY(-3px);
