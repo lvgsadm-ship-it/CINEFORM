@@ -15,11 +15,10 @@ return new class extends Migration {
             $table->id();
             $table->string('name', 150);
             $table->text('description');
-            $table->boolean('active');
-            
-            $table->unsignedBigInteger('user_id');
+            $table->boolean('active');            
+            $table->unsignedBigInteger('user_id');// Creado por user_id bigint [not null]
             $table->timestamp('register_date');
-            $table->ipAddress('ip');
+             $table->string('ip', 45); // ip varchar(45) [not null]
         });
 
         DB::table('security_profiles')->insert([

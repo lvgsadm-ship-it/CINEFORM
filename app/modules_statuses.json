@@ -1,5 +1,10 @@
 {
     "Security": true,
+<<<<<<< HEAD
     "Comun": true,
     "Taller": true
+=======
+    "Registro": true,
+    "Parametros": true
+>>>>>>> origin/feature/develop_lg
 }

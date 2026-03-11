@@ -331,7 +331,7 @@ class SecurityController extends Controller {
                             $User->country_id = $this->PAIS_VENEZUELA;
                             $User->profile_id = $this->PROFILE_TRAMITES;
 
-                            $User->active = true;
+                            $User->active = 0;
                             $User->user_id = 1;
                             $User->register_date = now();
                             $User->ip = $request->ip();
@@ -461,70 +461,110 @@ class SecurityController extends Controller {
         }
     }
 
-    public function login(Request $request) {
+    public function login(Request $request) { //Define el método login, que recibe como parámetro un objeto $request, que contiene los datos enviados por el usuario.
 
         if (Auth::check() == true) {
             session()->flush();
             Auth::logout();
-        }
+        } //Si el usuario está autenticado (ya inició sesión), se limpia toda la sesión y se ejecuta el cierre de sesión para asegurar un estado limpio antes de continuar.
 
         if (\Request::ajax()) {
             exit;
-        }
+        } // Si la petición es AJAX, se termina la ejecución inmediatamente, probablemente para prevenir accesos no autorizados por AJAX.
 
         if (\Request::isMethod('get')) {
             //Config::set('app.javascripts', ['5', '6']);
             //dd(config('app.javascripts'))
             //return view('login');
             //return view('welcome');
-            return view('security::users.login');
-        } else {
+            return view('security::users.login'); //Si la petición es GET, muestra la vista del formulario de login desde el módulo security, y no realiza nada más.
+        } else { //Si es otro tipo de petición (usualmente POST), continúa con la lógica de autenticación.
 
             $request->validate([
                 'username' => 'required',
                 'password' => 'required',
                 'captcha' => 'required',
-            ]);
+            ]);//Valida que los campos username, password y captcha estén presentes en el request, caso contrario lanza error.
             if (Lower(session()->get('SET_CAPTCHA')) !== Lower($request->captcha)) {
                 return back()->withErrors(['error-message' => __('Captcha does not match')])->withInput();
-            }
+            } //Compara el captcha almacenado en sesión (convertido a minúsculas) con el captcha enviado. Si no coinciden, retorna con error y llena el formulario con los datos previamente ingresados.
 
-            $type = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-
+            // $type = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username'; //Detecta el tipo de login: si el username es un emal válido, usa el campo email para buscar usuario, si no el campo username.
+            $type = 'username'; 
             $user = User::where($type, strtolower($request->username))
-                    //->orWhere('email', strtolower($request->username))
-                    ->first();
+                    ->orWhere('email', strtolower($request->username))
+                    ->first(); //Busca en la base de datos el usuario cuyo campo (email o username) coincide con el valor recibido, en minúscula.
 
             //dd($user);
-            if ($user == null) {
+            if ($user == null) {//Si no encuentra usuario, retorna con mensaje de error. Si sí, continúa.
+
+
                 return back()->withErrors(['error-message' => __('Wrong Data')]);
             } else {
-                if ($user->active == true) {
+                if ($user->active == 0) {//Verifica que el usuario esté activo. Si no lo está, retorna error. Si está activo, construye el arreglo de credenciales para autenticación.
                     $userdata = array(
                         $type => strtolower($request->username),
                         'password' => $request->password
                     );
-                    if (Auth::attempt($userdata)) {
-
+                    if (Auth::attempt($userdata)) {//Intenta autenticar (login) con las credenciales proporcionadas.
+                        
                         User::whereId(Auth::user()->id)->update([
                             'change_password' => false,
                             'token' => '',
                             'date_change_password' => null,
-                        ]);
+                        ]);//Si el login es exitoso, actualiza el usuario logueado para quitar flags temporales relacionados con el cambio de contraseña y limpiar tokens.
 
-                        if (Auth::user()->getModules()->count() == 1) {
-                            session()->put('MODULE', Auth::user()->getModules()[0]->id);
+                        //$perfiles = Auth::user()->getProfiles();
+                        $perfiles = Auth::user()->getProfiles(); //$user->profiles; // Ya gracias a la relación
+                        //dd($perfiles);
+                        if ($perfiles->count() <= 1) {
+                            // Obtener el primer perfil si existe, usando método first()
+                            $perfil = $perfiles->first();
+                        
+                            if ($perfil) {
+                                session()->put('profile_id', $perfil->id_rol);
+                            }
+                        } else {
+                            /* Mostrar selección porque hay más de un perfil
+                             *Crear vista donde se muestran los perfiles para que el usuario seleccione un perfil
+                             */
+
+                            //dd("Mostrar seleccion");
+                            //return to_route('registro.home');
+                            //return view('registro.home', compact('perfiles'));
+                            return view('Registro::personas.home', compact('perfiles'));
                         }
 
-                        return to_route('home');
+                        if (Auth::user()->getModules()->count() == 1) {
+                           session()->put('MODULE', Auth::user()->getModules()[0]->id);
+                        }///Si el usuario tiene asignado un solo módulo, guarda ese módulo en sesión.   
+
+                        return to_route('home'); //Redirige a la ruta nombrada home (dashboard o página principal).
                     } else {
-                        return back()->withErrors(['error-message' => __('Wrong Data')])->withInput();
+                        return back()->withErrors(['error-message' => __('Wrong Data')])->withInput(); //Si el login falla, muestra error y rellena el formulario con datos ingresados.
                     }
                 } else {
-                    return back()->withErrors(['error-message' => __('User blocked')])->withInput();
+                    return back()->withErrors(['error-message' => __('User blocked')])->withInput(); //Si el usuario no está activo (bloqueado), muestra error específico.
                 }
             }
         }
+    }
+
+    public function seleccionarPerfil($id_rol)
+    {
+        $user = auth()->user();
+
+        // Guarda el perfil seleccionado en sesión con la clave 'profile_id'
+        session()->put('profile_id', $id_rol);   
+        
+       // dd(session()->get('profile_id'));
+
+        // Aquí estableces la lógica que mencionas
+        if ($user->getModules()->count() == 1) {
+            session()->put('MODULE', $user->getModules()[0]->id);
+        }
+        // Rediriges a la página principal o la que corresponda
+        return to_route('home');
     }
 
     public function home() {
@@ -532,9 +572,12 @@ class SecurityController extends Controller {
         return view('security::users.home');
     }
 
+     public function registroHome() {
+        //dd(Auth::user()->getMenu());
+        return view('registro::personas.home');
+    }
+
     public function set_module($id) {
-
-
         session()->put('MODULE', Encryptor::decrypt($id));
         return to_route('home');
     }

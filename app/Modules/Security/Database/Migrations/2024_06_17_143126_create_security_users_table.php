@@ -13,160 +13,28 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('security_users', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('document_type_id');
-            $table->string('document', 20)->nullable();
-            $table->string('full_name', 200)->nullable();
-            ;
-            $table->string('email', 150)->unique();
-            $table->string('username', 50)->unique();
-            $table->string('password');
-            $table->string('phone', 20)->nullable();
-            $table->unsignedBigInteger('country_id')->nullable();
-
-            $table->unsignedBigInteger('profile_id');
-            $table->boolean('active')->default(true);
-
-            $table->boolean('change_password')->default(false);
-            $table->string('token', 50)->default('');
+            $table->id(); // id int [pk, increment]
+            $table->string('username', 300)->unique()->notNullable(); // username varchar(300) unique not null
+            $table->string('email', 300)->unique()->notNullable(); // username varchar(300) unique not null
+            $table->string('password'); // password varchar not null
+            $table->boolean('change_password')->default(false)->notNullable();
+            $table->string('token', 50)->default('')->notNullable();
             $table->timestamp('date_change_password')->nullable();
-
-
-
-            $table->unsignedBigInteger('user_id')->nullable();
-
-            $table->timestamp('register_date')->default(now());
-            $table->ipAddress('ip');
-
-
-
-            $table->foreign('document_type_id')->references('id')->on('security_document_types');
-            $table->foreign('profile_id')->references('id')->on('security_profiles');
-            $table->foreign('country_id')->references('id')->on('security_countries');
+            $table->timestamp('register_date')->notNullable();
+            $table->unsignedBigInteger('active')->default(0);
+            $table->string('ip', 45)->notNullable(); // ip varchar(45)        
 
         });
 
         DB::table('security_users')->insert([
             [
-                'document' => '99999999',
-                'document_type_id' => 1,
-                'full_name' => 'admin',
-                'email' => 'miguelrivero52@gmail.com',
-                'username' => 'admin',
-                'password' => Hash::make('12345678'),
-                'phone' => '+58 412-7777777',
-
-
-                'profile_id' => 1,
-                'country_id' => 238,
-                'active' => true,
+                'username' => 'lvgs',
+                'email' => 'lvgsadm@gmail.com',
+                'password' => Hash::make('123'),
                 'change_password' => false,
-
-                'user_id' => 1,
+                'id' => 1,
                 'ip' => '127.0.0.1',
                 'register_date' => now()
-
-            ],
-            [
-                'document' => '30098588',
-                'document_type_id' => 1,
-                'full_name' => 'Cristhofer Luis Leon Gonzalez',
-                'email' => 'crisclas@gmail.com',
-                'username' => 'Facilitador',
-                'password' => Hash::make('12345678'),
-                'phone' => '+58 412-8888888',
-
-
-                'profile_id' => 2,
-                'country_id' => 238,
-                'active' => true,
-                'change_password' => false,
-
-                'user_id' => 2,
-                'ip' => '127.0.0.1',
-                'register_date' => now()
-
-            ],
-
-            [
-                'document' => '29310488',
-                'document_type_id' => 1,
-                'full_name' => 'Zoe Anais Quintero Medina',
-                'email' => 'Zquinte@gmail.com',
-                'username' => 'Participante',
-                'password' => Hash::make('12345678'),
-                'phone' => '+58 412-9999999',
-
-
-                'profile_id' => 3,
-                'country_id' => 238,
-                'active' => true,
-                'change_password' => false,
-
-                'user_id' => 3,
-                'ip' => '127.0.0.1',
-                'register_date' => now()
-
-            ],
-            [
-                'document' => '12345679',
-                'document_type_id' => 1,
-                'full_name' => 'Jose Luis Garcia',
-                'email' => 'jluis@gmail.com',
-                'username' => 'Participante2',
-                'password' => Hash::make('12345678'),
-                'phone' => '+58 412-9999999',
-
-
-                'profile_id' => 3,
-                'country_id' => 238,
-                'active' => true,
-                'change_password' => false,
-
-                'user_id' => 3,
-                'ip' => '127.0.0.1',
-                'register_date' => now()
-
-            ],
-            [
-                'document' => '12345680',
-                'document_type_id' => 1,
-                'full_name' => 'Maria Julian leon Gonzales',
-                'email' => 'Mjulian@gmail.com',
-                'username' => 'Participante3',
-                'password' => Hash::make('12345678'),
-                'phone' => '+58 412-9999999',
-
-
-                'profile_id' => 3,
-                'country_id' => 238,
-                'active' => true,
-                'change_password' => false,
-
-                'user_id' => 3,
-                'ip' => '127.0.0.1',
-                'register_date' => now()
-
-            ],
-            [
-                'document' => '12345678',
-                'document_type_id' => 1,
-                'full_name' => 'Pedro Julian Leon Gonzalez',
-                'email' => 'Pjulian@gmail.com',
-                'username' => 'Coordinador',
-                'password' => Hash::make('12345678'),
-                'phone' => '+58 412-9999999',
-
-
-                'profile_id' => 4,
-                'country_id' => 238,
-                'active' => true,
-                'change_password' => false,
-
-                'user_id' => 1,
-                'ip' => '127.0.0.1',
-                'register_date' => now()
-
             ]
         ]);
     }

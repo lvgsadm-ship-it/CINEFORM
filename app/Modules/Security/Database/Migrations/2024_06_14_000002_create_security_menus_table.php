@@ -15,12 +15,12 @@ return new class extends Migration
         Schema::create('security_menus', function (Blueprint $table) {
             $table->id();
             $table->string('name', 50);
-            $table->string('description');
+            $table->string('description', 255);
             $table->string('icon', 50);
             $table->integer('order');
             $table->boolean('active');
             $table->unsignedBigInteger('module_id');
-            $table->foreign('module_id')->references('id')->on('security_modules');
+            $table->foreign('module_id')->references('id')->on('security_modules'); 
         });
 
         DB::table('security_menus')->insert([

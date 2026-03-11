@@ -14,7 +14,7 @@ return new class extends Migration {
     public function up() {
         Schema::create('security_codes', function (Blueprint $table) {
             $table->id();
-            $table->string('email', 50)->unique();
+             $table->string('email', 300)->unique(); // email varchar(300) unique
             $table->string('code');
             $table->timestamp('date');
             $table->boolean('processed')->default(false);

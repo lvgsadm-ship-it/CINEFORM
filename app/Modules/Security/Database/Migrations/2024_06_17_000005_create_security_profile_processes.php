@@ -13,12 +13,11 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('security_profile_processes', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('process_id');
-            $table->unsignedBigInteger('profile_id');
-            $table->string('actions', 200)->nullable();
-
-            $table->foreign('process_id')->references('id')->on('security_processes');
-            $table->foreign('profile_id')->references('id')->on('security_profiles');
+             $table->foreignId('process_id')->constrained('security_processes')->onDelete('cascade');
+            $table->foreignId('profile_id')->constrained('security_profiles')->onDelete('cascade');
+            $table->string('actions', 200)->nullable();            
+           /*  $table->foreign('process_id')->references('id')->on('security_processes');
+            $table->foreign('profile_id')->references('id')->on('security_profiles'); */
         });
 
         $sql = "

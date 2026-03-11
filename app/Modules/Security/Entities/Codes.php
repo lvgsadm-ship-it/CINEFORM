@@ -14,8 +14,8 @@ class Codes extends Model
      protected $table = "security_codes";
     public $timestamps = false;
     
-    protected static function newFactory()
+    /* protected static function newFactory()
     {
         return \Modules\Security\Database\factories\CodesFactory::new();
-    }
+    } */
 }

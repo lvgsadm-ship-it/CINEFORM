@@ -20,6 +20,7 @@
         </div>
         <!-- End Logo Header -->
     </div>
+
     <div class="sidebar-wrapper scrollbar scrollbar-inner">
         <div class="sidebar-content">
             <ul class="nav nav-secondary">
@@ -29,6 +30,7 @@
                     </span>
                     <h4 class="text-section text-center">MENU</h4>
                 </li>
+<<<<<<< HEAD
 
                 @foreach(Auth::user()->captureMenu() as $key => $value)
                     <li class="nav-item">
@@ -52,6 +54,30 @@
                     </li>
                 @endforeach
 
+=======
+                
+                @foreach(Auth::user()->captureMenu() as $key =>$value)
+               {{--  {{ dd($value) }} --}}
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#menu{{$key}}">                     
+                        <p>{{__($value['name'])}}</p>
+                        <span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="menu{{$key}}">
+                        <ul class="nav nav-collapse">
+                            @foreach($value['get_process'] as $value2)                           
+                               <i class="{{$value['icon']}}"></i>                               
+                            <li>
+                                <a href="{{route($value2['route'])}}">
+                                    <span class="sub-item">{{__($value2['name'])}}</span>
+                                </a>
+                            </li>
+                            @endforeach                            
+                        </ul>
+                    </div>
+                </li>
+                @endforeach                
+>>>>>>> origin/feature/develop_lg
             </ul>
         </div>
     </div>

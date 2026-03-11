@@ -32,7 +32,7 @@
                     <h1>{{__('Personal Data')}}</h1>
 
                     <div class="form-floating form-floating-custom mb-2">
-                        {{html()->select("document_type_id", $typeDoc, $user->getDocumentType->crypt_id )
+                        {{html()->select("document_type_id", $typeDoc, $user->getDocumentType?->crypt_id ?? '' )
                                                         ->class('form-select')
                                                         ->placeholder(__("Select"))
                                                         ->required(true)
@@ -85,17 +85,17 @@
                     <label id="phone-error" class="error" for="phone">{{__('This field is required')}}</label>
                     @enderror
 
-                    <div class="form-floating form-floating-custom mb-2">
+                   {{--  <div class="form-floating form-floating-custom mb-2">
                         {{html()->select("profile_id", $profiles, $user->getProfile->crypt_id )
                                                         ->class('form-select')
                                                         ->placeholder(__("Select"))
                                                         ->required(true)
                         }}
                         <label for="profile_id">{{__('Profile')}}</label>
-                    </div>
+                    </div> 
                     @error('profile_id')
                     <label id="profile_id-error" class="error" for="profile_id">{{__('This field is required')}}</label>
-                    @enderror
+                    @enderror --}}
                     <div class="form-floating form-floating-custom mb-2">
                         {{
                             html()->input("text", 'email', $user->email )

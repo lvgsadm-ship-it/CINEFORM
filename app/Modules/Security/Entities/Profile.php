@@ -21,8 +21,4 @@ class Profile extends Model {
         return $this->belongsToMany(Process::class, 'security_profile_processes')
                         ->withPivot('process_id', 'profile_id', 'actions');
     }
-    
-    
-    
-    
 }
