@@ -132,6 +132,7 @@
                         <li>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="{{route('update_profile')}}">{{__('Account Setting')}}</a>
+                            <a class="dropdown-item" href="{{route('usuario.cambiar_perfil')}}">{{__('Switch Profile')}}</a>
                             
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="{{route('logout')}}">{{__('Logout')}}</a>

@@ -15,7 +15,7 @@ return new class extends Migration {
         // 1. Claves foráneas para taller_cursos
         Schema::table('taller_cursos', function (Blueprint $table) {
             $table->foreign('id_modalidad')->references('id_modalidad')->on('modalidad')->onDelete('set null');
-            $table->foreign('id_persona')->references('id')->on('comun_personas')->onDelete('cascade');
+            $table->foreign('id_persona')->references('id_persona')->on('comun.personas')->onDelete('cascade');
         });
 
         // 2. Claves foráneas para taller_contenido_cursos
@@ -27,13 +27,13 @@ return new class extends Migration {
         // 3. Claves foráneas para inscripciones
         Schema::table('inscripciones', function (Blueprint $table) {
             $table->foreign('id_curso')->references('id_curso')->on('taller_cursos')->onDelete('cascade');
-            $table->foreign('id_persona')->references('id')->on('comun_personas')->onDelete('cascade');
+            $table->foreign('id_persona')->references('id_persona')->on('comun.personas')->onDelete('cascade');
         });
 
         // 4. Claves foráneas para taller_calificaciones
         Schema::table('taller_calificaciones', function (Blueprint $table) {
             $table->foreign('id_curso')->references('id_curso')->on('taller_cursos')->onDelete('cascade');
-            $table->foreign('id_persona')->references('id')->on('comun_personas')->onDelete('cascade');
+            $table->foreign('id_persona')->references('id_persona')->on('comun.personas')->onDelete('cascade');
 
             // Nota: id_contenido_curso ya tiene su clave foránea en su propia migración
         });

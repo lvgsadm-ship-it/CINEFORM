@@ -67,7 +67,7 @@ class Curso extends Model
 
     public function persona()
     {
-        return $this->belongsTo(\Modules\Comun\Entities\PersonalData::class, 'id_persona', 'id');
+        return $this->belongsTo(\Modules\Comun\Entities\PersonalData::class, 'id_persona', 'id_persona');
     }
 
     public function modalidad()

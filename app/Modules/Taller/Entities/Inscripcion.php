@@ -50,8 +50,10 @@ class Inscripcion extends Model
         // Al crear una nueva inscripción, actualizar el contador de cupos
         static::created(function ($inscripcion) {
             $curso = $inscripcion->curso;
-            if ($curso && $curso->cantidad_cupos > 0) {
-                $curso->decrement('cantidad_cupos');
+            if ($curso && (int) $curso->cantidad_cupos > 0) {
+                // Se convierte a entero para evitar error de PostgreSQL con columnas varchar
+                $curso->cantidad_cupos = (int) $curso->cantidad_cupos - 1;
+                $curso->save();
             }
         });
 
@@ -59,7 +61,8 @@ class Inscripcion extends Model
         static::deleted(function ($inscripcion) {
             $curso = $inscripcion->curso;
             if ($curso) {
-                $curso->increment('cantidad_cupos');
+                $curso->cantidad_cupos = (int) $curso->cantidad_cupos + 1;
+                $curso->save();
             }
         });
     }

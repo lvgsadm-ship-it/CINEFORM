@@ -103,7 +103,8 @@ Route::prefix('security')->group(function () {
         //Route::get('/usuario/perfil/seleccionar', [Modules\Security\Http\Controllers\SecurityController::class, 'showProfileSelection'])->name('usuario.mostrarPerfilSeleccion');
         Route::get('/usuario/perfil/seleccionar', [Modules\Registro\Http\Controllers\RegistroController::class, 'home'])->name('registro.home');
         //Route::get('/usuario/perfil/seleccionar/{id_rol}', [Modules\Security\Http\Controllers\SecurityController::class, 'seleccionarPerfil'])->name('usuario.seleccionarPerfil');
-        Route::post('/usuario/set_perfil/{id_rol}', [Modules\Security\Http\Controllers\SecurityController::class, 'seleccionarPerfil'])->name('usuario.set_perfil');
+        Route::match(['get', 'post'], '/usuario/set_perfil/{id_rol}', [Modules\Security\Http\Controllers\SecurityController::class, 'seleccionarPerfil'])->name('usuario.set_perfil');
+        Route::get('/usuario/cambiar-perfil', [Modules\Security\Http\Controllers\SecurityController::class, 'showSwitchProfile'])->name('usuario.cambiar_perfil');
 
         Route::get('home', [Modules\Security\Http\Controllers\SecurityController::class, 'home'])->name('home');
         Route::get('logout', [Modules\Security\Http\Controllers\SecurityController::class, 'logout'])->name('logout');

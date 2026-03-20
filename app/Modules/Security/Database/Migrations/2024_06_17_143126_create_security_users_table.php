@@ -35,7 +35,61 @@ return new class extends Migration {
                 'id' => 1,
                 'ip' => '127.0.0.1',
                 'register_date' => now()
-            ]
+            ],
+            [
+                'username' => 'cris',
+                'email' => 'cris@gmail.com',
+                'password' => Hash::make('123'),
+                'change_password' => false,
+                'id' => 2,
+                'ip' => '127.0.0.1',
+                'register_date' => now()
+            ],
+            [
+                'username' => 'zoe',
+                'email' => 'zoe@gmail.com',
+                'password' => Hash::make('123'),
+                'change_password' => false,
+                'id' => 3,
+                'ip' => '127.0.0.1',
+                'register_date' => now()
+            ],
+            [
+                'username' => 'pedro',
+                'email' => 'pedro@gmail.com',
+                'password' => Hash::make('123'),
+                'change_password' => false,
+                'id' => 4,
+                'ip' => '127.0.0.1',
+                'register_date' => now()
+            ],
+            [
+                'username' => 'jose',
+                'email' => 'jose@gmail.com',
+                'password' => Hash::make('123'),
+                'change_password' => false,
+                'id' => 5,
+                'ip' => '127.0.0.1',
+                'register_date' => now()
+            ],
+            [
+                'username' => 'maria',
+                'email' => 'maria@gmail.com',
+                'password' => Hash::make('123'),
+                'change_password' => false,
+                'id' => 6,
+                'ip' => '127.0.0.1',
+                'register_date' => now()
+            ],
+            [
+                'username' => 'luis',
+                'email' => 'luis@gmail.com',
+                'password' => Hash::make('123'),
+                'change_password' => false,
+                'id' => 7,
+                'ip' => '127.0.0.1',
+                'register_date' => now()
+            ],
         ]);
     }
 

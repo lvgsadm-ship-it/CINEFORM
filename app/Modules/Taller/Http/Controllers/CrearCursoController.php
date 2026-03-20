@@ -10,6 +10,7 @@ use Modules\Comun\Entities\PersonalData;
 use Modules\Taller\Entities\Curso;
 use Modules\Taller\Entities\ContenidoCurso;
 use Modules\Security\Entities\User;
+use Modules\Taller\Services\CondicionalBuscadorCurso;
 
 class CrearCursoController extends BaseController
 {
@@ -20,8 +21,8 @@ class CrearCursoController extends BaseController
      */
     public function create()
     {
-        // Verificar si el usuario es Coordinador (ID 4)
-        if (Auth::user()->profile_id != 4) {
+        // Solo coordinadores y administradores pueden crear cursos
+        if (!CondicionalBuscadorCurso::esCoordinadorOAdmin()) {
             abort(403, 'Solo los coordinadores pueden crear cursos.');
         }
 
@@ -31,8 +32,10 @@ class CrearCursoController extends BaseController
         // Obtener tipos de evaluación
         $tiposEvaluacion = \Modules\Taller\Entities\TipoEvaluacion::all();
 
-        // Obtener Facilitadores (Perfil 2) con sus datos personales y especializaciones
-        $facilitadores = User::where('profile_id', 2)
+        // Obtener Facilitadores (Perfil ID=2) con sus datos personales y especializaciones
+        $facilitadores = User::whereHas('getPerfiles', function ($q) {
+            $q->where('security_profiles.id', 2);
+        })
             ->with(['personalData.especializaciones'])
             ->get()
             ->filter(function ($user) {
@@ -53,7 +56,7 @@ class CrearCursoController extends BaseController
     public function store(Request $request)
     {
         // Verificar permiso nuevamente
-        if (Auth::user()->profile_id != 4) {
+        if (!CondicionalBuscadorCurso::esCoordinadorOAdmin()) {
             abort(403, 'Acceso denegado.');
         }
 
@@ -62,7 +65,7 @@ class CrearCursoController extends BaseController
             $validatedData = $request->validate([
                 'nombre' => 'required|string|max:255',
                 'id_modalidad' => 'required|exists:modalidad,id_modalidad',
-                'id_persona' => 'required|exists:comun_personas,id', // Facilitador
+                'id_persona' => 'required|exists:comun.personas,id_persona', // Facilitador
                 'descripcion' => 'nullable|string',
                 'duracion' => 'nullable|integer|min:1',
                 'horas' => 'nullable|integer|min:1',

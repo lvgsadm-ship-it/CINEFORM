@@ -14,7 +14,7 @@
                                     <i class="fas fa-microscope me-1"></i> Evaluación
                                 </span>
                                 <small class="text-muted text-uppercase fw-bold"
-                                    style="letter-spacing: 1px; font-size: 0.75rem;">{{ $curso->nombre_curso }}</small>
+                                    style="letter-spacing: 1px; font-size: 0.75rem;">{{ $curso->nombre }}</small>
                             </div>
                             <h3 class="fw-bold text-dark mb-0">{{ $contenido->titulo }}</h3>
                         </div>
@@ -133,8 +133,7 @@
                                                             </h6>
                                                             <div class="small text-muted d-flex align-items-center mt-1">
                                                                 <i class="far fa-id-card me-1"></i>
-                                                                {{ $estudiante->document ?? 'N/A' }}
-                                                                <!-- Asumiendo que el campo Cédula está disponible en el join -->
+                                                                {{ $estudiante->dni ?? 'N/A' }}
                                                             </div>
                                                         </div>
                                                     </div>

@@ -23,7 +23,7 @@ class CursoInscritoController extends BaseController
         $persona = $this->getUsuarioAutenticado()->personalData;
 
         // Obtener todos los cursos del usuario
-        $cursosInscritos = Inscripcion::where('id_persona', $persona->id)
+        $cursosInscritos = Inscripcion::where('id_persona', $persona->id_persona)
             ->with(['curso.estados', 'curso.modalidad'])
             ->get()
             ->pluck('curso')

@@ -41,14 +41,14 @@ class CursoController extends BaseController
 
         // Verificar si es facilitador
         $personalData = $this->getUsuarioAutenticado()->personalData;
-        $esFacilitador = $curso->id_persona == $personalData->id;
+        $esFacilitador = $curso->id_persona == $personalData->id_persona;
 
         // Si es estudiante y es una evaluación, buscar calificación
         $calificacion = null;
         if (!$esFacilitador && $contenidoActual && $contenidoActual->es_evaluacion) {
             $calificacion = DB::table('taller_calificaciones')
                 ->where('id_contenido_curso', $contenidoActual->id_contenido_curso)
-                ->where('id_persona', $personalData->id)
+                ->where('id_persona', $personalData->id_persona)
                 ->first();
         }
 
@@ -80,7 +80,7 @@ class CursoController extends BaseController
      */
     public function index(Request $request)
     {
-        $esCoordinador = Auth::user()->profile_id == 4;
+        $esCoordinador = CondicionalBuscadorCurso::esCoordinadorOAdmin();
 
         if ($this->usuarioSinDatosPersonales()) {
             return response()->json([
@@ -100,16 +100,21 @@ class CursoController extends BaseController
         $query = Curso::with(['modalidad', 'inscripciones', 'estados', 'persona'])
             ->withCount(['contenidos', 'inscripciones']);
 
-        // Si NO es coordinador, filtrar solo cursos con estado >= 6
+        // Si NO es coordinador, los participantes solo ven cursos en inscripción o mayor (>= 6)
+        // pero los facilitadores deben ver todos los que han creado.
         if (!$esCoordinador) {
-            $query->whereHas('estados', function ($q) {
-                $q->where('estados.id_estado', '>=', 6);
+            $idPersonaActual = Auth::user()->personalData->id_persona ?? null;
+            
+            $query->where(function ($q) use ($idPersonaActual) {
+                $q->whereHas('estados', function ($q2) {
+                    $q2->where('estados.id_estado', '>=', 6);
+                });
+                
+                if ($idPersonaActual) {
+                    $q->orWhere('id_persona', $idPersonaActual);
+                }
             });
         }
-
-        // Determinar qué vista se está cargando
-        $routeName = $request->route()->getName();
-        $isPrincipalView = ($routeName === 'taller.cursos.principal');
 
         // Filtro por búsqueda (nombre o descripción)
         if ($request->has('search') && !empty($request->search)) {
@@ -138,9 +143,8 @@ class CursoController extends BaseController
             ? \Modules\Taller\Entities\Estado::all()
             : \Modules\Taller\Entities\Estado::where('id_estado', '>=', 6)->get();
 
-        // Retornar la vista correspondiente
-        $view = $isPrincipalView ? 'taller::a.CursosPrincipal' : 'taller::a.Cursos';
-        return view($view, compact('vistaParcial', 'cursos', 'estados', 'esCoordinador', 'esFacilitador'));
+        // Siempre usar la vista Cursos (que internamente desglosa según el cargo)
+        return view('taller::a.Cursos', compact('vistaParcial', 'cursos', 'estados', 'esCoordinador', 'esFacilitador'));
     }
 
     /**
@@ -194,7 +198,7 @@ class CursoController extends BaseController
 
         // Obtener los cursos en los que la persona está inscrita
         $cursosParticipante = Curso::whereHas('inscripciones', function ($query) use ($persona) {
-            $query->where('id_persona', $persona->id);
+            $query->where('id_persona', $persona->id_persona);
         })
             ->with(['modalidad', 'inscripciones'])
             ->orderBy('fecha_inicio', 'desc')
@@ -235,9 +239,9 @@ class CursoController extends BaseController
         }
 
         // Verificar si el usuario es el facilitador o un participante
-        $esFacilitador = $curso->id_persona == $persona->id;
-        $esParticipante = $curso->inscripciones->contains('id_persona', $persona->id);
-        $esCoordinador = Auth::user()->profile_id == 4;
+        $esFacilitador = $curso->id_persona == $persona->id_persona;
+        $esParticipante = $curso->inscripciones->contains('id_persona', $persona->id_persona);
+        $esCoordinador = CondicionalBuscadorCurso::esCoordinadorOAdmin();
 
         if (!$esFacilitador && !$esParticipante && !$esCoordinador) {
             return response()->json([
@@ -278,7 +282,7 @@ class CursoController extends BaseController
         $personalData = $this->getUsuarioAutenticado()->personalData;
 
         // Verificar si el usuario es el propietario del curso
-        if ($curso->id_persona == $personalData->id) {
+        if ($curso->id_persona == $personalData->id_persona) {
             return response()->json([
                 'success' => false,
                 'message' => 'No puedes inscribirte en tu propio curso.'
@@ -287,7 +291,7 @@ class CursoController extends BaseController
 
         // Verificar si el usuario ya está inscrito en el curso
         $inscripcionExistente = Inscripcion::where('id_curso', $request->id_curso)
-            ->where('id_persona', $personalData->id)
+            ->where('id_persona', $personalData->id_persona)
             ->first();
 
         if ($inscripcionExistente) {
@@ -298,7 +302,7 @@ class CursoController extends BaseController
         }
 
         // Verificar si hay cupos disponibles
-        if ($curso->cantidad_cupos <= 0) {
+        if ((int) $curso->cantidad_cupos <= 0) {
             return response()->json([
                 'success' => false,
                 'message' => 'No hay cupos disponibles para este curso.'
@@ -308,7 +312,7 @@ class CursoController extends BaseController
         // Crear la inscripción
         $inscripcion = Inscripcion::create([
             'id_curso' => $request->id_curso,
-            'id_persona' => $personalData->id,
+            'id_persona' => $personalData->id_persona,
             'fecha_inscripcion' => now()
         ]);
 
@@ -338,7 +342,7 @@ class CursoController extends BaseController
         $personalData = $this->getUsuarioAutenticado()->personalData;
 
         $inscripcion = Inscripcion::where('id_inscripcion', $id)
-            ->where('id_persona', $personalData->id)
+            ->where('id_persona', $personalData->id_persona)
             ->first();
 
         if (!$inscripcion) {
@@ -380,7 +384,7 @@ class CursoController extends BaseController
 
             $personalData = $this->getUsuarioAutenticado()->personalData;
 
-            if ($curso->id_persona != $personalData->id) {
+            if ($curso->id_persona != $personalData->id_persona) {
                 return response()->json([
                     'success' => false,
                     'message' => 'No autorizado para finalizar la edición de este curso'

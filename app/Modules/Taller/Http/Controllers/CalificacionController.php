@@ -21,7 +21,7 @@ class CalificacionController extends BaseController
         // Verificar permisos (solo facilitador)
         // Nota: BaseController ya tiene métodos para validar datos personales, pero aquí validamos autoría
         $personalData = $this->getUsuarioAutenticado()->personalData;
-        if ($curso->id_persona != $personalData->id) {
+        if ($curso->id_persona != $personalData->id_persona) {
             abort(403, 'No tiene permiso para calificar este curso.');
         }
 
@@ -36,7 +36,7 @@ class CalificacionController extends BaseController
         // Obtener estudiantes inscritos y sus calificaciones para este contenido
         // Usamos leftJoin para traer la calificación si existe
         $query = Inscripcion::where('inscripciones.id_curso', $curso_id)
-            ->join('comun_personas', 'inscripciones.id_persona', '=', 'comun_personas.id')
+            ->join('comun.personas', 'inscripciones.id_persona', '=', 'comun.personas.id_persona')
             ->leftJoin('taller_calificaciones', function ($join) use ($contenido_id) {
                 $join->on('inscripciones.id_persona', '=', 'taller_calificaciones.id_persona')
                     ->where('taller_calificaciones.id_contenido_curso', '=', $contenido_id);
@@ -46,23 +46,24 @@ class CalificacionController extends BaseController
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('comun_personas.document', 'like', "%{$search}%")
-                    ->orWhere('comun_personas.primer_nombre', 'like', "%{$search}%")
-                    ->orWhere('comun_personas.primer_apellido', 'like', "%{$search}%");
+                $q->where('comun.personas.dni', 'like', "%{$search}%")
+                    ->orWhere('comun.personas.primer_nombre', 'like', "%{$search}%")
+                    ->orWhere('comun.personas.primer_apellido', 'like', "%{$search}%");
             });
         }
 
         $estudiantes = $query->select(
-            'comun_personas.id as id_persona',
-            'comun_personas.primer_nombre',
-            'comun_personas.segundo_nombre',
-            'comun_personas.primer_apellido',
-            'comun_personas.segundo_apellido',
+            'comun.personas.id_persona as id_persona',
+            'comun.personas.dni',
+            'comun.personas.primer_nombre',
+            'comun.personas.segundo_nombre',
+            'comun.personas.primer_apellido',
+            'comun.personas.segundo_apellido',
             'taller_calificaciones.calificacion',
             'taller_calificaciones.observacion',
             'taller_calificaciones.id_calificacion'
         )
-            ->orderBy('comun_personas.primer_apellido')
+            ->orderBy('comun.personas.primer_apellido')
             ->get();
 
         $search = $request->search;
@@ -78,7 +79,7 @@ class CalificacionController extends BaseController
         $curso = Curso::findOrFail($curso_id);
         $personalData = $this->getUsuarioAutenticado()->personalData;
 
-        if ($curso->id_persona != $personalData->id) {
+        if ($curso->id_persona != $personalData->id_persona) {
             abort(403, 'No autorizado.');
         }
 

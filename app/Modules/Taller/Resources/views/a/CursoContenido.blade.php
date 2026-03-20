@@ -30,12 +30,14 @@ Incluye una barra lateral de navegación entre lecciones y un área principal pa
                                 @php
                                     $esActivo = $contenidoActual && $contenido->id_contenido_curso == $contenidoActual->id_contenido_curso;
                                     $icono = 'fa-file-alt';
-                                    if (strtolower($contenido->tipo_contenido) == 'video')
+                                    $urlStr = strtolower($contenido->url_contenido ?? '');
+                                    if (str_contains($urlStr, 'youtube') || str_contains($urlStr, 'vimeo') || str_contains($urlStr, '.mp4')) {
                                         $icono = 'fa-play-circle';
-                                    if (strtolower($contenido->tipo_contenido) == 'archivo')
+                                    } elseif (str_contains($urlStr, '.pdf') || str_contains($urlStr, 'drive.google.com') || str_contains($urlStr, '.doc') || str_contains($urlStr, '.zip')) {
                                         $icono = 'fa-download';
-                                    if (strtolower($contenido->tipo_contenido) == 'enlace')
+                                    } else {
                                         $icono = 'fa-link';
+                                    }
 
                                     // Sobrescribir icono si es evaluación
                                     if ($contenido->es_evaluacion)
@@ -88,7 +90,13 @@ Incluye una barra lateral de navegación entre lecciones y un área principal pa
 
                             @php
                                 // Determinar el tipo de contenido y configurar el botón de acción
-                                $tipo = strtolower($contenidoActual->tipo_contenido);
+                                $urlLower = strtolower($contenidoActual->url_contenido ?? '');
+                                $tipo = 'enlace';
+                                if (str_contains($urlLower, 'youtube') || str_contains($urlLower, 'vimeo') || str_contains($urlLower, '.mp4')) {
+                                    $tipo = 'video';
+                                } elseif (str_contains($urlLower, '.pdf') || str_contains($urlLower, 'drive.google.com') || str_contains($urlLower, '.doc') || str_contains($urlLower, '.zip')) {
+                                    $tipo = 'archivo';
+                                }
                                 $url = $contenidoActual->url_contenido;
 
                                 // Configuración por defecto (Enlace)

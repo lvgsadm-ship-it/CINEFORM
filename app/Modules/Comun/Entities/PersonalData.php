@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Security\Entities\User;
 
-
 class PersonalData extends Model
 {
     use HasFactory;
@@ -16,10 +15,11 @@ class PersonalData extends Model
         'segundo_nombre',
         'primer_apellido',
         'segundo_apellido',
-        'document'
+        'dni'
     ];
 
-    protected $table = "comun_personas";
+    protected $table = "comun.personas";
+    protected $primaryKey = "id_persona";
     public $timestamps = false;
 
     /**
@@ -44,17 +44,17 @@ class PersonalData extends Model
     }
     public function securityUser()
     {
-        return $this->hasOne(User::class, 'document', 'document');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'document', 'document');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function cursos()
     {
-        return $this->hasMany(\Modules\Taller\Entities\Curso::class, 'id_persona', 'id');
+        return $this->hasMany(\Modules\Taller\Entities\Curso::class, 'id_persona', 'id_persona');
     }
 
     public function especializaciones()

@@ -179,7 +179,7 @@ NOTA: Todas las consultas y cálculos se realizan en el controlador (CursoDetall
                         <p class="text-muted mb-3">Instructor</p>
                         <div class="d-flex justify-content-center gap-2">
                             <button
-                                onclick="mostrarContactoProfesor('{{ $curso->persona->nombre_completo ?? 'No disponible' }}', '{{ $curso->persona->user->email ?? 'No disponible' }}', '{{ $curso->persona->user->cell_phone ?? 'No disponible' }}')"
+                                onclick="mostrarContactoProfesor('{{ $curso->persona->nombre_completo ?? 'No disponible' }}', '{{ $curso->persona->user->email ?? 'No disponible' }}', '{{ $curso->persona->telefono ?? 'No disponible' }}')"
                                 class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-envelope me-1"></i> Contactar
                             </button>

@@ -8,6 +8,7 @@ use Modules\Taller\Entities\Curso;
 use Modules\Taller\Entities\Inscripcion;
 use Modules\Comun\Entities\PersonalData;
 use Modules\Taller\Services\CondicionalEstadoCurso;
+use Modules\Taller\Services\CondicionalBuscadorCurso;
 /**
  * Controlador: CursoDetalleController
  * 
@@ -81,14 +82,14 @@ class CursoDetalleController extends BaseController
 
         $user = auth()->user();
 
-        // Obtener datos personales del usuario
-        $personalData = PersonalData::where('document', $user->document)->first();
-        $idPersona = $personalData ? $personalData->id : null;
+        // Obtener datos personales del usuario a través de su user_id
+        $personalData = PersonalData::where('user_id', $user->id)->first();
+        $idPersona = $personalData ? $personalData->id_persona : null;
 
         return [
             'user' => $user,
             'idPersona' => $idPersona,
-            'esCoordinador' => $user->profile_id == 4,
+            'esCoordinador' => CondicionalBuscadorCurso::esCoordinadorOAdmin(),
             'personalData' => $personalData,
         ];
     }

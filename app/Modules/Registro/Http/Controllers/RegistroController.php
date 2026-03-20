@@ -9,9 +9,13 @@ use Illuminate\Routing\Controller;
 class RegistroController extends Controller
 {
 
-     public function home() {
-        //dd(Auth::user()->getMenu());
-        return view('registro::personas.home');
+    public function home() {
+        if (!\Auth::check()) {
+            return redirect()->route('login');
+        }
+        
+        $perfiles = \Auth::user()->getPerfiles;
+        return view('security::users.select_profile', compact('perfiles'));
     }
 
     /**

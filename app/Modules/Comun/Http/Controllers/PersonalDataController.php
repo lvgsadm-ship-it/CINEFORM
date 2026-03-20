@@ -24,17 +24,17 @@ class PersonalDataController extends BaseController
     // Obtener el usuario autenticado con sus datos personales
     $user = $this->getUsuarioAutenticado();
     
-    // Obtener el registro de la tabla comun_personas que coincida con el documento del usuario
-    return \DB::table('comun_personas')
+    // Obtener el registro de la tabla comun.personas que coincida con el id del usuario
+    return \Illuminate\Support\Facades\DB::table('comun.personas')
         ->select([
-            'id',
+            'id_persona as id',
             'primer_nombre',
             'segundo_nombre',
             'primer_apellido',
             'segundo_apellido',
-            'document'
+            'dni as document'
         ])
-        ->where('document', $user->document)
+        ->where('user_id', $user->id)
         ->first(); 
 }
 

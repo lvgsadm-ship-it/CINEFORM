@@ -2,36 +2,72 @@
 
 namespace Modules\Taller\Services;
 
+use Illuminate\Support\Facades\Session;
+
 /**
  * Servicio: Condicional de Estados del Curso
- * 
- * Resuelve qué vista parcial debe mostrarse en función del estado del curso
- * y el rol del usuario, eliminando la necesidad de múltiples if/elseif.
- * 
- * @author Sistema de Gestión de Cursos
- * @version 1.0
+ *
+ * Resuelve qué vista parcial debe mostrarse en función del rol activo
+ * almacenado en sesión (profile_id), que se establece cuando el usuario
+ * selecciona su perfil en el login.
+ *
+ * IDs de perfiles:
+ *   1 = Administrador
+ *   2 = Facilitador
+ *   3 = Participante
+ *   4 = Coordinador
  */
 class CondicionalBuscadorCurso
 {
-    private const MAPA_ACCIONES = [
-        'coordinador' => 'partials.buscador-actions.CursosCoordinador',
-        'default' => 'partials.buscador-actions.Cursos',
-
-
+    private const MAPA_ROLES = [
+        1 => 'partials.Buscador-actions.CursosCoordinador', // Administrador ve vista completa
+        2 => 'partials.Buscador-actions.Cursos',            // Facilitador
+        3 => 'partials.Buscador-actions.Cursos',            // Participante
+        4 => 'partials.Buscador-actions.CursosCoordinador', // Coordinador
     ];
 
     /**
-     * @param bool $esCoordinador Si el usuario es coordinador
-     * @return string|null Ruta de la vista parcial a incluir
+     * Resuelve la vista parcial según el perfil activo en sesión.
+     *
+     * @param  bool $esCoordinador  Compatibilidad hacia atrás (ignorado si hay sesión)
+     * @return string|null          Ruta de la vista parcial a incluir
      */
-    public function resolverVista($esCoordinador)
+    public function resolverVista(bool $esCoordinador = false): ?string
     {
-        // Prioridad 1: Coordinador
-        if ($esCoordinador && isset(self::MAPA_ACCIONES['coordinador'])) {
-            return self::MAPA_ACCIONES['coordinador'];
+        $profileId = Session::get('profile_id');
+
+        if ($profileId && isset(self::MAPA_ROLES[$profileId])) {
+            return self::MAPA_ROLES[$profileId];
         }
 
-        // Prioridad 2: Vista por defecto
-        return self::MAPA_ACCIONES['default'] ?? null;
+        // Fallback: si no hay sesión, usar el parámetro de compatibilidad
+        return $esCoordinador
+            ? 'partials.Buscador-actions.CursosCoordinador'
+            : 'partials.Buscador-actions.Cursos';
+    }
+
+    /**
+     * Indica si el rol activo en sesión es coordinador o administrador.
+     */
+    public static function esCoordinadorOAdmin(): bool
+    {
+        $profileId = Session::get('profile_id');
+        return in_array($profileId, [1, 4]);
+    }
+
+    /**
+     * Indica si el rol activo en sesión es facilitador.
+     */
+    public static function esFacilitador(): bool
+    {
+        return Session::get('profile_id') == 2;
+    }
+
+    /**
+     * Indica si el rol activo en sesión es participante.
+     */
+    public static function esParticipante(): bool
+    {
+        return Session::get('profile_id') == 3;
     }
 }

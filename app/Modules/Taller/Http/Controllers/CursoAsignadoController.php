@@ -31,7 +31,7 @@ class CursoAsignadoController extends BaseController
                     ->withPivot('motivo');
             }
         ])
-            ->where('id_persona', $user->personalData->id)
+            ->where('id_persona', $user->personalData->id_persona)
             ->withCount(['contenidos as total_contenidos', 'inscripciones'])
             ->orderBy('fecha_inicio', 'desc')
             ->paginate(10);
@@ -90,7 +90,7 @@ class CursoAsignadoController extends BaseController
 
             // Verificar que el curso existe y pertenece al facilitador actual
             $curso = Curso::where('id_curso', $id_curso)
-                ->where('id_persona', $user->personalData->id)
+                ->where('id_persona', $user->personalData->id_persona)
                 ->firstOrFail();
 
             // Actualizar el estado existente del curso a 6 (Aceptado)

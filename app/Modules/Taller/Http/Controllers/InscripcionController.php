@@ -39,7 +39,7 @@ class InscripcionController extends BaseController
                 ], 400);
             }
             // Verificar si el usuario es el propietario del curso
-            if ($curso->id_persona == $user->personalData->id) {
+            if ($curso->id_persona == $user->personalData->id_persona) {
                 return response()->json([
                     'success' => false,
                     'message' => 'No puedes inscribirte en tu propio curso.'
@@ -48,7 +48,7 @@ class InscripcionController extends BaseController
 
             // Verificar si ya está inscrito
             $yaInscrito = Inscripcion::where('id_curso', $curso->id_curso)
-                ->where('id_persona', $user->personalData->id)
+                ->where('id_persona', $user->personalData->id_persona)
                 ->exists();
 
             if ($yaInscrito) {
@@ -60,7 +60,7 @@ class InscripcionController extends BaseController
 
             // Verificar si hay cupos disponibles
             $inscritos = Inscripcion::where('id_curso', $curso->id_curso)->count();
-            if ($curso->cantidad_cupos !== null && $inscritos >= $curso->cantidad_cupos) {
+            if ($curso->cantidad_cupos !== null && $inscritos >= (int) $curso->cantidad_cupos) {
                 return response()->json([
                     'success' => false,
                     'message' => 'No hay cupos disponibles para este curso.'
@@ -70,7 +70,7 @@ class InscripcionController extends BaseController
             // Crear la inscripción
             $inscripcion = Inscripcion::create([
                 'id_curso' => $curso->id_curso,
-                'id_persona' => $user->personalData->id,
+                'id_persona' => $user->personalData->id_persona,
                 'fecha_inscripcion' => Carbon::now(),
             ]);
 
@@ -113,7 +113,7 @@ class InscripcionController extends BaseController
             ], 404);
         }
 
-        if ($inscripcion->id_persona != $user->personalData->id) {
+        if ($inscripcion->id_persona != $user->personalData->id_persona) {
             return response()->json([
                 'success' => false,
                 'message' => 'No autorizada para cancelar esta inscripción.'

@@ -19,13 +19,15 @@ use Response;
 use App\Helpers\LockDB;
 use Illuminate\Support\Facades\Hash;
 
-class SecurityController extends Controller {
+class SecurityController extends Controller
+{
 
     private $NAC_VENEZOLANA = 1;
     private $PAIS_VENEZUELA = 1;
     private $PROFILE_TRAMITES = 3;
 
-    public function photo(Request $request) {
+    public function photo(Request $request)
+    {
         if (\Request::isMethod('get')) {
             return view('security::users.photo');
         } else {
@@ -33,7 +35,8 @@ class SecurityController extends Controller {
         }
     }
 
-    public function file_admin($id = null) {
+    public function file_admin($id = null)
+    {
 
         $pdfFile = storage_path($id . '.pdf');
         $FILE_PDF = new \Smalot\PdfParser\Parser();
@@ -72,7 +75,7 @@ class SecurityController extends Controller {
                     //Storage::disk('local')->put(public_path('pagos') . DIRECTORY_SEPARATOR . "$fileName", file_get_contents($request->img));
                     //$request->img->move(public_path('pagos'), $fileName);
                 } catch (Exception $ex) {
-                    
+
                 }
             } else {
                 $pdfFile = storage_path($id . '.pdf');
@@ -100,7 +103,8 @@ class SecurityController extends Controller {
      * sudo systemctl restart apache2
      */
 
-    public function show_pdf($pdf, $page = 0) {
+    public function show_pdf($pdf, $page = 0)
+    {
         // Ruta al archivo PDF
         //$pdfFile = 'a.pdf';
 
@@ -150,7 +154,8 @@ class SecurityController extends Controller {
         return view('security::files.img', compact('IMAGE'));
     }
 
-    public function captcha($seed = null) {
+    public function captcha($seed = null)
+    {
         $seed = substr(bcrypt($seed == null ? rand(1, 99999) : $seed), 10, 5);
         //dd($seed);
         #create image and set background color
@@ -224,7 +229,8 @@ class SecurityController extends Controller {
         return imagejpeg($captcha);
     }
 
-    public function show_avatar($img) {
+    public function show_avatar($img)
+    {
         //dd(Encryptor::encrypt(10));
         $num = Encryptor::decrypt($img);
 
@@ -244,11 +250,13 @@ class SecurityController extends Controller {
         return $response;
     }
 
-    private function generateCode() {
+    private function generateCode()
+    {
         return str_pad(mt_rand(100000, 999999), 6, '0', STR_PAD_LEFT);
     }
 
-    public function register(Request $request) {
+    public function register(Request $request)
+    {
         /*
           if (\Request::ajax()) {
           exit;
@@ -351,7 +359,8 @@ class SecurityController extends Controller {
         }
     }
 
-    public function recovery(Request $request, $token = null) {
+    public function recovery(Request $request, $token = null)
+    {
         /*
           if (\Request::ajax()) {
           exit;
@@ -461,7 +470,8 @@ class SecurityController extends Controller {
         }
     }
 
-    public function login(Request $request) { //Define el método login, que recibe como parámetro un objeto $request, que contiene los datos enviados por el usuario.
+    public function login(Request $request)
+    { //Define el método login, que recibe como parámetro un objeto $request, que contiene los datos enviados por el usuario.
 
         if (Auth::check() == true) {
             session()->flush();
@@ -490,10 +500,10 @@ class SecurityController extends Controller {
             } //Compara el captcha almacenado en sesión (convertido a minúsculas) con el captcha enviado. Si no coinciden, retorna con error y llena el formulario con los datos previamente ingresados.
 
             // $type = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username'; //Detecta el tipo de login: si el username es un emal válido, usa el campo email para buscar usuario, si no el campo username.
-            $type = 'username'; 
+            $type = 'username';
             $user = User::where($type, strtolower($request->username))
-                    ->orWhere('email', strtolower($request->username))
-                    ->first(); //Busca en la base de datos el usuario cuyo campo (email o username) coincide con el valor recibido, en minúscula.
+                ->orWhere('email', strtolower($request->username))
+                ->first(); //Busca en la base de datos el usuario cuyo campo (email o username) coincide con el valor recibido, en minúscula.
 
             //dd($user);
             if ($user == null) {//Si no encuentra usuario, retorna con mensaje de error. Si sí, continúa.
@@ -507,7 +517,7 @@ class SecurityController extends Controller {
                         'password' => $request->password
                     );
                     if (Auth::attempt($userdata)) {//Intenta autenticar (login) con las credenciales proporcionadas.
-                        
+
                         User::whereId(Auth::user()->id)->update([
                             'change_password' => false,
                             'token' => '',
@@ -515,28 +525,24 @@ class SecurityController extends Controller {
                         ]);//Si el login es exitoso, actualiza el usuario logueado para quitar flags temporales relacionados con el cambio de contraseña y limpiar tokens.
 
                         //$perfiles = Auth::user()->getProfiles();
-                        $perfiles = Auth::user()->getProfiles(); //$user->profiles; // Ya gracias a la relación
+                        $perfiles = Auth::user()->getPerfiles; //$user->profiles; // Ya gracias a la relación
                         //dd($perfiles);
                         if ($perfiles->count() <= 1) {
                             // Obtener el primer perfil si existe, usando método first()
                             $perfil = $perfiles->first();
-                        
+
                             if ($perfil) {
-                                session()->put('profile_id', $perfil->id_rol);
+                                session()->put('profile_id', $perfil->id);
                             }
                         } else {
-                            /* Mostrar selección porque hay más de un perfil
-                             *Crear vista donde se muestran los perfiles para que el usuario seleccione un perfil
-                             */
-
-                            //dd("Mostrar seleccion");
-                            //return to_route('registro.home');
-                            //return view('registro.home', compact('perfiles'));
-                            return view('Registro::personas.home', compact('perfiles'));
+                            /* Mostrar selección porque hay más de un perfil */
+                            $layout = 'layouts.kaiadmin-login';
+                            $withinSession = false;
+                            return view('security::users.select_profile', compact('perfiles', 'layout', 'withinSession'));
                         }
 
                         if (Auth::user()->getModules()->count() == 1) {
-                           session()->put('MODULE', Auth::user()->getModules()[0]->id);
+                            session()->put('MODULE', Auth::user()->getModules()[0]->id);
                         }///Si el usuario tiene asignado un solo módulo, guarda ese módulo en sesión.   
 
                         return to_route('home'); //Redirige a la ruta nombrada home (dashboard o página principal).
@@ -555,41 +561,62 @@ class SecurityController extends Controller {
         $user = auth()->user();
 
         // Guarda el perfil seleccionado en sesión con la clave 'profile_id'
-        session()->put('profile_id', $id_rol);   
-        
-       // dd(session()->get('profile_id'));
+        session()->put('profile_id', $id_rol);
 
-        // Aquí estableces la lógica que mencionas
-        if ($user->getModules()->count() == 1) {
-            session()->put('MODULE', $user->getModules()[0]->id);
+        // Limpiar el módulo anterior para que no quede inválido con el nuevo perfil
+        session()->forget('MODULE');
+
+        // Si el nuevo perfil tiene exactamente 1 módulo, lo seleccionamos automáticamente
+        $modules = $user->getModules();
+        if ($modules->count() == 1) {
+            session()->put('MODULE', $modules[0]->id);
         }
-        // Rediriges a la página principal o la que corresponda
+
         return to_route('home');
     }
 
-    public function home() {
+    public function showSwitchProfile()
+    {
+        $perfiles = Auth::user()->getPerfiles;
+
+        if ($perfiles->count() <= 1) {
+            return to_route('home')->withErrors(['error-message' => __('You only have one profile assigned.')]);
+        }
+
+        $layout = 'layouts.kaiadmin-login';
+        $withinSession = true;
+
+        return view('security::users.select_profile', compact('perfiles', 'layout', 'withinSession'));
+    }
+
+    public function home()
+    {
         //dd(Auth::user()->getMenu());
         return view('security::users.home');
     }
 
-     public function registroHome() {
+    public function registroHome()
+    {
         //dd(Auth::user()->getMenu());
         return view('registro::personas.home');
     }
 
-    public function set_module($id) {
+    public function set_module($id)
+    {
         session()->put('MODULE', Encryptor::decrypt($id));
         return to_route('home');
     }
 
-    public function logout() {
+    public function logout()
+    {
         session()->flush();
         Auth::logout();
 
         return to_route('login');
     }
 
-    public function update_profile(Request $request) {
+    public function update_profile(Request $request)
+    {
 
         if (\Request::isMethod('get')) {
 
@@ -639,9 +666,9 @@ class SecurityController extends Controller {
                      * Verificar que no este repetido la cedula
                      */
                     $Is = User::where('document_type_id', Encryptor::decrypt($request->type_document))
-                            ->where('document', $request->document)
-                            ->where('id', '!=', Auth::user()->id)
-                            ->exists()
+                        ->where('document', $request->document)
+                        ->where('id', '!=', Auth::user()->id)
+                        ->exists()
 
                     ;
                     if ($Is == true) {
@@ -700,7 +727,8 @@ class SecurityController extends Controller {
      * Display a listing of the resource.
      * @return Renderable
      */
-    public function index() {
+    public function index()
+    {
         return view('security::index');
     }
 
@@ -708,7 +736,8 @@ class SecurityController extends Controller {
      * Show the form for creating a new resource.
      * @return Renderable
      */
-    public function create() {
+    public function create()
+    {
         return view('security::create');
     }
 
@@ -717,7 +746,8 @@ class SecurityController extends Controller {
      * @param Request $request
      * @return Renderable
      */
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         //
     }
 
@@ -726,7 +756,8 @@ class SecurityController extends Controller {
      * @param int $id
      * @return Renderable
      */
-    public function show($id) {
+    public function show($id)
+    {
         return view('security::show');
     }
 
@@ -735,7 +766,8 @@ class SecurityController extends Controller {
      * @param int $id
      * @return Renderable
      */
-    public function edit($id) {
+    public function edit($id)
+    {
         return view('security::edit');
     }
 
@@ -745,7 +777,8 @@ class SecurityController extends Controller {
      * @param int $id
      * @return Renderable
      */
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id)
+    {
         //
     }
 
@@ -754,7 +787,8 @@ class SecurityController extends Controller {
      * @param int $id
      * @return Renderable
      */
-    public function destroy($id) {
+    public function destroy($id)
+    {
         //
     }
 }

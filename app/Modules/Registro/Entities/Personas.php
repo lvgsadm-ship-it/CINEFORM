@@ -25,10 +25,10 @@ class Personas extends Model
         'segundo_apellido',
         'telefono', 
         'telefono_opcional', 
-        'idPais', 
-        'idEstado', 
-        'idMunicipio', 
-        'idParroquia',
+        'id_pais', 
+        'id_estado', 
+        'id_municipio', 
+        'id_parroquia',
         'direccion', 
         'creado_por',
         'creado_en',
@@ -73,22 +73,22 @@ class Personas extends Model
 
     public function pais()
     {
-        return $this->belongsTo(\Modules\Security\Entities\Countries::class, 'idPais');
+        return $this->belongsTo(\Modules\Security\Entities\Countries::class, 'id_pais');
     }
 
     public function estado()
     {
-        return $this->belongsTo(\Modules\Parametros\Entities\Estados::class, 'idEstado');
+        return $this->belongsTo(\Modules\Parametros\Entities\Estados::class, 'id_estado');
     }
 
     public function municipio()
     {
-        return $this->belongsTo(\Modules\Parametros\Entities\Municipios::class, 'idMunicipio');
+        return $this->belongsTo(\Modules\Parametros\Entities\Municipios::class, 'id_municipio');
     }
 
     public function parroquia()
     {
-        return $this->belongsTo(\Modules\Parametros\Entities\Parroquias::class, 'idParroquia');
+        return $this->belongsTo(\Modules\Parametros\Entities\Parroquias::class, 'id_parroquia');
     }
 
     public function usuario()

@@ -55,61 +55,34 @@ class User extends Authenticatable
 
     public function getCellPhoneAttribute()
     {
-        return $this->getCountry->dial_code . ' ' . $this->phone;
+        return $this->getCountry?->dial_code ? ($this->getCountry->dial_code . ' ' . $this->phone) : ($this->phone ?? null);
     }
     public function getFullDocumentAttribute()
     {
-        return $this->getDocumentType->code . '-' . $this->document;
+        return $this->getDocumentType?->code ? ($this->getDocumentType->code . '-' . $this->document) : ($this->document ?? null);
     }
 
     function getProfile()
     {
         return $this->belongsTo(Profile::class, 'profile_id');
     }
-<<<<<<< HEAD
 
     function getCountry()
     {
         return $this->belongsTo(Countries::class, 'country_id');
     }
 
-
-    function getOffices()
-    {
-        return $this->belongsToMany(\Modules\Library\Entities\Offices::class, 'library_office_users', 'user_id', 'office_id');
-    }
-
+    /*   
+      function getOffices() {
+          return $this->belongsToMany(\Modules\Library\Entities\Offices::class, 'library_office_users', 'user_id', 'office_id');
+      }
+       */
     public function getDocumentType()
     {
         return $this->belongsTo(DocumentType::class, 'document_type_id');
     }
 
-    public function getModules()
-    {
-        $Modules = Modulo::join('security_menus', 'security_menus.module_id', '=', 'security_modules.id')
-            ->join('security_processes', 'security_processes.menu_id', '=', 'security_menus.id')
-            ->join('security_profile_processes', 'security_profile_processes.process_id', '=', 'security_processes.id')
-            ->where('security_profile_processes.profile_id', $this->profile_id)
-            ->groupBy("security_modules.id", "security_modules.name", "security_modules.description", "security_modules.icon", "security_modules.order")
-            ->select('security_modules.*')
-            ->get()
-            //->toSql()
-=======
-        
-    function getCountry() {
-        return $this->belongsTo(Countries::class, 'country_id');
-    }
-    
-  /*   
-    function getOffices() {
-        return $this->belongsToMany(\Modules\Library\Entities\Offices::class, 'library_office_users', 'user_id', 'office_id');
-    }
-     */
-    public function getDocumentType() {
-        return $this->belongsTo(DocumentType::class, 'document_type_id');
-    }
-
-  /*   public function getPerfiles()
+    public function getPerfiles()
     {
         return $this->belongsToMany(
             \Modules\Security\Entities\Profile::class,
@@ -120,40 +93,49 @@ class User extends Authenticatable
         ->select('security_profiles.*')
         ->withPivot('id_rol','status', 'fecha_aprobacion', 'aprobado_por', 'creado_por', 'creado_en', 'actualizado_por', 'actualizado_en');        
     } 
-    
+
     public function getPerfilesArray()
     {
-        $perfiles = $this->getPerfiles()->get(); // obtiene los perfiles relacionados
+        $perfiles = $this->getPerfiles; // obtiene los perfiles relacionados
         $resultado = [];
-    
+
         foreach ($perfiles as $perfil) {
-            unset($resultado[$perfil]);
+            $resultado[] = $perfil->id;
         }
-    
+
         return $resultado;
     }
-        */
 
     public function getProfiles()
     {
-        return $this->hasMany(ProfileUser::class, 'id_users');  
+        return $this->hasMany(ProfileUser::class, 'id_users');
     }
-    
+
     public function getPersona()
     {
-        return $this->hasOne(\Modules\Registro\Entities\Personas::class, 'user_id','id'); // Ajusta foreign key si es necesario
+        return $this->hasOne(\Modules\Registro\Entities\Personas::class, 'user_id', 'id'); // Ajusta foreign key si es necesario
     }
-    
-    public function getModules() {
+
+    public function personalData()
+    {
+        return $this->hasOne(\Modules\Comun\Entities\PersonalData::class, 'user_id', 'id');
+    }
+
+    public function getIdPersonaAttribute()
+    {
+        return $this->getPersona?->id_persona;
+    }
+
+    public function getModules()
+    {
         $Modules = Modulo::join('security_menus', 'security_menus.module_id', '=', 'security_modules.id')
-                ->join('security_processes', 'security_processes.menu_id', '=', 'security_menus.id')
-                ->join('security_profile_processes', 'security_profile_processes.process_id', '=', 'security_processes.id')
-                ->where('security_profile_processes.profile_id', session()->get('profile_id')) //$this->profile_id)
-                ->groupBy("security_modules.id", "security_modules.name", "security_modules.description", "security_modules.icon", "security_modules.order")
-                ->select('security_modules.*')
-                ->get()
-        //->toSql()
->>>>>>> origin/feature/develop_lg
+            ->join('security_processes', 'security_processes.menu_id', '=', 'security_menus.id')
+            ->join('security_profile_processes', 'security_profile_processes.process_id', '=', 'security_processes.id')
+            ->where('security_profile_processes.profile_id', session()->get('profile_id')) //$this->profile_id)
+            ->groupBy("security_modules.id", "security_modules.name", "security_modules.description", "security_modules.icon", "security_modules.order")
+            ->select('security_modules.*')
+            ->get()
+            //->toSql()
         ;
         return $Modules;
     }
@@ -161,23 +143,13 @@ class User extends Authenticatable
     public function getProcesses()
     {
         $Processes = Modulo::join('security_menus', 'security_menus.module_id', '=', 'security_modules.id')
-<<<<<<< HEAD
             ->join('security_processes', 'security_processes.menu_id', '=', 'security_menus.id')
             ->join('security_profile_processes', 'security_profiles_processes.process_id', '=', 'security_processes.id')
-            ->where('security_profile_processes.profile_id', $this->profile_id)
+            ->where('security_profile_processes.profile_id', session()->get('profile_id')) //$this->profile_id)
             ->groupBy("security_processes.id", "security_processes.name", "security_processes.description", "security_processes.icon", "security_processes.route", "security_processes.actions", "security_processes.order")
             ->select('security_processes.*')
             ->get()
             //->toSql()
-=======
-                ->join('security_processes', 'security_processes.menu_id', '=', 'security_menus.id')
-                ->join('security_profile_processes', 'security_profiles_processes.process_id', '=', 'security_processes.id')
-                ->where('security_profile_processes.profile_id',session()->get('profile_id')) //$this->profile_id)
-                ->groupBy("security_processes.id", "security_processes.name", "security_processes.description", "security_processes.icon", "security_processes.route", "security_processes.actions", "security_processes.order")
-                ->select('security_processes.*')
-                ->get()
-        //->toSql()
->>>>>>> origin/feature/develop_lg
         ;
         return $Processes;
     }
@@ -187,17 +159,18 @@ class User extends Authenticatable
 
         if (!session()->get('MODULE') == null) {
             return $this->getMenu(session()->get('MODULE'));
-        }  else {
-             return [];
-        } 
+        } else {
+            return [];
+        }
     }
 
-    public function capturePerfil() {
+    public function capturePerfil()
+    {
         if (session()->get('MODULE') == null) {
             return $this->getPerfiles->toArray();
-        }  else {
+        } else {
             return [];
-        } 
+        }
     }
 
     public function getMenu($Module)
@@ -205,7 +178,7 @@ class User extends Authenticatable
         $Menu = Menu::orderBy('order')->where("module_id", $Module)->with('getProcess')->get()->toArray();
         foreach ($Menu as $key => $value) {
             foreach ($value['get_process'] as $key2 => $value2) {
-                if (!in_array(/* $this->profile_id */session()->get('profile_id'), $value2['profile_array'])) {
+                if (!in_array(/* $this->profile_id */ session()->get('profile_id'), $value2['profile_array'])) {
                     unset($Menu[$key]['get_process'][$key2]);
                     unset($Menu[$key]['process'][$key2]);
                 }
@@ -217,17 +190,8 @@ class User extends Authenticatable
         return $Menu;
     }
 
-<<<<<<< HEAD
-    public function personalData()
-    {
-        return $this->hasOne(PersonalData::class, 'document', 'document');
-    }
-
     public function getShortNameAttribute()
     {
-=======
-    public function getShortNameAttribute() {
->>>>>>> origin/feature/develop_lg
         if ($this->document_type->is_natural === false) {
             $name = ucwords(Lower($this->full_name));
         } else {
@@ -253,17 +217,10 @@ class User extends Authenticatable
         }
 
         $has_permision = Process::join("security_profile_processes", "security_profile_processes.process_id", "security_processes.id")
-<<<<<<< HEAD
             ->select("*")
             ->where("route", $routeFather)
-            ->where("profile_id", $this->profile_id)
+            ->where("profile_id", session()->get('profile_id')) //$this->profile_id)
             ->first();
-=======
-                ->select("*")
-                ->where("route", $routeFather)
-                ->where("profile_id", session()->get('profile_id')) //$this->profile_id)
-                ->first();
->>>>>>> origin/feature/develop_lg
 
         if ($has_permision != null) {
             if ($routeSon == '') {

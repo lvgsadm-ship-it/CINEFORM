@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Modules\Comun\Entities\PersonalData;
 use Modules\Taller\Entities\Curso;
 use Modules\Taller\Entities\ContenidoCurso;
+use Modules\Taller\Services\CondicionalBuscadorCurso;
 
 class EditarCursoController extends BaseController
 {
@@ -25,18 +26,17 @@ class EditarCursoController extends BaseController
         $curso = Curso::with('estados')->findOrFail($id);
 
         // Obtener los datos de la persona autenticada
-        $persona = PersonalData::where('document', Auth::user()->document)->first();
-        $esCoordinador = Auth::user()->profile_id == 4;
+        $persona = PersonalData::where('user_id', Auth::id())->first();
+        $esCoordinador = CondicionalBuscadorCurso::esCoordinadorOAdmin();
 
         if (!$persona && !$esCoordinador) {
             Log::error('No se encontraron datos personales para el usuario (No Coordinador)', [
                 'user_id' => Auth::id(),
-                'document' => Auth::user()->document
             ]);
             abort(403, 'No se encontraron tus datos de perfil. Por favor, contacta al administrador.');
         }
 
-        $idPersona = $persona ? $persona->id : null;
+        $idPersona = $persona ? $persona->id_persona : null;
 
         Log::info('Datos del curso', [
             'curso_id' => $curso->id_curso,
@@ -161,20 +161,19 @@ class EditarCursoController extends BaseController
             }
 
             // Obtener los datos de la persona asociada al usuario
-            $persona = \Modules\Comun\Entities\PersonalData::where('document', $user->document)->first();
-            $isCoordinator = $user->profile_id == 4;
+            $persona = \Modules\Comun\Entities\PersonalData::where('user_id', $user->id)->first();
+            $isCoordinator = CondicionalBuscadorCurso::esCoordinadorOAdmin();
 
             if (!$persona && !$isCoordinator) {
                 Log::error('No se encontraron datos de persona para el usuario (No Coordinador)', [
                     'user_id' => $user->id,
-                    'document' => $user->document
                 ]);
                 return back()
                     ->withInput()
                     ->withErrors(['error' => 'No se encontró tu perfil de persona. Contacta al administrador.']);
             }
 
-            $idPersona = $persona ? $persona->id : null;
+            $idPersona = $persona ? $persona->id_persona : null;
 
             // Buscar el curso con sus relaciones
             $curso = Curso::with('contenidos')->find($id);

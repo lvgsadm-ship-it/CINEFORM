@@ -127,7 +127,7 @@
                                 <div class="row mt-3">
                                     <div class="col-12 col-md-6 col-lg-4">
                                         <div class="form-floating form-floating-custom mb-2">
-                                            {{html()->select("type_document", $typeDoc, Auth::user()->getDocumentType->crypt_id )
+                                            {{html()->select("type_document", $typeDoc, Auth::user()->getDocumentType?->crypt_id )
                                                         ->class('form-select')
                                                         ->placeholder(__("Select"))
                                                         ->required(true)
@@ -342,7 +342,7 @@
          getCamerasPC();
         
         iti = window.intlTelInput(document.getElementById('phone'), {
-            initialCountry: '{{Auth::user()->getCountry->iso2}}',
+            initialCountry: '{{Auth::user()->getCountry?->iso2 ?? 'us'}}',
             //onPhoneNumberBlur
             //countryDialCode: '+58',
             strictMode: true,

@@ -4,8 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -13,10 +12,10 @@ return new class extends Migration
      */
     public function up()
     {
-       Schema::create('security_profiles_users', function (Blueprint $table) {
+        Schema::create('security_profiles_users', function (Blueprint $table) {
             $table->id('id_rol_persona');
-            $table->foreignId('id_rol')->constrained('security_profiles')->onDelete('cascade');            
-            $table->foreignId('id_users')->constrained('security_users')->onDelete('cascade');                             
+            $table->foreignId('id_rol')->constrained('security_profiles')->onDelete('cascade');
+            $table->foreignId('id_users')->constrained('security_users')->onDelete('cascade');
             $table->unsignedBigInteger('status')->default(0);
             $table->date('fecha_aprobacion')->nullable();
             $table->unsignedBigInteger('aprobado_por')->nullable();
@@ -26,8 +25,56 @@ return new class extends Migration
             $table->dateTime('actualizado_en')->nullable();
         });
 
+
+        //1. Administrador
+        //2. Facilitador
+        //3. Participante
+        //4. Coordinador
+
+
         DB::table('security_profiles_users')->insert([
-            ['id_rol_persona' => 1,'id_rol'=> 1, 'id_users' => 1,'creado_por' => 1, 'creado_en' => now()]
+            [
+                'id_rol_persona' => 1,
+                'id_rol' => 1,
+                'id_users' => 1,
+                'creado_por' => 1,
+                'creado_en' => now()
+            ],
+            [
+                'id_rol_persona' => 6,
+                'id_rol' => 4,
+                'id_users' => 1,
+                'creado_por' => 1,
+                'creado_en' => now()
+            ],
+            [
+                'id_rol_persona' => 2,
+                'id_rol' => 1,
+                'id_users' => 2,
+                'creado_por' => 1,
+                'creado_en' => now()
+            ],
+            [
+                'id_rol_persona' => 3,
+                'id_rol' => 2,
+                'id_users' => 2,
+                'creado_por' => 1,
+                'creado_en' => now()
+            ],
+            [
+                'id_rol_persona' => 4,
+                'id_rol' => 3,
+                'id_users' => 2,
+                'creado_por' => 1,
+                'creado_en' => now()
+            ],
+            [
+                'id_rol_persona' => 5,
+                'id_rol' => 4,
+                'id_users' => 2,
+                'creado_por' => 1,
+                'creado_en' => now()
+            ],
         ]);
     }
 
