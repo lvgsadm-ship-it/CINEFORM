@@ -102,6 +102,16 @@ class EditarCursoController extends BaseController
         // Determinar si el usuario es facilitador del curso
         $esFacilitador = $idPersona && $curso->id_persona == $idPersona;
 
+        // Obtener Facilitadores (Perfil ID=2) para que el coordinador pueda reasignar
+        $facilitadores = \Modules\Security\Entities\User::whereHas('getPerfiles', function ($q) {
+            $q->where('security_profiles.id', 2);
+        })
+            ->with(['personalData.especializaciones'])
+            ->get()
+            ->filter(fn($u) => $u->personalData != null);
+
+        $especializaciones = \Modules\Comun\Entities\Especializacion::where('status', 'Activo')->get();
+
         Log::info('Permiso de edición concedido');
         return view('taller::a.CursoEditar', compact(
             'curso',
@@ -109,7 +119,9 @@ class EditarCursoController extends BaseController
             'contenidos',
             'tiposEvaluacion',
             'esCoordinador',
-            'esFacilitador'
+            'esFacilitador',
+            'facilitadores',
+            'especializaciones'
         ));
     }
 
@@ -240,17 +252,18 @@ class EditarCursoController extends BaseController
                     'cantidad_cupos' => 'nullable|integer|min:0',
                     'fecha_inicio' => 'nullable|date',
                     'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
-                    'lugar' => 'nullable|string|max:255',
-                    'id_tipo_evaluacion' => 'nullable|exists:tipo_evaluacion,id_tipo_evaluacion',
-                    'id_estado' => 'nullable|exists:estado_curso,id_estado',
-                    'id_persona' => 'nullable|exists:personal_data,id_persona',
-                    'id_institucion' => 'nullable|exists:institucion,id_institucion',
-                    'id_area' => 'nullable|exists:area,id_area',
-                    'id_categoria' => 'nullable|exists:categoria,id_categoria',
-                    'id_subcategoria' => 'nullable|exists:subcategoria,id_subcategoria',
-                    'id_modalidad_inscripcion' => 'nullable|exists:modalidad_inscripcion,id_modalidad_inscripcion',
-                    'id_modalidad_evaluacion' => 'nullable|exists:modalidad_evaluacion,id_modalidad_evaluacion',
-                    'id_modalidad_evaluacion' => 'nullable|exists:modalidad_evaluacion,id_modalidad_evaluacion',
+                    'id_persona' => 'required|exists:Modules\Comun\Entities\PersonalData,id_persona',
+                    
+                    'contenidos' => 'nullable|array',
+                    'contenidos.*.id' => 'nullable|integer',
+                    'contenidos.*.titulo' => 'required|string|max:255',
+                    'contenidos.*.url_contenido' => 'required|url',
+                    'contenidos.*.descripcion' => 'nullable|string',
+                    'contenidos.*.descripcion_breve' => 'nullable|string',
+                    'contenidos.*.orden' => 'nullable|integer|min:0',
+                    'contenidos.*.es_evaluacion' => 'nullable|boolean',
+                    'contenidos.*.id_tipo_evaluacion' => 'nullable|exists:tipo_evaluaciones,id_tipo_evaluacion',
+                    'contenidos.*.ponderacion' => 'nullable|numeric|min:0|max:100'
                 ]);
             } else {
                 $validatedData = $request->validate([

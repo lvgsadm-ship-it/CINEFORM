@@ -1,39 +1,35 @@
 @extends('layouts.kaiadmin-login')
 @section('content')
 <style>
-    input[type=text]:focus,  input[type=password]:focus{
-        background-color: #FFFF99 !important;
+    input[type=text]:focus, input[type=password]:focus, select:focus {
+        background-color: #f7faff !important;
+        border-color: #3f67f0 !important;
+        box-shadow: 0 0 0 0.25rem rgba(63, 103, 240, 0.15) !important;
+        outline: none;
     }
-    .form-floating-custom .form-control:focus+label,.form-floating-custom .form-control:not(:placeholder-shown)+label,.form-floating-custom .form-select:focus+label,.form-floating-custom .form-select:not(:placeholder-shown)+label {
-        font-weight: bold;
+    .form-floating-custom .form-control:focus+label,
+    .form-floating-custom .form-control:not(:placeholder-shown)+label {
+        font-weight: 700;
+        color: #3f67f0;
+    }
+    .container-login {
+        max-width: 500px !important;
+        width: 100% !important;
+    }
+    .wrapper-login {
+        min-height: 100vh;
     }
 </style>
 
-<div class="wrapper wrapper-login">
-    <div class="container container-login animated fadeIn">
-        <div class="row mb-2 text-center">
-             
-             <div class="col-6 col-md-6 col-lg-6 text-center ">
-                 <a href="{{route('language', 'es')}}">
-                 <i style="display:inline-block" class="iti__flag iti__ve"></i>
-                 </a>
-             </div>
-             <div class="col-6 col-md-6 col-lg-6  text-center ">
-                 <a href="{{route('language', 'en')}}">
-                 <i style="display:inline-block" class="iti__flag iti__gb"></i>
-                 </a>
-             </div>
-            
-            
+<div class="wrapper-login d-flex justify-content-center align-items-center py-5">
+    <div class="container-login bg-white shadow-lg rounded-4 p-5 animated fadeIn">
+        <div class="text-center mb-4">
+            <div class="mb-3">
+                <i class="fas fa-key fa-3x text-primary"></i>
+            </div>
+            <h2 class="fw-bold text-primary">{{__('Recover Password')}}</h2>
+            <p class="text-muted small">Ingrese su correo electrónico para recibir las instrucciones de recuperación</p>
         </div>
-        <h3 class="text-center d-block d-sm-none">
-            <img class="img-fluid" src="{{ asset('template/kaiadmin/assets/img/kaiadmin/logo.jpeg')}}" alt="Card image cap">
-       
-        </h3>
-        <h3 class="text-center">
-            
-            {{__('Recover Password')}}
-        </h3>
         <form method="post" action="{{route('recovery')}}" autocomplete="off" id="frm1">
             @csrf
             <input type="hidden" value="POST" name="_method" />
@@ -78,32 +74,29 @@
                     @error('captcha')
                     <label id="captcha-error" class="error" for="captcha">{{__('This field is required')}}</label>
                     @enderror
-                    <div class="row mt-3">
-                        <div class="col-8 ">
-                        
-                            <img id="img-c" class="img-fluid" src="{{ route('captcha', rand(1,999)) }}" alt="captcha">
-                        
-                        </div>
-                        <div class="col-4 mt-1">
-                            <div class="row ">
-                                <button id="reload-img"   type="button" class="btn btn-large btn-info">
-                                    <i class="fa fa-undo"></i>
-                                </button>
-
+                    <div class="row mt-4 align-items-center">
+                        <div class="col-8">
+                            <div class="border rounded p-1 bg-light text-center">
+                                <img id="img-c" class="img-fluid" src="{{ route('captcha', rand(1,999)) }}" alt="captcha" style="max-height: 45px;">
                             </div>
                         </div>
-                        
+                        <div class="col-4">
+                            <button id="reload-img" type="button" class="btn btn-outline-primary w-100" title="Recargar Captcha">
+                                <i class="fa fa-sync-alt"></i>
+                            </button>
+                        </div>
                     </div>
-                    
                 </div>
 
-                <div class="form-action mb-3">
-                    <button id="checkUser" type="button" class="btn btn-primary w-100 btn-login"><i class="icon-login"></i> {{__('Recover Password')}}</button>
-
+                <div class="form-action mb-4 mt-4">
+                    <button id="checkUser" type="button" class="btn btn-primary btn-lg w-100 shadow-sm">
+                        <i class="fas fa-paper-plane me-2"></i> {{__('Enviar Solicitud')}}
+                    </button>
                 </div>
-                <div class="login-account">
-                    
-                    <a href="{{route('login')}}" id="show-signup" class="link">{{__("Sign In")}}</a>
+                <div class="login-account text-center">
+                    <a href="{{route('login')}}" id="show-signup" class="text-muted small" style="text-decoration: none;">
+                        <i class="fas fa-arrow-left me-1"></i> {{__("Volver al Inicio de Sesión")}}
+                    </a>
                 </div>
             </div>
         </form>

@@ -104,14 +104,22 @@ class CursoController extends BaseController
         // pero los facilitadores deben ver todos los que han creado.
         if (!$esCoordinador) {
             $idPersonaActual = Auth::user()->personalData->id_persona ?? null;
-            
-            $query->where(function ($q) use ($idPersonaActual) {
+            $esParticipante = CondicionalBuscadorCurso::esParticipante();
+
+            $query->where(function ($q) use ($idPersonaActual, $esParticipante) {
+                // El filtro base para participantes/facilitadores son cursos >= 6 (Inscripción/Activo)
                 $q->whereHas('estados', function ($q2) {
                     $q2->where('estados.id_estado', '>=', 6);
                 });
-                
+
                 if ($idPersonaActual) {
-                    $q->orWhere('id_persona', $idPersonaActual);
+                    if ($esParticipante) {
+                        // REGLA: Si es perfil participante, EXCLUIR sus propios cursos
+                        $q->where('taller_cursos.id_persona', '!=', $idPersonaActual);
+                    } else {
+                        // REGLA: Si es facilitador, MOSTRAR sus propios cursos aunque no tengan estado >= 6
+                        $q->orWhere('taller_cursos.id_persona', $idPersonaActual);
+                    }
                 }
             });
         }

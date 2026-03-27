@@ -11,11 +11,26 @@ class PersonalData extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
+        'tipo_dni',
+        'dni',
+        'pasaporte',
+        'rif',
+        'reg_nac_cine',
+        'genero',
         'primer_nombre',
         'segundo_nombre',
         'primer_apellido',
         'segundo_apellido',
-        'dni'
+        'telefono',
+        'telefono_opcional',
+        'id_pais',
+        'id_estado',
+        'id_municipio',
+        'id_parroquia',
+        'direccion',
+        'creado_por',
+        'creado_en'
     ];
 
     protected $table = "comun.personas";

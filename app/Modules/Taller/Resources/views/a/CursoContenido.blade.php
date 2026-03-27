@@ -18,15 +18,16 @@ Incluye una barra lateral de navegación entre lecciones y un área principal pa
         </div>
         <div class="row">
             <!-- Sidebar de Navegación (Izquierda en pantallas grandes) -->
+            <!-- Sidebar de Navegación (Derecha) -->
             <div class="col-lg-4 order-lg-2 mb-4">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-header bg-white border-bottom">
-                        <h5 class="mb-0">Contenido del Curso</h5>
-                        <small class="text-muted">{{ $curso->nombre }}</small>
+                <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                    <div class="card-header bg-primary py-4 px-4 text-white border-0">
+                        <h5 class="mb-1 fw-bold text-white"><i class="fas fa-list-ul me-2"></i> Contenido del Curso</h5>
+                        <p class="mb-0 small opacity-75 text-white">{{ $curso->nombre }}</p>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="list-group list-group-flush" style="max-height: 500px; overflow-y: auto;">
-                            @forelse($curso->contenidos as $contenido)
+                    <div class="card-body p-3 bg-light">
+                        <div class="list-group list-group-flush rounded-3 overflow-hidden shadow-sm" style="max-height: 600px; overflow-y: auto;">
+                            @forelse($curso->contenidos as $index => $contenido)
                                 @php
                                     $esActivo = $contenidoActual && $contenido->id_contenido_curso == $contenidoActual->id_contenido_curso;
                                     $icono = 'fa-file-alt';
@@ -34,46 +35,39 @@ Incluye una barra lateral de navegación entre lecciones y un área principal pa
                                     if (str_contains($urlStr, 'youtube') || str_contains($urlStr, 'vimeo') || str_contains($urlStr, '.mp4')) {
                                         $icono = 'fa-play-circle';
                                     } elseif (str_contains($urlStr, '.pdf') || str_contains($urlStr, 'drive.google.com') || str_contains($urlStr, '.doc') || str_contains($urlStr, '.zip')) {
-                                        $icono = 'fa-download';
-                                    } else {
-                                        $icono = 'fa-link';
+                                        $icono = 'fa-file-download';
                                     }
 
-                                    // Sobrescribir icono si es evaluación
-                                    if ($contenido->es_evaluacion)
-                                        $icono = 'fa-clipboard-list';
+                                    if ($contenido->es_evaluacion) $icono = 'fa-clipboard-check';
                                 @endphp
                                 <a href="{{ route('taller.cursos.contenido', ['curso' => $curso->id_curso, 'contenido_id' => $contenido->id_contenido_curso]) }}"
-                                    class="list-group-item list-group-item-action d-flex align-items-center p-3 {{ $esActivo ? 'active bg-primary text-white border-primary' : '' }}">
-                                    <div class="me-3">
-                                        <i class="fas {{ $icono }} {{ $esActivo ? 'text-white' : 'text-primary' }}"></i>
+                                    class="list-group-item list-group-item-action d-flex align-items-center border-0 mb-2 rounded-3 py-3 px-3 shadow-sm {{ $esActivo ? 'active-lesson-shadow border-start border-primary border-4' : 'bg-white' }}">
+                                    <div class="lesson-number me-3 text-center rounded-circle {{ $esActivo ? 'bg-primary text-white' : 'bg-light text-muted' }}" style="width: 32px; height: 32px; line-height: 32px; font-weight: bold; font-size: 0.85rem; transition: all 0.3s;">
+                                        {{ $index + 1 }}
                                     </div>
                                     <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <h6 class="mb-0 {{ $esActivo ? 'text-white' : '' }}">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <span class="mb-0 fw-bold text-dark" style="font-size: 0.95rem; line-height: 1.2;">
                                                 {{ $contenido->titulo }}
-                                                @if($contenido->es_evaluacion && $contenido->ponderacion > 0)
-                                                    <span
-                                                        class="badge {{ $esActivo ? 'bg-white text-primary' : 'bg-warning text-dark' }} ms-1"
-                                                        style="font-size: 0.7em;">
-                                                        {{ $contenido->ponderacion }}%
-                                                    </span>
-                                                @endif
-                                            </h6>
-                                            <small class="{{ $esActivo ? 'text-white-50' : 'text-muted' }} ms-2">
-                                                {{ $contenido->orden }}
+                                            </span>
+                                            @if($contenido->es_evaluacion)
+                                                <span class="badge bg-warning text-dark ms-2 shadow-xs" style="font-size: 0.7rem; padding: 0.35em 0.65em;">
+                                                    {{ $contenido->ponderacion ?? '0' }}%
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <div class="d-flex align-items-center mt-1">
+                                            <i class="fas {{ $icono }} me-2 text-primary opacity-75" style="font-size: 0.8rem;"></i>
+                                            <small class="text-secondary text-truncate" style="max-width: 180px; font-size: 0.8rem;">
+                                                {{ $contenido->descripcion_breve ?? 'Lección académica' }}
                                             </small>
                                         </div>
-                                        <small class="{{ $esActivo ? 'text-white-50' : 'text-muted' }} d-block text-truncate"
-                                            style="max-width: 250px;">
-                                            {{ $contenido->descripcion_breve }}
-                                        </small>
                                     </div>
                                 </a>
                             @empty
-                                <div class="p-4 text-center">
-                                    <i class="fas fa-box-open fa-2x text-muted mb-2"></i>
-                                    <p class="text-muted mb-0">No hay contenidos disponibles.</p>
+                                <div class="p-5 text-center bg-white">
+                                    <i class="fas fa-ghost fa-3x text-light mb-3"></i>
+                                    <p class="text-muted mb-0">No hay módulos disponibles en este curso.</p>
                                 </div>
                             @endforelse
                         </div>
@@ -144,24 +138,34 @@ Incluye una barra lateral de navegación entre lecciones y un área principal pa
                                 }
                             @endphp
 
-                            <!-- Encabezado -->
-                            <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 pb-3 border-bottom">
-                                <div class="d-flex align-items-center mb-2 mb-md-0">
-                                    <span class="badge bg-light text-dark border me-3 px-3 py-2 rounded-pill fw-normal">
-                                        {{ ucfirst($tipo) }}
-                                        @if($contenidoActual->es_evaluacion && $contenidoActual->ponderacion > 0)
-                                            <span class="ms-1 px-2 py-0 badge bg-success text-white">Valor:
-                                                {{ $contenidoActual->ponderacion }}%</span>
-                                        @elseif(!$contenidoActual->es_evaluacion)
-                                            <span class="ms-1 px-2 py-0 badge bg-secondary text-white">Contenido no evaluado</span>
+                            <!-- Encabezado Estilizado -->
+                            <div class="row align-items-center mb-5 g-3">
+                                <div class="col-md-9">
+
+                                    <div class="d-flex flex-wrap gap-3 mt-3">
+                                        <div class="px-3 py-2 bg-light border rounded-3 d-flex align-items-center">
+                                            <i class="fas fa-tag text-primary me-2"></i>
+                                            <span class="small fw-bold">{{ ucfirst($tipo) }}</span>
+                                        </div>
+                                        @if($contenidoActual->es_evaluacion)
+                                            <div class="px-3 py-2 bg-success bg-opacity-10 border border-success border-opacity-25 rounded-3 d-flex align-items-center shadow-sm">
+                                                <i class="fas fa-percentage text me-2"></i>
+                                                <span class="small text fw-bold">Ponderación: {{ $contenidoActual->ponderacion ?? '0' }}%</span>
+                                            </div>
+                                        @else
+                                            <div class="px-3 py-2 bg-secondary bg-opacity-10 border border-secondary border-opacity-25 rounded-3 d-flex align-items-center">
+                                                <i class="fas fa-book-reader text-secondary me-2"></i>
+                                                <span class="small text-secondary fw-bold">Visto General</span>
+                                            </div>
                                         @endif
-                                    </span>
-                                    <span class="text-muted small"><i class="far fa-calendar-alt me-1"></i>
-                                        {{ $contenidoActual->created_at ? $contenidoActual->created_at->format('d/m/Y') : 'N/A' }}</span>
+                                        
+                                    </div>
                                 </div>
-                                <a href="{{ $url }}" class="btn {{ $btnClass }} rounded-pill px-4 btn-action">
-                                    <i class="fas {{ $btnIcon }} me-2"></i> {{ $btnText }}
-                                </a>
+                                <div class="col-md-3 text-md-end">
+                                    <a href="{{ $url }}" class="btn {{ $btnClass }} btn-lg rounded-pill shadow-sm btn-action w-100">
+                                        <i class="fas {{ $btnIcon }} me-2"></i> {{ $btnText }}
+                                    </a>
+                                </div>
                             </div>
 
                             <!-- Resultado de Evaluación (Solo Estudiantes con nota) -->
@@ -197,11 +201,14 @@ Incluye una barra lateral de navegación entre lecciones y un área principal pa
                             @endif
 
                             <!-- Descripción y Detalles -->
-                            <div class="contenido-descripcion mt-4">
-                                <h5 class="text-dark fw-bold mb-3" style="font-family: 'Poppins', sans-serif;">Sobre este
-                                    contenido</h5>
-                                <div class="text-muted lead" style="font-size: 1.05rem; line-height: 1.8;">
-                                    {{ $contenidoActual->descripcion }}
+                            <div class="card bg-light border-0 rounded-4 mt-5">
+                                <div class="card-body p-4">
+                                    <h5 class="fw-bold mb-3 text-primary d-flex align-items-center">
+                                        <i class="fas fa-info-circle me-2"></i> Sobre este contenido
+                                    </h5>
+                                    <div class="text-muted" style="font-size: 1rem; line-height: 1.7;">
+                                        {!! nl2br(e($contenidoActual->descripcion)) !!}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -224,87 +231,53 @@ Incluye una barra lateral de navegación entre lecciones y un área principal pa
     @push('styles')
         <style>
             .card {
-                border-radius: 16px;
-                border: 1px solid rgba(0, 0, 0, 0.05);
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
-                transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-            }
-
-            .card:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-            }
-
-            /* Estilo del Sidebar */
-            .list-group-item {
+                border-radius: 20px;
                 border: none;
-                border-radius: 8px !important;
-                margin-bottom: 4px;
-                padding: 1rem 1.25rem;
-                transition: all 0.2s ease;
-                color: #525f7f;
-            }
-
-            .list-group-item:hover {
-                background-color: #f8f9fa;
-                color: #212529;
-            }
-
-            .list-group-item.active {
-                background-color: #f6f9fc !important;
-                color: #2dce89 !important;
-                /* Color primario suave o verde éxito */
-                font-weight: 600;
-                border: 1px solid #e9ecef;
-                box-shadow: inset 4px 0 0 #2dce89;
-                /* Borde izquierdo activo */
-            }
-
-            .list-group-item.active .text-muted {
-                color: #8898aa !important;
-            }
-
-            .list-group-item.active i {
-                color: #2dce89 !important;
-            }
-
-            /* Scrollbar personalizado para la lista */
-            .list-group-flush::-webkit-scrollbar {
-                width: 6px;
-            }
-
-            .list-group-flush::-webkit-scrollbar-track {
-                background: #f1f1f1;
-            }
-
-            .list-group-flush::-webkit-scrollbar-thumb {
-                background: #c1c1c1;
-                border-radius: 4px;
-            }
-
-            .list-group-flush::-webkit-scrollbar-thumb:hover {
-                background: #a8a8a8;
-            }
-
-            /* Botón de Acción */
-            .btn-action {
-                border-width: 2px;
-                font-weight: 600;
-                letter-spacing: 0.5px;
                 transition: all 0.3s ease;
             }
 
-            .btn-action:hover {
-                background-color: #212529;
-                color: #fff;
-                transform: translateY(-1px);
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            /* Estilo del Sidebar LMS */
+            .list-group-item {
+                border: none;
+                transition: all 0.2s ease;
+                background-color: #fff;
             }
 
-            /* Header Gradiente (si se usa) */
-            .bg-gradient-primary {
-                background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
+            .list-group-item:hover {
+                background-color: #f1f4f9;
+                transform: scale(1.02);
             }
+
+            .list-group-item .text-dark {
+                color: #212529 !important;
+            }
+
+            .active-lesson-shadow {
+                background-color: #f8fbff !important;
+                box-shadow: 0 10px 25px rgba(30, 58, 138, 0.1) !important;
+                transform: translateX(5px);
+            }
+
+            .lesson-number {
+                transition: all 0.3s ease;
+            }
+
+            /* Áreas de contenido */
+            .btn-action {
+                transition: all 0.3s ease;
+                font-weight: 700;
+            }
+
+            .btn-action:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important;
+            }
+
+            /* Scrollbar personalizado */
+            .list-group-flush::-webkit-scrollbar { width: 5px; }
+            .list-group-flush::-webkit-scrollbar-track { background: transparent; }
+            .list-group-flush::-webkit-scrollbar-thumb { background: #dce1eb; border-radius: 10px; }
+            .list-group-flush::-webkit-scrollbar-thumb:hover { background: #cbd5e0; }
         </style>
     @endpush
 @endsection

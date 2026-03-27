@@ -64,8 +64,8 @@ class CrearCursoController extends BaseController
             // Validación
             $validatedData = $request->validate([
                 'nombre' => 'required|string|max:255',
-                'id_modalidad' => 'required|exists:modalidad,id_modalidad',
-                'id_persona' => 'required|exists:comun.personas,id_persona', // Facilitador
+                'id_modalidad' => 'required|exists:' . \Modules\Taller\Entities\Modalidad::class . ',id_modalidad',
+                'id_persona' => 'required|exists:' . \Modules\Comun\Entities\PersonalData::class . ',id_persona', // Facilitador
                 'descripcion' => 'nullable|string',
                 'duracion' => 'nullable|integer|min:1',
                 'horas' => 'nullable|integer|min:1',
@@ -79,7 +79,7 @@ class CrearCursoController extends BaseController
                 'contenidos.*.descripcion_breve' => 'nullable|string',
                 'contenidos.*.orden' => 'nullable|integer|min:0',
                 'contenidos.*.es_evaluacion' => 'nullable|boolean',
-                'contenidos.*.id_tipo_evaluacion' => 'nullable|exists:tipo_evaluaciones,id_tipo_evaluacion',
+                'contenidos.*.id_tipo_evaluacion' => 'nullable|exists:' . \Modules\Taller\Entities\TipoEvaluacion::class . ',id_tipo_evaluacion',
                 'contenidos.*.ponderacion' => 'nullable|numeric|min:0|max:100'
             ]);
 

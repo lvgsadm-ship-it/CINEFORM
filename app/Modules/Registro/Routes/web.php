@@ -13,6 +13,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('registro')->group(function() {
     Route::get('/', 'RegistroController@index');
+    
+    // Rutas para el registro de usuarios (públicas)
+    Route::get('/usuario', [\Modules\Registro\Http\Controllers\RegisterController::class, 'index'])->name('registro.usuario');
+    Route::post('/usuario', [\Modules\Registro\Http\Controllers\RegisterController::class, 'store'])->name('registro.usuario.store');
+    
+    // Endpoints AJAX para selects dependientes
+    Route::get('/ajax/estados/{pais_id}', [\Modules\Registro\Http\Controllers\RegisterController::class, 'getEstados'])->name('registro.ajax.estados');
+    Route::get('/ajax/municipios/{estado_id}', [\Modules\Registro\Http\Controllers\RegisterController::class, 'getMunicipios'])->name('registro.ajax.municipios');
+    Route::get('/ajax/parroquias/{municipio_id}', [\Modules\Registro\Http\Controllers\RegisterController::class, 'getParroquias'])->name('registro.ajax.parroquias');
 });
 
   Route::group(array('middleware' => array('auth', \Modules\Security\Http\Middleware\CheckSecurity::class)), function () {

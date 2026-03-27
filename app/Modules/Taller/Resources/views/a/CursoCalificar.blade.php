@@ -5,7 +5,7 @@
         <!-- Header Section -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card bg-white border-0 shadow-sm overflow-hidden" style="border-radius: 1rem;">
+                <div class="card bg-white border-0 shadow-card overflow-hidden" style="border-radius: 1rem;">
                     <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
                         <div>
                             <div class="d-flex align-items-center mb-1">
@@ -18,235 +18,176 @@
                             </div>
                             <h3 class="fw-bold text-dark mb-0">{{ $contenido->titulo }}</h3>
                         </div>
-                        <a href="{{ route('taller.cursos.contenido', ['curso' => $curso->id_curso, 'contenido_id' => $contenido->id_contenido_curso]) }}"
-                            class="btn btn-outline-light text-dark border-0 bg-gray-100 hover-lift">
-                            <i class="fas fa-arrow-left me-2"></i> Volver al contenido
-                        </a>
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('taller.cursos.contenido', ['curso' => $curso->id_curso, 'contenido_id' => $contenido->id_contenido_curso]) }}"
+                                class="btn btn-outline-light text-dark border-0 bg-gray-100 hover-lift">
+                                <i class="fas fa-arrow-left me-2"></i> Volver al contenido
+                            </a>
+                            <a href="{{ route('taller.cursos.show', $curso->id_curso) }}"
+                                class="btn btn-outline-light text-dark border-0 bg-gray-100 hover-lift" style="background-color: #f8fafc;">
+                                <i class="fas fa-arrow-left me-2"></i> Volver al curso
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </div> 
         </div>
 
-        @if(session('success'))
-            <div class="alert alert-success border-0 shadow-sm rounded-3 d-flex align-items-center mb-4 fade show" role="alert">
-                <div class="icon-shape icon-sm bg-success-light text-success rounded-circle me-3">
-                    <i class="fas fa-check"></i>
-                </div>
-                <div>
-                    <h6 class="mb-0 fw-bold">¡Éxito!</h6>
-                    <small>{{ session('success') }}</small>
-                </div>
-                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="alert alert-danger border-0 shadow-sm rounded-3 d-flex align-items-center mb-4 fade show" role="alert">
-                <div class="icon-shape icon-sm bg-danger-light text-danger rounded-circle me-3">
-                    <i class="fas fa-exclamation"></i>
-                </div>
-                <div>
-                    <h6 class="mb-0 fw-bold">Error</h6>
-                    <small>{{ session('error') }}</small>
-                </div>
-                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
-        <div class="row">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 1.5rem;">
-                    <!-- Toolbar & Filters -->
-                    <div class="card-header bg-white border-0 py-4 px-4 pb-0" style="border-radius: 1.5rem 1.5rem 0 0;">
-                        <div class="row g-3 align-items-center justify-content-between">
-                            <div class="col-12 col-md-6">
-                                <h5 class="mb-1 fw-bold text-dark">Estudiantes Inscritos</h5>
-                                <p class="text-muted small mb-0">Gestiona las calificaciones y retroalimentación.</p>
-                            </div>
-                            <div class="col-12 col-md-auto d-flex gap-3 align-items-center">
-                                <span
-                                    class="badge bg-warning-soft text-warning px-3 py-2 rounded-pill border border-warning border-opacity-25">
-                                    <i class="fas fa-weight-hanging me-1"></i> Ponderación:
-                                    <strong>{{ $contenido->ponderacion }}%</strong>
-                                </span>
+                        <!-- Search Bar Centered -->
+                        <div class="row justify-content-center mt-4 mb-4">
+                            <div class="col-12">
+                                <form action="{{ route('taller.calificaciones.index', ['curso' => $curso->id_curso, 'contenido' => $contenido->id_contenido_curso]) }}" method="GET">
+                                    <div class="input-group input-group-lg shadow-sm border bg-white rounded-pill overflow-hidden search-box-focus">
+                                        <span class="input-group-text border-0 bg-transparent ps-4 text-muted"><i class="fas fa-search"></i></span>
+                                        <input type="text" name="search"
+                                            class="form-control border-0 bg-transparent shadow-none ps-2 fs-6"
+                                            placeholder="Buscar participante por nombre o cédula..."
+                                            value="{{ request('search') }}">
+                                        @if(request('search'))
+                                            <a href="{{ route('taller.calificaciones.index', ['curso' => $curso->id_curso, 'contenido' => $contenido->id_contenido_curso]) }}" 
+                                               class="btn btn-link text-muted px-3 border-0 shadow-none"><i class="fas fa-times-circle"></i></a>
+                                        @endif
+                                        <button type="submit" class="btn btn-primary px-4 rounded-pill m-1 fw-bold shadow-sm" style="background-color: #1e3a8a;">Buscar</button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
 
-                        <!-- Search Bar -->
-                        <div class="mt-4 mb-2">
-                            <form
-                                action="{{ route('taller.calificaciones.index', ['curso' => $curso->id_curso, 'contenido' => $contenido->id_contenido_curso]) }}"
-                                method="GET">
-                                <div
-                                    class="input-group input-group-lg shadow-none border bg-light rounded-pill overflow-hidden">
-                                    <span class="input-group-text border-0 bg-transparent ps-4 text-muted"><i
-                                            class="fas fa-search"></i></span>
-                                    <input type="text" name="search"
-                                        class="form-control border-0 bg-transparent shadow-none ps-2"
-                                        placeholder="Buscar por nombre, apellido o cédula..."
-                                        value="{{ request('search') }}">
-                                    @if(request('search'))
-                                        <a href="{{ route('taller.calificaciones.index', ['curso' => $curso->id_curso, 'contenido' => $contenido->id_contenido_curso]) }}"
-                                            class="btn btn-link text-muted pe-4 text-decoration-none">
-                                            <i class="fas fa-times"></i>
-                                        </a>
-                                    @else
-                                        <button class="btn btn-primary px-4 rounded-pill m-1" type="submit">Buscar</button>
-                                    @endif
-                                </div>
-                            </form>
+                <form action="{{ route('taller.calificaciones.store', ['curso' => $curso->id_curso, 'contenido' => $contenido->id_contenido_curso]) }}" method="POST">
+                    @csrf
+                    <!-- Lista Zen-Minimalista -->
+                    <div class="mt-4 bg-white rounded-3 border-top border-bottom">
+                        <div class="d-none d-lg-flex bg-light py-2 px-4 border-bottom text-muted small fw-bold text-uppercase" style="letter-spacing: 1px;">
+                            <div style="width: 30%;">Estudiante</div>
+                            <div style="width: 15%;" class="text-center">Calificación (0-100)</div>
+                            <div style="width: 55%;" class="ps-4">Observaciones del Facilitador</div>
                         </div>
-                    </div>
 
-                    <div class="card-body px-0 pt-2">
-                        <form
-                            action="{{ route('taller.calificaciones.store', ['curso' => $curso->id_curso, 'contenido' => $contenido->id_contenido_curso]) }}"
-                            method="POST">
-                            @csrf
-
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle mb-0"
-                                    style="border-collapse: separate; border-spacing: 0;">
-                                    <thead class="bg-light">
-                                        <tr>
-                                            <th class="ps-4 text-uppercase text-muted small fw-bold py-3"
-                                                style="letter-spacing: 0.5px;">Estudiante</th>
-                                            <th class="text-uppercase text-muted small fw-bold py-3 text-center"
-                                                style="width: 180px;">Calificación</th>
-                                            <th class="text-uppercase text-muted small fw-bold py-3">Feedback</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($estudiantes as $estudiante)
-                                            <tr class="align-middle position-relative transition-hover">
-                                                <td class="ps-4 py-3">
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="avatar avatar-md me-3 bg-gradient-primary text-white rounded-circle shadow-sm d-flex align-items-center justify-content-center fw-bold"
-                                                            style="width: 45px; height: 45px; font-size: 1.1rem;">
-                                                            {{ substr($estudiante->primer_nombre, 0, 1) }}{{ substr($estudiante->primer_apellido, 0, 1) }}
-                                                        </div>
-                                                        <div>
-                                                            <h6 class="mb-0 fw-bold text-dark">{{ $estudiante->primer_nombre }}
-                                                                {{ $estudiante->segundo_nombre }}
-                                                                {{ $estudiante->primer_apellido }}
-                                                                {{ $estudiante->segundo_apellido }}
-                                                            </h6>
-                                                            <div class="small text-muted d-flex align-items-center mt-1">
-                                                                <i class="far fa-id-card me-1"></i>
-                                                                {{ $estudiante->dni ?? 'N/A' }}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td class="text-center">
-                                                    <div
-                                                        class="input-group input-group-sm border rounded-3 overflow-hidden {{ isset($estudiante->calificacion) ? ($estudiante->calificacion >= 80  ? 'border-success' : 'border-danger') : 'border-light' }}">
-                                                        <input type="number"
-                                                            name="calificaciones[{{ $estudiante->id_persona }}][nota]"
-                                                            class="form-control border-0 text-center fw-bold fs-6 py-2 {{ isset($estudiante->calificacion) ? ($estudiante->calificacion >= 80 ? 'text-success' : 'text-danger') : '' }}"
-                                                            value="{{ $estudiante->calificacion }}" min="0" max="100"
-                                                            step="0.01" placeholder="-" style="background: #f8f9fa;">
-                                                        <span
-                                                            class="input-group-text border-0 bg-white text-muted small px-2">/100</span>
-                                                    </div>
-                                                </td>
-                                                <td class="pe-4">
-                                                    <div class="input-group">
-                                                        <span class="input-group-text bg-white border-end-0 text-muted ps-3"><i
-                                                                class="far fa-comment-dots"></i></span>
-                                                        <input type="text"
-                                                            name="calificaciones[{{ $estudiante->id_persona }}][observacion]"
-                                                            class="form-control border-start-0 ps-0"
-                                                            value="{{ $estudiante->observacion }}"
-                                                            placeholder="Escribe una observación..."
-                                                            style="background-color: transparent;">
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="3" class="text-center py-5">
-                                                    <div class="py-4">
-                                                        <div class="mb-3">
-                                                            <div class="icon-shape icon-lg bg-light text-muted rounded-circle">
-                                                                <i class="fas fa-search fa-2x"></i>
-                                                            </div>
-                                                        </div>
-                                                        <h5 class="fw-bold text-dark">No se encontraron resultados</h5>
-                                                        <p class="text-muted mb-0">Intenta ajustar los filtros de búsqueda.</p>
-                                                        @if(request('search'))
-                                                            <a href="{{ route('taller.calificaciones.index', ['curso' => $curso->id_curso, 'contenido' => $contenido->id_contenido_curso]) }}"
-                                                                class="btn btn-sm btn-outline-primary mt-3">Limpiar búsqueda</a>
-                                                        @endif
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            @if(count($estudiantes) > 0)
-                                <div class="card-footer bg-white py-4 px-4 border-0 d-flex justify-content-end">
-                                    <button type="submit"
-                                        class="btn btn-dark btn-lg px-5 rounded-pill shadow-lg hover-transform">
-                                        <i class="fas fa-save me-2"></i> Guardar Cambios
-                                    </button>
+                    @forelse($estudiantes as $estudiante)
+                        <div class="zen-row py-4 px-4 border-bottom transition-all">
+                            <div class="row align-items-center g-0">
+                                <!-- Nombre -->
+                                <div class="col-lg-4 col-md-5 mb-3 mb-lg-0">
+                                    <h6 class="fw-bold text-dark mb-1">{{ $estudiante->primer_nombre ?? '' }} {{ $estudiante->primer_apellido ?? '' }}</h6>
+                                    <span class="text-muted small">C.I. {{ $estudiante->dni ?? 'N/A' }}</span>
                                 </div>
-                            @endif
-                        </form>
-                    </div>
+
+                                <!-- Calificación -->
+                                <div class="col-lg-2 col-md-3 mb-3 mb-lg-0 text-center px-lg-4">
+                                    <input type="number" 
+                                        name="calificaciones[{{ $estudiante->id_persona }}][nota]" 
+                                        class="form-control text-center py-2 fw-bold border bg-light shadow-none zen-input-grade"
+                                        value="{{ $estudiante->calificacion }}" min="0" max="100" step="0.01" placeholder="--"
+                                        style="font-size: 1.1rem; border-radius: 8px;">
+                                </div>
+
+                                <!-- Feedback -->
+                                <div class="col-lg-6 col-md-4">
+                                    <input type="text" 
+                                        name="calificaciones[{{ $estudiante->id_persona }}][observacion]" 
+                                        class="form-control border-0 border-bottom bg-transparent rounded-0 shadow-none ps-lg-4 py-2 zen-input-feedback"
+                                        value="{{ $estudiante->observacion }}"
+                                        placeholder="Escribir feedback opcional..."
+                                        style="font-size: 0.95rem;">
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="py-5 text-center text-muted">
+                            <i class="fas fa-user-slash mb-3 opacity-25" style="font-size: 3rem;"></i>
+                            <p>No hay alumnos registrados para calificar.</p>
+                        </div>
+                    @endforelse
                 </div>
-            </div>
+
+                @if(count($estudiantes) > 0)
+                    <div class="py-5 text-end">
+                        <button type="submit" class="btn btn-dark btn-lg rounded-3 px-5 py-3 fw-bold border-0 shadow-sm" style="background-color: #1e293b;">
+                            Guardar Cambios y Finalizar
+                        </button>
+                    </div>
+                @endif
+            </form>
         </div>
     </div>
+</div>
+</div>
 
-    @push('styles')
+@push('styles')
         <style>
-            .bg-primary-soft {
-                background-color: rgba(94, 114, 228, 0.1) !important;
-                color: #5e72e4 !important;
+            body { background-color: #f8fafc; }
+            .card { border-radius: 16px; border: 1px solid #eef2f6; }
+            
+            .search-box-focus:focus-within {
+                border-color: #1e3a8a !important;
+                background-color: #fff !important;
+                box-shadow: 0 4px 12px rgba(30, 58, 138, 0.08);
             }
 
-            .bg-warning-soft {
-                background-color: rgba(251, 99, 64, 0.1) !important;
-                color: #fb6340 !important;
+            .student-row-refined:hover {
+                background-color: #fbfdff !important;
             }
 
-            .bg-gray-100 {
-                background-color: #f6f9fc !important;
+            .avatar-box {
+                transition: transform 0.2s ease;
             }
 
-            .hover-lift {
-                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            .grade-input-container {
+                border: 2px solid #f1f4f8;
+                transition: all 0.2s ease;
             }
 
-            .hover-lift:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+            .grade-input-container:focus-within {
+                border-color: #1e3a8a;
+                background-color: #fff !important;
+                box-shadow: 0 4px 12px rgba(30, 58, 138, 0.08);
             }
 
-            .hover-transform:hover {
-                transform: translateY(-1px);
+            .feedback-box-minimal {
+                border: 1px solid #f1f4f8;
+                transition: all 0.2s ease;
             }
 
-            .bg-gradient-primary {
-                background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
+            .feedback-box-minimal:focus-within {
+                border-color: #1e3a8a;
+                background-color: #fff !important;
+                box-shadow: 0 4px 12px rgba(30, 58, 138, 0.05);
             }
 
-            .transition-hover:hover {
-                background-color: #fbfcfd;
+            /* Quitar flechas de input number */
+            .no-spinners::-webkit-inner-spin-button, 
+            .no-spinners::-webkit-outer-spin-button { 
+                -webkit-appearance: none; 
+                margin: 0; 
+            }
+            .no-spinners {
+                -moz-appearance: textfield;
             }
 
-            input[type=number]::-webkit-inner-spin-button,
-            input[type=number]::-webkit-outer-spin-button {
-                -webkit-appearance: none;
-                margin: 0;
+            .breadcrumb-item + .breadcrumb-item::before {
+                content: "›";
+                color: #cbd5e0;
+                font-weight: bold;
             }
 
-            .form-control:focus {
-                box-shadow: none;
-                border-color: #5e72e4;
+            .zen-row:hover { background-color: #f8fafc; }
+            .zen-row { border-bottom: 1px solid #f1f5f9; }
+
+            .zen-input-grade:focus {
+                background-color: #fff !important;
+                border-color: #1e293b !important;
+                color: #0f172a !important;
+            }
+
+            .zen-input-feedback:focus {
+                border-bottom-color: #1e293b !important;
+                color: #0f172a !important;
+            }
+
+            .badge-minimal {
+                background-color: #f1f5f9;
+                color: #475569;
+                font-weight: 600;
             }
         </style>
     @endpush
@@ -254,18 +195,12 @@
     @push('scripts')
         <script>
             document.addEventListener('input', function (e) {
-                if (e.target.matches('input[name^="calificaciones"][name$="[nota]"]')) {
-                    const val = parseFloat(e.target.value);
-                    if (val > 100) {
-                        e.target.value = 100;
-
-                        // Feedback visual rápido
-                        e.target.classList.add('is-invalid');
-                        setTimeout(() => e.target.classList.remove('is-invalid'), 1000);
-                    }
-                    if (val < 0) {
-                        e.target.value = 0;
-                    }
+                if (e.target.matches('.zen-input-grade')) {
+                    const input = e.target;
+                    let val = parseFloat(input.value);
+                    
+                    if (val > 100) { input.value = 100; val = 100; }
+                    if (val < 0) { input.value = 0; val = 0; }
                 }
             });
         </script>

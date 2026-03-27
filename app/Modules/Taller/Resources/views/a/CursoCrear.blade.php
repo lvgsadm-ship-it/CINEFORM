@@ -1,441 +1,589 @@
 @extends('layouts.kaiadmin-menu')
 
-@push('styles')
-    <style>
-        .cursor-pointer { cursor: pointer; }
-        .hover-bg-light:hover { background-color: #f8f9fa !important; }
-        .bg-primary-subtle { background-color: rgba(13, 110, 253, 0.1); }
-    </style>
-@endpush
-
 @section('content')
-    <div class="row">
-        <div class="col-md-12">
+    <div class="row justify-content-center">
+        <div class="col-lg-11">
+            <!-- Alertas -->
             @if(session('success'))
-                <div class="alert alert-success">
-                    {{ session('success') }}
+                <div class="alert alert-success border-0 shadow-sm rounded-4 d-flex align-items-center mb-4 fade show">
+                    <div class="icon-shape icon-sm bg-success-light text-success rounded-circle me-3">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div><h6 class="mb-0 fw-bold">¡Creado!</h6><small>{{ session('success') }}</small></div>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
                 </div>
             @endif
-            @if(session('error'))
-                <div class="alert alert-danger">
-                    {{ session('error') }}
+
+            <!-- Encabezado de Creación -->
+            <div class="d-flex justify-content-between align-items-end mb-4 px-2">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-1 p-0 bg-transparent" style="font-size: 0.8rem;">
+                            <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted">Administración</a></li>
+                            <li class="breadcrumb-item active text-primary fw-bold">Nuevo Programa</li>
+                        </ol>
+                    </nav>
+                    <h2 class="fw-bold text-dark mb-0">Crear Nuevo Curso</h2>
+                    <p class="text-muted small mb-0"><i class="fas fa-magic me-1 text-primary"></i> Estás configurando una nueva oferta académica para el sistema.</p>
                 </div>
-            @endif
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Crear Nuevo Curso</h6>
+                <div class="text-end">
+                    <a href="{{ route('taller.cursos.index') }}"
+                        class="btn btn-white shadow-sm border rounded-pill px-4 btn-sm fw-bold transition-hover">
+                        <i class="fas fa-arrow-left me-2 text-primary"></i> Cancelar
+                    </a>
                 </div>
-                <div class="card-body">
-                    @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <ul class="mb-0">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
+            </div>
+
+            <form action="{{ route('taller.cursos.store_new') }}" method="POST">
+                @csrf
+
+                @if ($errors->any())
+                    <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4">
+                        <ul class="mb-0 small ps-3">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <!-- Panel de Control Principal -->
+                <div class="card border-0 shadow-card rounded-4 mb-5 overflow-hidden border-top border-4 border-primary">
+                    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center">
+                        <div class="icon-box bg-primary text-white rounded-3 me-3 p-2 shadow-sm">
+                            <i class="fas fa-plus fs-5"></i>
                         </div>
-                    @endif
-
-                    <form action="{{ route('taller.cursos.store_new') }}" method="POST">
-                        @csrf
-
-                        <!-- Fila 1: Nombre y Modalidad -->
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="nombre">Nombre del Curso *</label>
-                                    <input type="text" class="form-control" id="nombre" name="nombre"
-                                        value="{{ old('nombre') }}" required placeholder="Ingrese el nombre del curso">
-                                </div>
+                        <h5 class="fw-bold mb-0 text-dark">Información de Cabecera</h5>
+                    </div>
+                    <div class="card-body p-4 bg-light bg-opacity-10">
+                        <div class="row g-4">
+                            <!-- Nombre del Curso -->
+                            <div class="col-md-7">
+                                <label for="nombre" class="text-muted small fw-bold mb-2 d-flex align-items-center">
+                                    <i class="fas fa-heading me-2 opacity-50"></i> NOMBRE DEL CURSO *
+                                </label>
+                                <input type="text" class="form-control border-2 shadow-none rounded-3 bg-white fw-bold py-3 fs-5 border-light-2" id="nombre" name="nombre"
+                                    value="{{ old('nombre') }}" placeholder="Ej: Especialización en Guion Cinematográfico" required>
                             </div>
 
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="id_modalidad">Modalidad *</label>
-                                    <select name="id_modalidad" id="id_modalidad" class="form-control" required>
-                                        <option value="">Seleccione una modalidad...</option>
-                                        @foreach($modalidades as $modalidad)
-                                            <option value="{{ $modalidad->id_modalidad }}" {{ old('id_modalidad') == $modalidad->id_modalidad ? 'selected' : '' }}>
-                                                {{ $modalidad->nombre_modalidad }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Fila: Facilitador con Búsqueda Integrada -->
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="card border-light shadow-sm mb-3">
-                                    <div class="card-body">
-                                        <label class="fw-bold mb-2">Asignar Facilitador *</label>
-                                        
-                                        <!-- Filtros -->
-                                        <div class="row g-2 mb-3">
-                                            <div class="col-md-6">
-                                                <div class="input-group">
-                                                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
-                                                    <input type="text" class="form-control bg-light border-start-0" 
-                                                           id="filtro_nombre_cedula" 
-                                                           placeholder="Buscar por nombre o cédula..." 
-                                                           autocomplete="off">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <select id="filtro_especializacion" class="form-select bg-light">
-                                                    <option value="">Todas las especializaciones</option>
-                                                    @foreach($especializaciones as $esp)
-                                                        <option value="{{ $esp->id }}">{{ $esp->nombre }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
+                            <!-- Facilitador Asignado -->
+                            <div class="col-md-5">
+                                <label class="text-muted small fw-bold mb-2 d-flex align-items-center">
+                                    <i class="fas fa-user-tie me-2 opacity-50 text-primary"></i> FACILITADOR RESPONSABLE *
+                                </label>
+                                <div class="bg-white border-2 rounded-3 p-2 px-3 shadow-xs border-light-2 d-flex align-items-center" style="height: 58px;">
+                                    <div class="avatar-sm me-3">
+                                        <div class="bg-primary-soft text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                                            <i class="fas fa-chalkboard-teacher small"></i>
                                         </div>
+                                    </div>
+                                    <div class="flex-grow-1 overflow-hidden">
+                                        <h6 class="mb-0 fw-bold text-dark text-truncate" id="selected-facilitator-name">
+                                            @php
+                                                $facilitadorOld = old('id_persona') ? $facilitadores->first(fn($f) => $f->personalData->id_persona == old('id_persona')) : null;
+                                            @endphp
+                                            {{ $facilitadorOld ? ($facilitadorOld->personalData->primer_nombre . ' ' . $facilitadorOld->personalData->primer_apellido) : 'No asignado' }}
+                                        </h6>
+                                        <small class="text-muted d-block" id="selected-facilitator-doc">
+                                            {{ $facilitadorOld ? 'C.I: ' . $facilitadorOld->personalData->dni : 'Haga clic para seleccionar' }}
+                                        </small>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-light border rounded-pill px-2 py-0 ms-2" data-bs-toggle="modal" data-bs-target="#modalFacilitadores">
+                                        <i class="fas fa-search small"></i>
+                                    </button>
+                                </div>
+                                <input type="hidden" name="id_persona" id="id_persona" value="{{ old('id_persona') }}" required>
+                            </div>
 
-                                        <!-- Input Oculto para el valor real -->
-                                        <input type="hidden" name="id_persona" id="id_persona" value="{{ old('id_persona') }}" required>
+                            <!-- Modalidad y Cupos -->
+                            <div class="col-md-4">
+                                <label for="id_modalidad" class="text-muted small fw-bold mb-2 d-flex align-items-center">
+                                    <i class="fas fa-laptop-house me-2 opacity-50"></i> MODALIDAD *
+                                </label>
+                                <select name="id_modalidad" id="id_modalidad" class="form-select border-2 shadow-none rounded-3 bg-white py-2 border-light-2" required>
+                                    <option value="">Seleccione modalidad...</option>
+                                    @foreach($modalidades as $mod)
+                                        <option value="{{ $mod->id_modalidad }}" {{ old('id_modalidad') == $mod->id_modalidad ? 'selected' : '' }}>
+                                            {{ $mod->nombre_modalidad }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="text-muted small fw-bold mb-2 d-flex align-items-center">
+                                    <i class="fas fa-users-cog me-2 opacity-50"></i> CUPO MÁXIMO
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-2 border-end-0 text-muted border-light-2"><i class="fas fa-user-plus small"></i></span>
+                                    <input type="number" class="form-control border-2 border-start-0 py-2 fw-bold border-light-2" name="cantidad_cupos" value="{{ old('cantidad_cupos') }}" placeholder="0">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="text-muted small fw-bold mb-2 d-flex align-items-center text-truncate">
+                                    <i class="fas fa-calendar-week me-2 opacity-50"></i> DÍAS
+                                </label>
+                                <input type="number" class="form-control border-2 py-2 text-center fw-bold border-light-2 rounded-3" name="duracion" value="{{ old('duracion') }}" placeholder="0">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="text-muted small fw-bold mb-2 d-flex align-items-center text-truncate">
+                                    <i class="fas fa-clock me-2 opacity-50"></i> HORAS
+                                </label>
+                                <input type="number" class="form-control border-2 py-2 text-center fw-bold border-light-2 rounded-3" name="horas" value="{{ old('horas') }}" placeholder="0">
+                            </div>
 
-                                        <!-- Lista de Facilitadores -->
-                                        <div id="facilitator-container" class="border rounded bg-white" style="max-height: 300px; overflow-y: auto;">
-                                            @foreach($facilitadores as $facilitador)
-                                                <div class="facilitator-item p-3 border-bottom cursor-pointer hover-bg-light {{ old('id_persona') == $facilitador->personalData->id ? 'bg-primary-subtle border-primary' : '' }}"
-                                                     onclick="selectFacilitator(this, '{{ $facilitador->personalData->id }}', '{{ $facilitador->personalData->primer_nombre }} {{ $facilitador->personalData->primer_apellido }}')"
-                                                     data-name="{{ strtolower($facilitador->personalData->primer_nombre . ' ' . $facilitador->personalData->primer_apellido) }}"
-                                                     data-doc="{{ $facilitador->personalData->document }}"
-                                                     data-specializations="{{ $facilitador->personalData->especializaciones->pluck('id')->join(',') }}">
-                                                    
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="avatar-sm me-3">
-                                                            <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                                                <i class="fas fa-user-tie"></i>
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex-grow-1">
-                                                            <div class="d-flex justify-content-between">
-                                                                <h6 class="mb-0 text-dark font-weight-bold">
-                                                                    {{ $facilitador->personalData->primer_nombre }} {{ $facilitador->personalData->primer_apellido }}
-                                                                </h6>
-                                                                <span class="badge bg-info-subtle text-info border border-info">
-                                                                    C.I: {{ $facilitador->personalData->document }}
-                                                                </span>
-                                                            </div>
-                                                            <div class="small text-muted">
-                                                                @if($facilitador->personalData->especializaciones->count() > 0)
-                                                                    <i class="fas fa-graduation-cap me-1"></i>
-                                                                    {{ $facilitador->personalData->especializaciones->pluck('nombre')->join(', ') }}
-                                                                @else
-                                                                    <span class="fst-italic">Sin especializaciones registradas</span>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                        <div class="ms-3 check-icon {{ old('id_persona') == $facilitador->personalData->id ? '' : 'd-none' }}">
-                                                            <i class="fas fa-check-circle text-success fs-4"></i>
-                                                        </div>
+                            <!-- Fechas -->
+                            <div class="col-md-6">
+                                <label class="text-muted small fw-bold mb-2 d-flex align-items-center text-uppercase">
+                                    <i class="far fa-calendar-alt me-2 opacity-50 text-success"></i> INICIO DEL CURSO
+                                </label>
+                                <div class="input-group shadow-xs">
+                                    <span class="input-group-text bg-white border-2 border-end-0 text-muted border-light-2"><i class="far fa-calendar-check"></i></span>
+                                    <input type="date" class="form-control border-2 border-start-0 py-2 border-light-2" name="fecha_inicio" value="{{ old('fecha_inicio') }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small fw-bold mb-2 d-flex align-items-center text-uppercase">
+                                    <i class="far fa-calendar-times me-2 opacity-50 text-danger"></i> FINALIZACIÓN
+                                </label>
+                                <div class="input-group shadow-xs">
+                                    <span class="input-group-text bg-white border-2 border-end-0 text-muted border-light-2"><i class="far fa-calendar-minus"></i></span>
+                                    <input type="date" class="form-control border-2 border-start-0 py-2 border-light-2" name="fecha_fin" value="{{ old('fecha_fin') }}">
+                                </div>
+                            </div>
+
+                            <!-- Descripción -->
+                            <div class="col-12 mt-2">
+                                <label for="descripcion" class="text-muted small fw-bold mb-2 d-flex align-items-center">
+                                    <i class="fas fa-align-left me-2 opacity-50"></i> RESUMEN O SÍNTESIS DEL PROGRAMA
+                                </label>
+                                <textarea class="form-control border-2 shadow-none rounded-4 bg-white p-3 border-light-2" id="descripcion" name="descripcion"
+                                    rows="4" placeholder="Breve descripción del programa académico...">{{ old('descripcion') }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección: Currículo Académico -->
+                <div class="card border-0 shadow-card rounded-4 mb-5 overflow-hidden">
+                    <div class="card-header bg-white py-4 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-box bg-primary text-white rounded-3 me-3 p-2 shadow-sm">
+                                    <i class="fas fa-layer-group fs-5"></i>
+                                </div>
+                                <div>
+                                    <h4 class="fw-bold mb-0 text-dark">Estructura de Contenidos</h4>
+                                    <p class="text-muted small mb-0">Define los módulos evaluables y recursos digitales.</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Barra de Ponderación -->
+                            <div id="total-ponderacion-container" class="card border-2 border-dashed shadow-xs p-2 px-3 rounded-4 bg-light" style="min-width: 250px;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="small fw-bold text-muted uppercase">Balance Académico</span>
+                                    <span class="badge bg-white text-dark fw-bold border"><span id="total-ponderacion-valor">0</span>%</span>
+                                </div>
+                                <div class="progress mt-2" style="height: 6px;">
+                                    <div id="ponderacion-progress" class="progress-bar rounded-pill" role="progressbar" style="width: 0%; transition: width 0.5s ease;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4 bg-light bg-opacity-25">
+                        <div id="contenidos-container" class="row row-cols-1 g-4">
+                            @foreach(old('contenidos', []) as $index => $contenido)
+                                <div class="col contenido-item animate__animated animate__fadeIn" data-index="{{ $index }}">
+                                    <div class="card border-0 shadow-card rounded-4 overflow-hidden content-card-edit mb-2">
+                                        <div class="card-body p-4">
+                                            <div class="row align-items-center g-3 border-bottom pb-3 mb-3">
+                                                <div class="col-md-auto">
+                                                    <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 35px; height: 35px; font-size: 0.8rem;">
+                                                        {{ $loop->iteration }}
                                                     </div>
                                                 </div>
-                                            @endforeach
-                                            
-                                            <div id="no-results-facilitators" class="p-4 text-center text-muted d-none">
-                                                <i class="fas fa-user-slash mb-2 fs-2"></i><br>
-                                                No se encontraron facilitadores que coincidan con los filtros
+                                                <div class="col">
+                                                    <input type="text" name="contenidos[{{ $index }}][titulo]" 
+                                                        class="form-control border-0 bg-transparent fs-5 fw-bold p-0 text-dark focus-none" 
+                                                        required value="{{ $contenido['titulo'] ?? '' }}" placeholder="Título del bloque...">
+                                                </div>
+                                                <div class="col-md-auto">
+                                                    <div class="form-check form-switch p-0 d-flex align-items-center bg-light rounded-pill px-3 py-1 border shadow-xs">
+                                                        <input type="hidden" name="contenidos[{{ $index }}][es_evaluacion]" value="0">
+                                                        <input type="checkbox" class="form-check-input ms-0 me-2 custom-control-input" 
+                                                            id="evalSwitch_{{ $index }}" name="contenidos[{{ $index }}][es_evaluacion]" 
+                                                            value="1" onchange="toggleEvaluacion(this)"
+                                                            {{ (isset($contenido['es_evaluacion']) && $contenido['es_evaluacion'] == '1') ? 'checked' : '' }}>
+                                                        <label class="form-check-label small fw-bold text-muted mt-1" for="evalSwitch_{{ $index }}">Evaluable</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-auto">
+                                                    <button type="button" class="btn btn-outline-danger btn-sm border-0 remove-contenido"><i class="fas fa-trash-alt"></i></button>
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 evaluacion-fields bg-primary rounded-3 p-3 mb-3" 
+                                                style="{{ (isset($contenido['es_evaluacion']) && $contenido['es_evaluacion'] == '1') ? 'display:flex' : 'display:none' }}; background-color: #0d6efd !important;">
+                                                <div class="col-md-7">
+                                                    <label class="small text-white fw-bold mb-1">METODOLOGÍA</label>
+                                                    <select name="contenidos[{{ $index }}][id_tipo_evaluacion]" class="form-select border-0 shadow-sm">
+                                                        <option value="">Seleccione...</option>
+                                                        @foreach($tiposEvaluacion as $tipo)
+                                                            <option value="{{ $tipo->id_tipo_evaluacion }}" {{ (isset($contenido['id_tipo_evaluacion']) && $contenido['id_tipo_evaluacion'] == $tipo->id_tipo_evaluacion) ? 'selected' : '' }}>
+                                                                {{ $tipo->nombre }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-5">
+                                                    <label class="small text-white fw-bold mb-1">PESO (%)</label>
+                                                    <input type="number" name="contenidos[{{ $index }}][ponderacion]" 
+                                                        class="form-control border-0 text-center fw-bold text-primary" 
+                                                        oninput="actualizarPonderacionTotal()" value="{{ $contenido['ponderacion'] ?? '' }}" placeholder="0">
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3">
+                                                <div class="col-md-9">
+                                                    <label class="small text-muted fw-bold mb-1">URL RECURSO</label>
+                                                    <input type="url" name="contenidos[{{ $index }}][url_contenido]" 
+                                                        class="form-control border-light-2 bg-light bg-opacity-50 py-2" required 
+                                                        value="{{ $contenido['url_contenido'] ?? '' }}" placeholder="https://...">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="small text-muted fw-bold mb-1">ORDEN</label>
+                                                    <input type="number" name="contenidos[{{ $index }}][orden]" 
+                                                        class="form-control border-light-2 text-center" value="{{ $contenido['orden'] ?? ($index + 1) }}">
+                                                </div>
+                                                <div class="col-12">
+                                                    <textarea name="contenidos[{{ $index }}][descripcion_breve]" class="form-control border-light-2" 
+                                                        rows="2" placeholder="Breve explicación...">{{ $contenido['descripcion_breve'] ?? '' }}</textarea>
+                                                </div>
                                             </div>
                                         </div>
-                                        @error('id_persona')
-                                            <div class="text-danger small mt-1">{{ $message }}</div>
-                                        @enderror
                                     </div>
                                 </div>
-                            </div>
+                            @endforeach
                         </div>
 
-                        <div class="form-group">
-                            <label for="descripcion">Descripción del Curso</label>
-                            <textarea class="form-control" id="descripcion" name="descripcion" rows="3"
-                                placeholder="Descripción detallada del curso...">{{ old('descripcion') }}</textarea>
+                        <div class="text-center mt-5">
+                            <button type="button" id="agregar-contenido"
+                                class="btn btn-outline-dark border-2 px-5 py-3 rounded-pill fw-bold hvr-push shadow-sm">
+                                <i class="fas fa-plus-circle me-2"></i> Añadir Bloque Académico
+                            </button>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Fila 2: Detalles Numéricos -->
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="duracion">Duración (días) *</label>
-                                    <input type="number" class="form-control" id="duracion" name="duracion"
-                                        value="{{ old('duracion') }}" min="1" required placeholder="Ej: 30">
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="horas">Horas totales</label>
-                                    <input type="number" class="form-control" id="horas" name="horas"
-                                        value="{{ old('horas') }}" min="1" placeholder="Ej: 40">
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="cantidad_cupos">Cupos disponibles</label>
-                                    <input type="number" class="form-control" id="cantidad_cupos" name="cantidad_cupos"
-                                        value="{{ old('cantidad_cupos') }}" min="0" placeholder="Ej: 20">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Fila 3: Fechas -->
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="fecha_inicio">Fecha de inicio</label>
-                                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio"
-                                        value="{{ old('fecha_inicio') }}">
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="fecha_fin">Fecha de finalización</label>
-                                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin"
-                                        value="{{ old('fecha_fin') }}">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card mt-4">
-                            <div class="card-header">
-                                <h5 class="card-title">Contenidos del Curso (Opcional)</h5>
-                            </div>
-                            <div class="card-body">
-                                <div id="contenidos-container">
-                                    {{-- Contenidos dinámicos --}}
-                                </div>
-
-                                <div class="text-end mt-3">
-                                    <button type="button" id="agregar-contenido"
-                                        class="btn btn-outline-primary shadow-sm hover-scale">
-                                        <i class="fas fa-plus-circle me-2"></i> Agregar Nuevo Contenido
+                <!-- Footer de Acciones -->
+                <div class="row justify-content-center mt-5 pb-5">
+                    <div class="col-lg-6">
+                        <div class="card border shadow rounded-pill overflow-hidden bg-white">
+                            <div class="card-body p-2 d-flex align-items-center justify-content-between">
+                                <a href="{{ route('taller.cursos.index') }}"
+                                    class="btn btn-link text-muted fw-bold text-decoration-none px-4 ms-2">
+                                    Descartar
+                                </a>
+                                <div class="d-flex align-items-center me-2">
+                                    <div class="me-3 text-end">
+                                        <div id="alert-100" class="text-success small fw-bold" style="display: none;">
+                                            <i class="fas fa-check-circle me-1"></i> Listo para crear
+                                        </div>
+                                        <div id="alert-insufficient" class="text-warning small fw-bold">
+                                            <i class="fas fa-info-circle me-1"></i> Sin contenidos
+                                        </div>
+                                        <div id="alert-over" class="text-danger small fw-bold" style="display: none;">
+                                            <i class="fas fa-times-circle me-1"></i> Exceso de (%)
+                                        </div>
+                                    </div>
+                                    <button type="submit" id="btn-save-curso" class="btn btn-primary px-5 py-3 rounded-pill fw-bold shadow-lg">
+                                        <i class="fas fa-rocket me-2"></i> Crear Nuevo Curso
                                     </button>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 
-                        <div class="card-action mt-4 d-flex justify-content-between align-items-center">
-                            <a href="{{ route('taller.cursos.index') }}"
-                                class="btn btn-link text-muted text-decoration-none">
-                                <i class="fas fa-arrow-left me-2"></i> Cancelar
-                            </a>
-                            <button type="submit" class="btn btn-primary px-4 fw-bold shadow-sm">
-                                <i class="fas fa-save me-2"></i> Crear Curso
-                            </button>
+    <!-- Modal Facilitadores (Igual a Editar) -->
+    <div class="modal fade" id="modalFacilitadores" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header border-0 bg-primary py-4 px-4">
+                    <h5 class="modal-title fw-bold text-white"><i class="fas fa-search me-2"></i> Asignar Facilitador</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 bg-light bg-opacity-50">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-7">
+                            <div class="input-group shadow-sm">
+                                <span class="input-group-text bg-white border-end-0 text-muted border-light-2"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control border-start-0 py-2 border-light-2" id="filtro_nombre_cedula_modal" onkeyup="filterFacilitators()" placeholder="Nombre o cédula...">
+                            </div>
                         </div>
-                    </form>
+                        <div class="col-md-5">
+                            <select id="filtro_especializacion_modal" class="form-select shadow-sm py-2 border-light-2" onchange="filterFacilitators()">
+                                <option value="">Todas las especialidades</option>
+                                @foreach($especializaciones as $esp)
+                                    <option value="{{ $esp->id }}">{{ $esp->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
 
-                    @push('scripts')
-                        <script>
-                            // --- Facilitator Search & Filter Logic ---
-                            function selectFacilitator(element, id, name) {
-                                // Remover clase activa de todos
-                                document.querySelectorAll('.facilitator-item').forEach(item => {
-                                    item.classList.remove('bg-primary-subtle', 'border-primary');
-                                    item.querySelector('.check-icon').classList.add('d-none');
-                                });
-
-                                // Agregar clase activa al seleccionado
-                                element.classList.add('bg-primary-subtle', 'border-primary');
-                                element.querySelector('.check-icon').classList.remove('d-none');
-
-                                // Actualizar valor oculto
-                                document.getElementById('id_persona').value = id;
-                            }
-
-                            function filterFacilitators() {
-                                const searchText = document.getElementById('filtro_nombre_cedula').value.toLowerCase();
-                                const specId = document.getElementById('filtro_especializacion').value;
-                                const items = document.querySelectorAll('.facilitator-item');
-                                let hasVisible = false;
-
-                                items.forEach(item => {
-                                    const name = item.getAttribute('data-name');
-                                    const doc = item.getAttribute('data-doc');
-                                    const specs = item.getAttribute('data-specializations').split(',');
-
-                                    const matchesSearch = name.includes(searchText) || doc.includes(searchText);
-                                    const matchesSpec = specId === "" || specs.includes(specId);
-
-                                    if (matchesSearch && matchesSpec) {
-                                        item.classList.remove('d-none');
-                                        hasVisible = true;
-                                    } else {
-                                        item.classList.add('d-none');
-                                    }
-                                });
-
-                                const noResults = document.getElementById('no-results-facilitators');
-                                if (hasVisible) {
-                                    noResults.classList.add('d-none');
-                                } else {
-                                    noResults.classList.remove('d-none');
-                                }
-                            }
-
-                            document.getElementById('filtro_nombre_cedula').addEventListener('keyup', filterFacilitators);
-                            document.getElementById('filtro_especializacion').addEventListener('change', filterFacilitators);
-
-                            window.addEventListener('load', () => {
-                                const selectedId = document.getElementById('id_persona').value;
-                                if (selectedId) {
-                                    const selectedItem = document.querySelector(`.facilitator-item[onclick*="'${selectedId}'"]`);
-                                    if (selectedItem) {
-                                        selectedItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                                    }
-                                }
-                            });
-          
-
-
-                        
-                            const tiposEvaluacion = {!! json_encode($tiposEvaluacion) !!};
-
-                            function getTipoOptions() {
-                                return tiposEvaluacion.map(t => `<option value="${t.id_tipo_evaluacion}">${t.nombre}</option>`).join('');
-                            }
-
-                            function toggleEvaluacion(inputElement) {
-                                const container = inputElement.closest('.contenido-item');
-                                const evalFields = container.querySelector('.evaluacion-fields');
-
-                                const isActive = inputElement.type === 'checkbox' ? inputElement.checked : inputElement.value == '1';
-
-                                if (isActive) {
-                                    evalFields.style.display = 'flex';
-                                    evalFields.style.opacity = 0;
-                                    setTimeout(() => { evalFields.style.opacity = 1; }, 50);
-                                    evalFields.querySelectorAll('input, select').forEach(el => el.disabled = false);
-                                } else {
-                                    evalFields.style.display = 'none';
-                                    evalFields.querySelectorAll('input, select').forEach(el => {
-                                        el.disabled = true;
-                                        el.value = '';
-                                    });
-                                }
-                            }
-
-                            document.addEventListener('DOMContentLoaded', function () {
-                                let contadorContenidos = 0;
-
-                                // Agregar nuevo contenido
-                                document.getElementById('agregar-contenido').addEventListener('click', function () {
-                                    const contenedor = document.getElementById('contenidos-container');
-                                    const nuevoIndice = contadorContenidos++;
-
-                                    const nuevoContenido = `
-                                            <div class="contenido-item mb-3 border p-3 bg-light rounded animate__animated animate__fadeIn" data-index="${nuevoIndice}">
-
-                                                <div class="row g-3">
-                                                    <div class="col-md-2 d-flex align-items-center pt-3">
-                                                        <div class="form-check form-switch ps-0">
-                                                            <input type="hidden" name="contenidos[${nuevoIndice}][es_evaluacion]" value="0">
-                                                            <div class="custom-control custom-switch">
-                                                                <input type="checkbox" class="custom-control-input" 
-                                                                       id="evalSwitch_${nuevoIndice}" 
-                                                                       name="contenidos[${nuevoIndice}][es_evaluacion]" 
-                                                                       value="1" 
-                                                                       onchange="toggleEvaluacion(this)">
-                                                                <label class="custom-control-label small fw-bold text-muted" for="evalSwitch_${nuevoIndice}">
-                                                                    <i class="fas fa-star me-1 text-warning"></i> Evaluable
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="form-group mb-0">
-                                                            <label class="small text-muted fw-bold">Título *</label>
-                                                            <input type="text" name="contenidos[${nuevoIndice}][titulo]" class="form-control" required placeholder="Título del contenido">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-5">
-                                                        <div class="form-group mb-0">
-                                                            <label class="small text-muted fw-bold">URL / Enlace *</label>
-                                                            <input type="url" name="contenidos[${nuevoIndice}][url_contenido]" class="form-control" required placeholder="https://...">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-1 d-flex align-items-end justify-content-center">
-                                                        <button type="button" class="btn btn-outline-danger btn-sm remove-contenido border-0" title="Eliminar">
-                                                            <i class="fas fa-trash-alt"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Descripción Breve y Detallada -->
-                                                <div class="row mt-2">
-                                                    <div class="col-md-6">
-                                                        <div class="form-group mb-0">
-                                                            <label class="small text-muted fw-bold">Descripción Breve (Opcional)</label>
-                                                            <input type="text" name="contenidos[${nuevoIndice}][descripcion_breve]" class="form-control form-control-sm" placeholder="Resumen corto..." maxlength="190">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                         <div class="form-group mb-0">
-                                                            <label class="small text-muted fw-bold">Descripción Detallada (Opcional)</label>
-                                                            <textarea name="contenidos[${nuevoIndice}][descripcion]" class="form-control form-control-sm" rows="1" placeholder="Detalles adicionales..."></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Campos de Evaluación -->
-                                                <div class="row g-3 mt-2 evaluacion-fields border-top pt-3 bg-white mx-0 rounded pb-2 mb-2" style="display:none; transition: all 0.3s ease;">
-                                                    <div class="col-12"><span class="badge bg-warning text-dark mb-2"><i class="fas fa-star me-1"></i> Configuración de Evaluación</span></div>
-                                                    <div class="col-md-4">
-                                                        <div class="form-group mb-0">
-                                                            <label class="small text-muted fw-bold">Tipo de Evaluación</label>
-                                                            <select name="contenidos[${nuevoIndice}][id_tipo_evaluacion]" class="form-select" disabled>
-                                                                <option value="">Seleccione...</option>
-                                                                ${getTipoOptions()}
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <div class="form-group mb-0">
-                                                            <label class="small text-muted fw-bold">Ponderación (%)</label>
-                                                            <div class="input-group">
-                                                                <input type="number" name="contenidos[${nuevoIndice}][ponderacion]" class="form-control" min="0" max="100" placeholder="0" disabled>
-                                                                <span class="input-group-text">%</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                     <div class="col-md-5 d-flex align-items-center">
-                                                         <small class="text-muted">La nota de esta actividad se promediará.</small>
-                                                    </div>
-                                                </div>
-
-                                                <div class="row mt-2">
-                                                    <div class="col-md-1">
-                                                            <div class="form-group mb-0">
-                                                                    <label class="small text-muted fw-bold">Orden</label>
-                                                                    <input type="number" name="contenidos[${nuevoIndice}][orden]" class="form-control form-control-sm" value="${nuevoIndice + 1}" min="1">
-                                                            </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            `;
-
-                                    contenedor.insertAdjacentHTML('beforeend', nuevoContenido);
-                                });
-
-                                // Eliminar contenido
-                                document.addEventListener('click', function (e) {
-                                    if (e.target.closest('.remove-contenido')) {
-                                        if (confirm('¿Estás seguro de eliminar este contenido?')) {
-                                            const item = e.target.closest('.contenido-item');
-                                            item.style.opacity = '0';
-                                            setTimeout(() => item.remove(), 300);
-                                        }
-                                    }
-                                });
-                            });
-                        </script>
-                    @endpush
+                    <div id="facilitator-container" class="bg-white rounded-4 border border-light-2 overflow-auto shadow-sm" style="max-height: 400px;">
+                        @foreach($facilitadores as $facilitador)
+                            @php $p = $facilitador->personalData @endphp
+                            <div class="facilitator-item p-3 border-bottom cursor-pointer transition-all hover-bg-light {{ old('id_persona') == $p->id_persona ? 'bg-primary-soft border-primary border-start border-4' : '' }}"
+                                onclick="selectFacilitator(this, '{{ $p->id_persona }}', '{{ $p->primer_nombre }} {{ $p->primer_apellido }}', '{{ $p->dni }}')"
+                                data-name="{{ strtolower($p->primer_nombre . ' ' . $p->primer_apellido) }}"
+                                data-doc="{{ $p->dni }}"
+                                data-specializations="{{ $p->especializaciones->pluck('id')->join(',') }}">
+                                
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-3">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 45px; height: 45px;">
+                                            <i class="fas fa-user-tie"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0 fw-bold text-dark">{{ $p->primer_nombre }} {{ $p->primer_apellido }}</h6>
+                                        <small class="text-muted d-block">C.I: {{ $p->dni }}</small>
+                                        <div class="mt-1">
+                                            @foreach($p->especializaciones as $esp)
+                                                <span class="badge bg-light text-primary border border-primary-soft small fw-normal rounded-pill me-1 px-2" style="font-size: 0.75rem;">
+                                                    {{ $esp->nombre }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    <div class="ms-3 check-icon {{ old('id_persona') == $p->id_persona ? '' : 'd-none' }}">
+                                        <i class="fas fa-check-circle text-primary fs-3"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0 bg-light bg-opacity-50">
+                    <button type="button" class="btn btn-primary rounded-pill px-5 shadow-sm fw-bold w-100 py-3" data-bs-dismiss="modal">
+                        Confirmar Selección
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+
+    @push('styles')
+    <style>
+        .bg-primary-soft { background-color: rgba(30, 58, 138, 0.1); }
+        .bg-success-light { background-color: rgba(16, 185, 129, 0.1); }
+        .border-light-2 { border-color: #f1f4f8 !important; }
+        .shadow-xs { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .shadow-card { box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        
+        .content-card-edit {
+            border: 1px solid #e2e8f0;
+            border-left: 5px solid #1e3a8a;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+        .content-card-edit:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 35px rgba(30, 58, 138, 0.12) !important;
+            border-color: rgba(30, 58, 138, 0.2);
+        }
+        
+        .focus-none:focus { outline: none; border: none; box-shadow: none; }
+        .hvr-push { transition: transform 0.2s; }
+        .hvr-push:active { transform: scale(0.98); }
+        .transition-hover { transition: all 0.2s ease; }
+        .transition-hover:hover { background-color: #f1f5f9; transform: translateY(-1px); }
+        .uppercase { text-transform: uppercase; letter-spacing: 0.5px; }
+        .cursor-pointer { cursor: pointer; }
+    </style>
+    @endpush
+
+    @push('scripts')
+    <script>
+        const tiposEvaluacion = {!! json_encode($tiposEvaluacion) !!};
+        let contadorContenidos = {{ count(old('contenidos', [])) }};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            actualizarPonderacionTotal();
+        });
+
+        function getTipoOptions() {
+            return tiposEvaluacion.map(t => `<option value="${t.id_tipo_evaluacion}">${t.nombre}</option>`).join('');
+        }
+
+        function filterFacilitators() {
+            const searchText = document.getElementById('filtro_nombre_cedula_modal').value.toLowerCase();
+            const specId = document.getElementById('filtro_especializacion_modal').value;
+            const items = document.querySelectorAll('.facilitator-item');
+
+            items.forEach(item => {
+                const name = item.getAttribute('data-name');
+                const doc = item.getAttribute('data-doc');
+                const specs = item.getAttribute('data-specializations').split(',');
+
+                const matchesSearch = name.includes(searchText) || doc.includes(searchText);
+                const matchesSpec = specId === "" || specs.includes(specId);
+
+                if (matchesSearch && matchesSpec) {
+                    item.classList.remove('d-none');
+                } else {
+                    item.classList.add('d-none');
+                }
+            });
+        }
+
+        function selectFacilitator(element, id, name, doc) {
+            document.querySelectorAll('.facilitator-item').forEach(item => {
+                item.classList.remove('bg-primary-soft', 'border-primary', 'border-start', 'border-4');
+                item.querySelector('.check-icon').classList.add('d-none');
+            });
+
+            element.classList.add('bg-primary-soft', 'border-primary', 'border-start', 'border-4');
+            element.querySelector('.check-icon').classList.remove('d-none');
+
+            document.getElementById('id_persona').value = id;
+            document.getElementById('selected-facilitator-name').innerText = name;
+            document.getElementById('selected-facilitator-doc').innerText = 'C.I: ' + doc;
+            
+            // Cerrar modal tras selección
+            const modalEl = document.getElementById('modalFacilitadores');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if(modal) setTimeout(() => modal.hide(), 250);
+        }
+
+        function toggleEvaluacion(inputElement) {
+            const container = inputElement.closest('.contenido-item');
+            const evalFields = container.querySelector('.evaluacion-fields');
+            const isActive = inputElement.checked;
+
+            if(isActive) {
+                evalFields.style.display = 'flex';
+                evalFields.style.opacity = 0;
+                setTimeout(() => { evalFields.style.opacity = 1; }, 50);
+            } else {
+                evalFields.style.display = 'none';
+                evalFields.querySelectorAll('input, select').forEach(el => el.value = '');
+            }
+            actualizarPonderacionTotal();
+        }
+
+        function actualizarPonderacionTotal() {
+            let total = 0;
+            const evalInputs = document.querySelectorAll('input[name*="[ponderacion]"]');
+            
+            evalInputs.forEach(input => {
+                const container = input.closest('.contenido-item');
+                const isEval = container.querySelector('.custom-control-input').checked;
+                if (isEval) {
+                    total += parseFloat(input.value) || 0;
+                }
+            });
+
+            document.getElementById('total-ponderacion-valor').innerText = total;
+            const progressBar = document.getElementById('ponderacion-progress');
+            progressBar.style.width = Math.min(total, 100) + '%';
+            
+            const alert100 = document.getElementById('alert-100');
+            const alertInsuff = document.getElementById('alert-insufficient');
+            const alertOver = document.getElementById('alert-over');
+            
+            alert100.style.display = 'none';
+            alertInsuff.style.display = 'none';
+            alertOver.style.display = 'none';
+
+            if (total > 100) {
+                progressBar.className = 'progress-bar bg-danger';
+                alertOver.style.display = 'block';
+            } else if (total < 100) {
+                progressBar.className = 'progress-bar bg-warning';
+                alertInsuff.style.display = 'block';
+            } else {
+                progressBar.className = 'progress-bar bg-success';
+                alert100.style.display = 'block';
+            }
+        }
+
+        document.getElementById('agregar-contenido').addEventListener('click', function () {
+            const contenedor = document.getElementById('contenidos-container');
+            const index = contadorContenidos++;
+            const template = `
+                <div class="col contenido-item animate__animated animate__zoomIn" data-index="${index}">
+                    <div class="card border-0 shadow-card rounded-4 overflow-hidden content-card-edit mb-2">
+                        <div class="card-body p-4">
+                            <div class="row align-items-center g-3 border-bottom pb-3 mb-3">
+                                <div class="col-md-auto">
+                                    <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 35px; height: 35px; font-size: 0.8rem;">
+                                        ${index + 1}
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <input type="text" name="contenidos[${index}][titulo]" class="form-control border-0 bg-transparent fs-5 fw-bold p-0 text-dark focus-none" required placeholder="Título del bloque...">
+                                </div>
+                                <div class="col-md-auto">
+                                    <div class="form-check form-switch p-0 d-flex align-items-center bg-light rounded-pill px-3 py-1 border shadow-xs">
+                                        <input type="hidden" name="contenidos[${index}][es_evaluacion]" value="0">
+                                        <input type="checkbox" class="form-check-input ms-0 me-2 custom-control-input" id="evalSwitch_${index}" name="contenidos[${index}][es_evaluacion]" value="1" onchange="toggleEvaluacion(this)">
+                                        <label class="form-check-label small fw-bold text-muted mt-1" for="evalSwitch_${index}">Evaluable</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-auto">
+                                    <button type="button" class="btn btn-outline-danger btn-sm border-0 remove-contenido"><i class="fas fa-trash-alt"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 evaluacion-fields bg-primary rounded-3 p-3 mb-3" style="display:none; background-color: #0d6efd !important;">
+                                <div class="col-md-7">
+                                    <label class="small text-white fw-bold mb-1">METODOLOGÍA</label>
+                                    <select name="contenidos[${index}][id_tipo_evaluacion]" class="form-select border-0 shadow-sm">
+                                        <option value="">Seleccione...</option>
+                                        ${getTipoOptions()}
+                                    </select>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="small text-white fw-bold mb-1">PESO (%)</label>
+                                    <input type="number" name="contenidos[${index}][ponderacion]" class="form-control border-0 text-center fw-bold text-primary" oninput="actualizarPonderacionTotal()" placeholder="0">
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-9">
+                                    <label class="small text-muted fw-bold mb-1">URL RECURSO</label>
+                                    <input type="url" name="contenidos[${index}][url_contenido]" class="form-control border-light-2 bg-light bg-opacity-50 py-2" required placeholder="https://...">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="small text-muted fw-bold mb-1">ORDEN</label>
+                                    <input type="number" name="contenidos[${index}][orden]" class="form-control border-light-2 text-center" value="${index + 1}">
+                                </div>
+                                <div class="col-12">
+                                    <textarea name="contenidos[${index}][descripcion_breve]" class="form-control border-light-2" rows="2" placeholder="Breve explicación..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            contenedor.insertAdjacentHTML('beforeend', template);
+            actualizarPonderacionTotal();
+        });
+
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('.remove-contenido')) {
+                const item = e.target.closest('.contenido-item');
+                item.classList.add('animate__zoomOut');
+                setTimeout(() => {
+                    item.remove();
+                    actualizarPonderacionTotal();
+                }, 300);
+            }
+        });
+    </script>
+    @endpush
 @endsection

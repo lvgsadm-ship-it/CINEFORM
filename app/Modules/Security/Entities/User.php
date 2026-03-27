@@ -53,13 +53,42 @@ class User extends Authenticatable
         // 'password' => 'hashed',
     ];
 
+    public function getFullNameAttribute()
+    {
+        return $this->attributes['full_name'] ?? $this->personalData?->nombre_completo ?? '';
+    }
+
+    public function getDocumentAttribute()
+    {
+        return $this->attributes['document'] ?? $this->personalData?->dni ?? '';
+    }
+
+    public function getPhoneAttribute()
+    {
+        return $this->attributes['phone'] ?? $this->personalData?->telefono ?? '';
+    }
+
+    public function getDocumentTypeIdAttribute()
+    {
+        return $this->attributes['document_type_id'] ?? $this->personalData?->tipo_dni ?? null;
+    }
+
+    public function getCountryIdAttribute()
+    {
+        return $this->attributes['country_id'] ?? $this->personalData?->id_pais ?? null;
+    }
+
     public function getCellPhoneAttribute()
     {
-        return $this->getCountry?->dial_code ? ($this->getCountry->dial_code . ' ' . $this->phone) : ($this->phone ?? null);
+        $country = $this->getCountry;
+        $phone = $this->phone;
+        return ($country && $country->dial_code) ? ($country->dial_code . ' ' . $phone) : ($phone ?? null);
     }
     public function getFullDocumentAttribute()
     {
-        return $this->getDocumentType?->code ? ($this->getDocumentType->code . '-' . $this->document) : ($this->document ?? null);
+        $docType = $this->getDocumentType;
+        $doc = $this->document;
+        return ($docType && $docType->code) ? ($docType->code . '-' . $doc) : ($doc ?? null);
     }
 
     function getProfile()
@@ -80,6 +109,11 @@ class User extends Authenticatable
     public function getDocumentType()
     {
         return $this->belongsTo(DocumentType::class, 'document_type_id');
+    }
+
+    public function getProfileIdAttribute()
+    {
+        return $this->attributes['profile_id'] ?? session()->get('profile_id') ?? $this->getPerfiles()->first()?->id ?? null;
     }
 
     public function getPerfiles()
